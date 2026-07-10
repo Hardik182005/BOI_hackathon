@@ -39,8 +39,35 @@ evaluate-locked-test:
 plots:
 	$(PY) -m muleguard.evaluation.plots
 
+run:
+	bash run.sh
+
+stop:
+	bash scripts/stop.sh
+
 test:
 	$(PY) -m pytest
+
+test-ml:
+	bash scripts/test_ml.sh
+
+test-backend:
+	bash scripts/test_backend.sh
+
+test-frontend:
+	bash scripts/test_frontend.sh
+
+test-e2e:
+	bash scripts/test_e2e.sh
+
+test-security:
+	bash scripts/test_security.sh
+
+test-offline:
+	bash scripts/test_offline.sh
+
+release-test:
+	bash scripts/release_test.sh
 
 serve-api:
 	$(PY) -m uvicorn muleguard.api.main:app --host 127.0.0.1 --port 8001

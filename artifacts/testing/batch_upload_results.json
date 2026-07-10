@@ -1,0 +1,29 @@
+{
+  "generated_utc": "2026-07-10T23:02:58.960371+00:00",
+  "backend": "http://127.0.0.1:8001",
+  "n_checks": 4,
+  "n_passed": 4,
+  "all_passed": true,
+  "checks": [
+    {
+      "check": "batch_upload_pytest_10_cases",
+      "passed": true,
+      "detail": "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html"
+    },
+    {
+      "check": "live_upload_returns_csv",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "output_contains_model_version_and_tier",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "no_hidden_thresholds_in_output",
+      "passed": true,
+      "detail": ""
+    }
+  ]
+}

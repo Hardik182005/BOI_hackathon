@@ -1,0 +1,84 @@
+{
+  "generated_utc": "2026-07-10T23:01:32.597451+00:00",
+  "backend": "http://127.0.0.1:8001",
+  "n_checks": 15,
+  "n_passed": 15,
+  "all_passed": true,
+  "checks": [
+    {
+      "check": "health_live",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "health_ready",
+      "passed": true,
+      "detail": "{'status': 'ready', 'model_version': '1.0.0', 'winner': 'catboost_tuned_top60', 'ollama_model': 'llama3.2:3b', 'ollama_r"
+    },
+    {
+      "check": "ollama_not_required",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "model_metadata",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "score_single",
+      "passed": true,
+      "detail": "{\"request_id\":\"adbfa77d-e09e-4ec6-9b99-d34b444c343a\",\"correlation_id\":\"a8257e95-85cf-4882-9c9f-57ec6dc8d4b8\",\"account_re"
+    },
+    {
+      "check": "deterministic_rescore",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "score_batch",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "cases_list",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "case_detail",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "deterministic_report_no_llm",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "target_in_request_rejected_422",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "missing_features_schema_error_422",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "unmasked_reference_rejected",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "metrics_from_artifacts",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "drift_endpoint",
+      "passed": true,
+      "detail": ""
+    }
+  ]
+}

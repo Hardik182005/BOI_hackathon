@@ -104,11 +104,14 @@ def run_llm_scenes() -> dict:
                                 direction="INCREASES_RISK", shap_contribution=0.21)],
     )
     det = deterministic_narrative(ctx)
+    # schema-valid on purpose so every CONTENT rule fires and is recorded:
+    # altered score, altered tier, invented feature, invented amount, guilt
+    # claim, disallowed action, missing required limitations
     hallucinated = (
         '{"summary": "Account DEMO-ACC-6 moved Rs. 4,50,000 through F999 and the '
         'holder is guilty of laundering.", "risk_tier": "MONITOR", '
         '"verified_risk_score": 0.05, "reason_codes": [], '
-        '"recommended_checks": ["FREEZE_ACCOUNT_NOW"], "limitations": []}'
+        '"recommended_checks": ["FREEZE_ACCOUNT_NOW"], "limitations": ["none"]}'
     )
     out, reasons = validate_llm_output(hallucinated, ctx)
     assert out is None, "validator must reject the planted hallucination"

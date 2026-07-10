@@ -1,0 +1,39 @@
+{
+  "generated_utc": "2026-07-10T23:01:35.667650+00:00",
+  "backend": "http://127.0.0.1:8001",
+  "n_checks": 6,
+  "n_passed": 6,
+  "all_passed": true,
+  "checks": [
+    {
+      "check": "locked_test_dev_disjoint",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "all_rows_partitioned",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "oof_never_contains_test_rows",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "locked_test_single_genuine_touch",
+      "passed": true,
+      "detail": "touches=1"
+    },
+    {
+      "check": "metrics_trace_to_saved_predictions",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "probabilities_bounded",
+      "passed": true,
+      "detail": ""
+    }
+  ]
+}

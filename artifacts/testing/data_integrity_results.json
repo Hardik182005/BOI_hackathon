@@ -1,0 +1,86 @@
+{
+  "generated_utc": "2026-07-10T23:01:35.574331+00:00",
+  "backend": "http://127.0.0.1:8001",
+  "n_checks": 11,
+  "n_passed": 11,
+  "all_passed": true,
+  "checks": [
+    {
+      "check": "raw_hash_recorded",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "rows_9082",
+      "passed": true,
+      "detail": "9082"
+    },
+    {
+      "check": "cols_3925",
+      "passed": true,
+      "detail": "3925"
+    },
+    {
+      "check": "target_81_pos",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "no_missing_targets",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "independent_engine_validation",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "quarantine_has_F3924",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "quarantine_has_F3912",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "quarantine_has_F2230_month_leak",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "quarantine_has_index",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "bundle_disjoint_from_quarantine",
+      "passed": true,
+      "detail": "set()"
+    }
+  ],
+  "fingerprint": {
+    "n_rows": 9082,
+    "n_cols": 3925,
+    "positive_prevalence": 0.008919
+  },
+  "profile_summary": {
+    "n_rows": 9082,
+    "n_cols_total": 3925,
+    "n_feature_cols": 3924,
+    "n_missing_cells": 9847086,
+    "missing_cell_rate": 0.27631,
+    "n_cols_with_missing": 3835,
+    "n_constant": 359,
+    "n_quasi_constant": 1078,
+    "n_exact_duplicate_cols": 977,
+    "dtype_counts": {
+      "Float64": 3916,
+      "String": 6,
+      "Date": 1,
+      "Datetime(time_unit='ms', time_zone=None)": 1
+    }
+  }
+}

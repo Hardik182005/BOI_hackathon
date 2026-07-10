@@ -111,8 +111,8 @@ overlap {sel['fold_overlap_top60_mean']:.2f}. Compact sets: top-15/30/60 evaluat
 
 | Metric | Value |
 |---|---|
-| PR-AUC (raw winner scores) | {_fmt_ci(lt['pr_auc'])} |
-| PR-AUC (calibrated) | {_fmt_ci(lt['calibrated_pr_auc'])} |
+| PR-AUC — production scorer (winner, calibrated) | {_fmt_ci(lt['pr_auc'])} |
+| PR-AUC — LightGBM agreement model (secondary) | {_fmt_ci(lt['agreement_model_lightgbm_pr_auc'])} |
 | ROC-AUC (secondary) | {_fmt_ci(lt['roc_auc'])} |
 | Brier score | {lt['brier']:.5f} |
 | ECE ({lt['calibration']['n_bins']} bins) | {lt['calibration']['ece']:.4f} |

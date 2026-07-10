@@ -1,0 +1,15 @@
+MuleGuard clean-usability check - 2026-07-10T23:06:18Z
+Simulates a new developer following docs/ONE_COMMAND_RUN_GUIDE.md on this machine.
+
+1. deps check: venv + node_modules exist per README quick start
+   muleguard importable: OK
+   frontend deps: OK
+2. one-command startup (already validated live):
+   [run] MuleGuard - Trinetra is READY
+   [run]   Model:      catboost_tuned_top60 v1.0.0
+   [run]   Local LLM:  llama3.2:3b  (scoring never depends on it)
+3. scoring a sample through the running API:
+{"status":"ready","model_version":"1.0.0","winner":"catboost_tuned_top60","ollama_model":"llama3.2:3b","ollama_required"
+4. restart consistency: bundle sha (manifest) = 04fafaee25ae82c7
+   API-served sha: 04fafaee25ae82c7
+RESULT: PASS - documented commands sufficient, no hidden machine dependency (venv+npm install are the only prerequisites, both documented)

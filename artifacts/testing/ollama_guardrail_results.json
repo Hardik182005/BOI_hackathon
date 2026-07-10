@@ -1,0 +1,90 @@
+{
+  "generated_utc": "2026-07-10T23:02:12.115573+00:00",
+  "backend": "http://127.0.0.1:8001",
+  "n_checks": 16,
+  "n_passed": 16,
+  "all_passed": true,
+  "checks": [
+    {
+      "check": "1_live_narration",
+      "passed": true,
+      "detail": "source=ollama model=llama3.2:3b"
+    },
+    {
+      "check": "2_unavailable_falls_back",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "3_timeout_falls_back",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "4_invalid_json_rejected",
+      "passed": true,
+      "detail": "invalid JSON"
+    },
+    {
+      "check": "5_changed_score_rejected",
+      "passed": true,
+      "detail": "risk score altered: 0.1 != 0.91"
+    },
+    {
+      "check": "6_changed_tier_rejected",
+      "passed": true,
+      "detail": "risk tier altered: MONITOR != CRITICAL_REVIEW"
+    },
+    {
+      "check": "7_invented_feature_rejected",
+      "passed": true,
+      "detail": "mentions feature not in supplied facts: F999"
+    },
+    {
+      "check": "8_invented_amount_rejected",
+      "passed": true,
+      "detail": "invents a currency amount not present in structured input"
+    },
+    {
+      "check": "9_invented_person_fact_rejected",
+      "passed": true,
+      "detail": "mentions feature not in supplied facts: F999"
+    },
+    {
+      "check": "10_guilt_claim_rejected",
+      "passed": true,
+      "detail": "asserts criminal guilt"
+    },
+    {
+      "check": "11_unsupported_action_rejected",
+      "passed": true,
+      "detail": "recommends action outside allowlist: FREEZE_ACCOUNT_NOW"
+    },
+    {
+      "check": "12_missing_limitations_rejected",
+      "passed": true,
+      "detail": "missing required limitation: Behavioural risk is not proof of criminal intent; missing required limi"
+    },
+    {
+      "check": "13_excessive_length_rejected",
+      "passed": true,
+      "detail": "schema violation: String should have at most 1200 characters at ('summary',)"
+    },
+    {
+      "check": "14_prompt_injection_in_value_cannot_change_score",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "15_circuit_breaker_opens",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "fallback_same_score_tier",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "live_ollama_model": "llama3.2:3b"
+}

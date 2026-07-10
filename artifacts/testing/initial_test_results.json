@@ -1,0 +1,20 @@
+{
+  "captured_utc": "2026-07-10T21:37:31.306598+00:00",
+  "commit": "cd6f9c83d821ffbdae9c4fabd4825bfe8e7abd9c",
+  "baseline_before_qa_fixes": {
+    "backend_pytest": {
+      "command": "python -m pytest -q",
+      "collected": 83,
+      "passed": 83,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "frontend_vitest": {
+      "command": "npx vitest run",
+      "passed": 3,
+      "failed": 0,
+      "exit_code": 0
+    }
+  },
+  "notes": "baseline recorded before one-command startup, batch upload endpoint and QA harnesses were added"
+}

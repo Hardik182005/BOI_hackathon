@@ -34,7 +34,26 @@ def _record(results: dict, name: str, status: str, reason: str, **extra) -> None
     log.info("%s: %s - %s", name, status, reason)
 
 
+def _find_spec(name: str) -> bool:
+    try:
+        return importlib.util.find_spec(name) is not None
+    except ModuleNotFoundError:  # parent package absent
+        return False
+
+
 def try_tabpfn(results: dict) -> None:
+    existing = load_json(settings.METRICS_DIR / "oof_metrics.json")["models"] \
+        if (settings.METRICS_DIR / "oof_metrics.json").exists() else {}
+    if "tabpfn_top60" in existing:
+        m = existing["tabpfn_top60"]
+        _record(results, "tabpfn", "RAN",
+                "completed on top-60 features, 1 repeat (cached OOF result); "
+                "challenger only - winner eligibility requires 5-repeat evidence, "
+                f"and CPU runtime ({m.get('runtime_seconds', '?')}s for one repeat) "
+                "is operationally prohibitive at ~26 min/fold",
+                pr_auc_mean=m["pr_auc_mean"], n_repeats=m["n_repeats"],
+                runtime_seconds=m.get("runtime_seconds"))
+        return
     if importlib.util.find_spec("tabpfn") is None:
         _record(results, "tabpfn", "SKIPPED",
                 "package not installed in CPU-mode environment (Mode A policy: "
@@ -85,7 +104,7 @@ def try_tabpfn(results: dict) -> None:
 
 
 def try_tabicl(results: dict) -> None:
-    if importlib.util.find_spec("tabicl") is None:
+    if not _find_spec("tabicl"):
         _record(results, "tabicl", "SKIPPED",
                 "package not installed; TabICL(v2) requires GPU-class resources "
                 "for its in-context regime - Mode A (CPU 16GB) excludes it. "
@@ -95,7 +114,7 @@ def try_tabicl(results: dict) -> None:
 
 
 def try_autogluon(results: dict) -> None:
-    if importlib.util.find_spec("autogluon.tabular") is None:
+    if not _find_spec("autogluon.tabular"):
         py = f"{sys.version_info.major}.{sys.version_info.minor}"
         _record(results, "autogluon", "SKIPPED",
                 f"AutoGluon does not support Python {py} at build time "

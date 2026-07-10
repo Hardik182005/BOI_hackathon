@@ -1,0 +1,22 @@
+{
+  "generated_utc": "2026-07-10T21:43:21.314779+00:00",
+  "compute_mode": "cpu_16gb",
+  "policy": "challengers accepted only on repeated OOF evidence; skips are recorded with reasons, never silently",
+  "challengers": {
+    "tabpfn": {
+      "status": "RAN",
+      "reason": "completed on top-60 features, 1 repeat (cached OOF result); challenger only - winner eligibility requires 5-repeat evidence, and CPU runtime (3144.3s for one repeat) is operationally prohibitive at ~26 min/fold",
+      "pr_auc_mean": 0.8969585278109471,
+      "n_repeats": 1,
+      "runtime_seconds": 3144.3
+    },
+    "tabicl": {
+      "status": "SKIPPED",
+      "reason": "package not installed; TabICL(v2) requires GPU-class resources for its in-context regime - Mode A (CPU 16GB) excludes it. Documented as a Mode B/C experiment."
+    },
+    "autogluon": {
+      "status": "SKIPPED",
+      "reason": "AutoGluon does not support Python 3.13 at build time (requires <=3.12); benchmark documented as a roadmap item on a compatible environment"
+    }
+  }
+}

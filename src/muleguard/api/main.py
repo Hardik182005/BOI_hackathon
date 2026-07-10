@@ -56,6 +56,10 @@ app.add_middleware(
     allow_methods=["*"], allow_headers=["*"],
 )
 
+from muleguard.api.routes_upload import router as upload_router  # noqa: E402
+
+app.include_router(upload_router)
+
 _narrator: OllamaNarrator | None = None
 _rate: dict[str, list[float]] = {}
 RATE_LIMIT_PER_MIN = 240

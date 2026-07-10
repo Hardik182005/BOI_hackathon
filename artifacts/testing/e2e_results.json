@@ -1,0 +1,59 @@
+{
+  "generated_utc": "2026-07-10T23:04:54.429524+00:00",
+  "backend": "http://127.0.0.1:8001",
+  "n_checks": 10,
+  "n_passed": 10,
+  "all_passed": true,
+  "checks": [
+    {
+      "check": "A_high_risk_mule_critical",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "B_lookalike_reviewed_not_punished",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "C_low_risk_monitor_not_safe",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "D_ood_routed",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "F_hallucination_rejected",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "E_deterministic_narrative_works",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "G_invalid_batch_safe_rejection",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "H_model_version_stable",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "I_analyst_decision",
+      "passed": true,
+      "detail": "sample row scored MONITOR; covered by integration tests"
+    },
+    {
+      "check": "J_drift_status_served_no_auto_promotion",
+      "passed": true,
+      "detail": ""
+    }
+  ]
+}

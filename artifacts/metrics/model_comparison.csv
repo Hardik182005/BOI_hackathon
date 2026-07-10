@@ -1,5 +1,6 @@
 model,status,n_features,pr_auc_mean,pr_auc_std,roc_auc_mean,n_repeats,runtime_s
 REJECTED_leakage_lgbm_with_F3912,"REJECTED LEAKAGE - evidence only, never a candidate model","",0.9419,0.0119,0.9933,2,176.1
+tabpfn_top60,candidate,"",0.897,0.0,0.989,1,3144.3
 catboost_tuned_top60,candidate,60,0.8077,0.045,0.9648,5,142.2
 lightgbm_tuned_top60,candidate,60,0.7717,0.0528,0.9614,5,51.5
 lightgbm_tuned_full,candidate,full_clean,0.7637,0.0223,0.9602,5,710.2

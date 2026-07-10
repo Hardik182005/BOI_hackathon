@@ -1,0 +1,29 @@
+2026-07-11 04:32:11,892 WARNING muleguard.llm.ollama | Ollama call failed: ReadTimeout
+2026-07-11 04:32:12,111 WARNING muleguard.llm.ollama | Ollama call failed: ReadTimeout
+Exception in thread Thread-4 (_readerthread):
+Traceback (most recent call last):
+  File "C:\Python313\Lib\threading.py", line 1041, in _bootstrap_inner
+    self.run()
+    ~~~~~~~~^^
+  File "C:\Python313\Lib\threading.py", line 992, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python313\Lib\subprocess.py", line 1611, in _readerthread
+    buffer.append(fh.read())
+                  ~~~~~~~^^
+  File "C:\Python313\Lib\encodings\cp1252.py", line 23, in decode
+    return codecs.charmap_decode(input,self.errors,decoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'charmap' codec can't decode byte 0x8f in position 141: character maps to <undefined>
+backend_test_results: PASS (15/15)
+data_integrity_results: PASS (11/11)
+leakage_test_results: PASS (6/6)
+ollama_guardrail_results: PASS (16/16)
+performance_results: FAIL (6/7)
+  FAIL memory_headroom: 0.7 GB free
+e2e_results: FAIL (9/10)
+  FAIL F_hallucination_rejected: 
+api_frontend_consistency: PASS (6/6)
+security_results: PASS (7/7)
+frontend: CRASH TypeError: can only concatenate str (not "NoneType") to str
+batch_upload_results: PASS (4/4)

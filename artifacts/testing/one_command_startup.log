@@ -1,0 +1,13 @@
+[run] starting backend on http://127.0.0.1:8001 ...
+[run] starting frontend on http://localhost:5173 ...
+[run] -------------------------------------------------------------
+[run] MuleGuard - Trinetra is READY
+[run]   Frontend:   http://localhost:5173
+[run]   Backend:    http://127.0.0.1:8001
+[run]   API docs:   http://127.0.0.1:8001/docs
+[run]   Health:     http://127.0.0.1:8001/health/ready
+[run]   Model:      catboost_tuned_top60 v1.0.0
+[run]   Local LLM:  llama3.2:3b  (scoring never depends on it)
+[run]   Logs:       logs/backend.log  logs/frontend.log
+[run] Press Ctrl+C to stop all services.
+[run] -------------------------------------------------------------
