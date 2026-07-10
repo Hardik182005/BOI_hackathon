@@ -1,0 +1,28 @@
+# Data ingestion, audit and split parameters.
+raw:
+  original_xlsx: DataSet.xlsx            # original upload at repo root (never modified)
+  raw_copy: data/raw/DataSet.xlsx        # read-only working copy
+  sheet_index: 0
+
+interim:
+  parquet: data/interim/dataset.parquet
+  schema_json: data/interim/schema.json
+  fingerprint_json: data/interim/data_fingerprint.json
+
+audit:
+  quasi_constant_share: 0.99             # top-value share (non-null) to call quasi-constant
+  suspicious_abs_corr: 0.95              # |pearson r| with target -> leakage flag
+  suspicious_single_feature_ap: 0.90     # single-feature CV PR-AUC -> leakage flag
+  identifier_unique_ratio: 0.98          # n_unique/n_rows above this on int-like -> ID flag
+  spot_check_cells: 24                   # random cells revalidated against raw engine
+  single_feature_cv_folds: 5
+
+splits:
+  locked_test_fraction: 0.20
+  min_test_positives: 12                 # defensible minimum; abort if unmet
+  cv_n_splits: 5
+  cv_n_repeats: 5
+  files:
+    locked_test: data/splits/locked_test_indices.parquet
+    cv_folds: data/splits/cv_folds.parquet
+    duplicate_groups: data/splits/duplicate_row_groups.parquet

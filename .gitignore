@@ -1,0 +1,51 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# --- Raw / derived data: never committed, never modified in place ---
+DataSet.xlsx
+DataSet.csv
+data/raw/*
+data/interim/*
+data/processed/*
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+# split definitions ARE committed (small, required for reproducibility)
+!data/splits/
+
+# --- Secrets ---
+.env
+*.pem
+*.key
+
+# --- Databases / studies ---
+*.db
+*.sqlite3
+artifacts/optuna/*
+
+# --- Node ---
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# --- Large model binaries kept out of git; manifests + hashes are committed ---
+artifacts/models/*.bin
+artifacts/models/*.cbm

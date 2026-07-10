@@ -1,0 +1,43 @@
+# Training / tournament configuration (Mode A: 16GB CPU laptop).
+compute_mode: cpu_16gb
+n_jobs: 4                     # leave headroom on an 8-thread CPU
+early_stop_fraction: 0.15     # carved from TRAIN fold only, stratified
+
+alert_budgets: [25, 50, 100]  # plus top-1% computed dynamically
+fpr_targets: [0.005, 0.01]
+
+baselines:
+  logistic:
+    C: 1.0
+    max_iter: 3000
+  lightgbm:
+    n_estimators: 2000
+    learning_rate: 0.05
+    num_leaves: 31
+    min_child_samples: 25
+    feature_fraction: 0.70
+    bagging_fraction: 0.80
+    bagging_freq: 1
+
+optuna:
+  storage: sqlite:///artifacts/optuna/studies.db
+  sampler_seed: 42
+  n_trials:
+    lightgbm: 40
+    xgboost: 30
+    catboost: 25
+  timeout_minutes_per_study: 45
+
+stability_selection:
+  n_subsamples: 40
+  subsample_fraction: 0.70
+  top_k_per_fit: 60
+  frequency_thresholds: [0.6, 0.8]
+  compact_sizes: [15, 30, 60]
+
+tournament:
+  repeats_for_finalists: 5    # 5x5 repeated stratified CV for headline OOF numbers
+  repeats_for_scouting: 1     # single 5-fold during tuning
+
+ensemble:
+  min_consistent_improvement: 0.0   # stacker accepted only if >= best single on >=4/5 repeats

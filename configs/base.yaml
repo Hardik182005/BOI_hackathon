@@ -1,0 +1,33 @@
+# MuleGuard base configuration - single source of truth for global constants.
+project: muleguard-trinetra
+version: "1.0.0"
+seed: 42
+target_column: F3924
+
+# Positive class semantics (authoritative, from Topic.pdf):
+#   1 = suspicious / mule account
+#   0 = legitimate / not currently labelled mule
+positive_label: 1
+
+# Features the bank states are commonly used for fraud detection (Topic.pdf).
+# These are HINTS for reporting context only - never a substitute for
+# data-driven selection, never assigned invented semantics.
+bank_hint_features:
+  - F115
+  - F321
+  - F527
+  - F531
+  - F670
+  - F1692
+  - F2082
+  - F2122
+  - F2582
+  - F2678
+  - F2737
+  - F2956
+  - F3043
+  - F3836
+  - F3887
+  - F3889
+  - F3891
+  - F3894
