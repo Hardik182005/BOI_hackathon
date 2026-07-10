@@ -56,7 +56,12 @@ def main() -> None:
     df = ingest.load_dataset()
     quarantined = load_quarantine_list()
     feat_cols = candidate_feature_columns(df, quarantined)
-    X_all, names, _ = encode_dataframe(df, feat_cols)
+    X_all, names, cat_maps = encode_dataframe(df, feat_cols)
+    feature_schema = {
+        c: ("date" if df.schema[c].is_temporal()
+            else "numeric" if df.schema[c].is_numeric() else "categorical")
+        for c in feat_cols
+    }
     y_all = df[settings.TARGET_COLUMN].cast(pl.Int32).to_numpy()
     test_mask = split_mod.load_locked_test_mask()
     dev_mask = ~test_mask
@@ -64,7 +69,12 @@ def main() -> None:
 
     # ---- winner + feature list ------------------------------------------
     oof_metrics = load_json(settings.METRICS_DIR / "oof_metrics.json")["models"]
-    candidates = {k: v for k, v in oof_metrics.items() if not k.startswith("REJECTED")}
+    # winner eligibility: leakage-free AND full 5-repeat OOF evidence
+    # (challengers run at 1 repeat can inform but never win the bundle slot)
+    candidates = {
+        k: v for k, v in oof_metrics.items()
+        if not k.startswith("REJECTED") and v.get("n_repeats", 0) >= 5
+    }
     winner_name = max(candidates, key=lambda k: candidates[k]["pr_auc_mean"])
     ens = load_json(settings.METRICS_DIR / "ensemble_decision.json")
     log.info("OOF winner: %s (PR-AUC %.4f); ensemble accepted=%s",
@@ -91,13 +101,39 @@ def main() -> None:
 
     # ---- OOF winner scores for lens fitting ------------------------------
     oof = pl.read_parquet(settings.PREDICTIONS_DIR / "oof_predictions.parquet")
-    won = oof.filter(pl.col("model") == winner_name)
-    # average score across repeats per row (stable OOF estimate)
-    agg = won.group_by("row_index").agg(
-        pl.col("score").mean().alias("score"), pl.col("target").first().alias("target")
-    ).sort("row_index")
-    oof_scores = agg["score"].to_numpy()
-    oof_y = agg["target"].to_numpy()
+
+    def _repeat_avg(model_name: str) -> pl.DataFrame:
+        return (
+            oof.filter(pl.col("model") == model_name)
+            .group_by("row_index")
+            .agg(pl.col("score").mean().alias(model_name),
+                 pl.col("target").first().alias("target"))
+            .sort("row_index")
+        )
+
+    won = _repeat_avg(winner_name).rename({winner_name: "score"})
+    oof_scores = won["score"].to_numpy()
+    oof_y = won["target"].to_numpy()
+
+    # winner family drives which raw score the calibrator applies to at
+    # scoring time; a frozen stacker is shipped only if the ensemble won.
+    if winner_name == "ensemble_stack":
+        winner_family = "ensemble"
+    else:
+        winner_family = next(f for f in ("lightgbm", "xgboost", "catboost", "logistic", "dummy")
+                             if winner_name.startswith(f))
+    final_stacker = None
+    if winner_family == "ensemble":
+        from sklearn.linear_model import LogisticRegression
+
+        base_names = [f"{m}_tuned_top60" for m in BASE_MODELS]
+        joined = _repeat_avg(base_names[0])
+        for bn in base_names[1:]:
+            joined = joined.join(_repeat_avg(bn).drop("target"), on="row_index")
+        S = np.column_stack([joined[bn].to_numpy() for bn in base_names])
+        Z = np.log(np.clip(S, 1e-7, 1 - 1e-7) / (1 - np.clip(S, 1e-7, 1 - 1e-7)))
+        final_stacker = LogisticRegression(C=0.5, class_weight="balanced", max_iter=2000)
+        final_stacker.fit(Z, joined["target"].to_numpy())
 
     # ---- Lens 2: calibration ---------------------------------------------
     cal_sel = select_calibrator(oof_scores, oof_y, seed=settings.GLOBAL_SEED)
@@ -175,9 +211,13 @@ def main() -> None:
         "created_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
         "git": git_info(settings.REPO_ROOT),
         "winner_oof_name": winner_name,
+        "winner_family": winner_family,
+        "stacker": final_stacker,
         "ensemble_accepted": ens["accepted"],
         "feature_list_selected": selected,
         "feature_list_kept": kept,
+        "feature_schema": {c: feature_schema[c] for c in selected},
+        "cat_maps": {c: v for c, v in cat_maps.items() if c in set(selected)},
         "preprocessor": prep,
         "models": finals,
         "calibrator": calibrator,

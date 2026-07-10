@@ -208,30 +208,19 @@ def run_tune() -> None:
         print(f"TUNED {model}: best OOF AP {study.best_value:.4f} over {len(study.trials)} trials")
 
 
-def _subset_scorer(model: str, feature_list: list[str], names: list[str]):
-    """Wrap a core scorer to operate on a fixed feature subset by name."""
-    name_idx = {f: i for i, f in enumerate(names)}
-    cols = np.array([name_idx[f] for f in feature_list])
-    inner = core_models.SCORERS[model]
-
-    def scorer(Xtr, ytr, Xva, seed):
-        return inner(Xtr[:, cols], ytr, Xva[:, cols], seed)
-
-    return scorer
-
-
 def run_finalists() -> None:
-    """5x5 repeated OOF for finalists; per-fold in-fold selection for compact sets.
+    """5x5 repeated OOF for finalists.
 
-    Compact-set evaluation uses the FOLD-LOCAL selection stored during
-    `select` for repeat_0 folds and dev-frozen lists for other repeats -
-    the headline compact metric quoted in reports is the fold-local one.
+    Compact sets are passed as run_oof feature subsets (restriction happens
+    BEFORE in-fold preprocessing, mirroring the tuning objective). Configs
+    that already hold 5-repeat metrics are skipped, making the stage
+    resumable after a crash.
     """
     from muleguard.models import baselines as bl
 
     set_global_seed(settings.GLOBAL_SEED)
     compact_sets = load_json(SELECTION_DIR / "selected_features.json")["compact_sets"]
-    _, _, names, _ = _dev_matrices()
+    existing = (load_json(OOF_METRICS)["models"] if OOF_METRICS.exists() else {})
 
     finalists: list[tuple[str, str, list[str] | None]] = [
         ("lightgbm_tuned_full", "lightgbm", None),
@@ -242,12 +231,15 @@ def run_finalists() -> None:
         ("catboost_tuned_top60", "catboost", compact_sets["top_60"]),
     ]
     for run_name, model, feats in finalists:
+        if existing.get(run_name, {}).get("n_repeats") == 5:
+            log.info("%s already complete, skipping", run_name)
+            continue
         t0 = time.perf_counter()
-        scorer = core_models.SCORERS[model] if feats is None else None
         preds = bl.run_oof(
             run_name,
-            scorer if scorer else _subset_scorer(model, feats, names),
+            core_models.SCORERS[model],
             mode="tree",
+            feature_subset=feats,
         )
         append_oof(preds)
         entry = evaluate_oof(preds, run_name)

@@ -41,11 +41,49 @@ class SchemaError(ValueError):
     """Raised when required selected features are missing from a request."""
 
 
+_DATE_FORMATS = ["%Y-%m-%d %H:%M:%S", "%Y-%m-%d", "%m-%d-%Y", "%d-%m-%Y"]
+
+
+def _canonicalize_request(rows: pl.DataFrame, selected: list[str],
+                          schema: dict[str, str]) -> pl.DataFrame:
+    """Coerce raw request values to the training schema per column.
+
+    numeric: parse floats ("NA"/blank -> null); date: parse known formats;
+    categorical: keep utf8 (trained cat_maps applied downstream). Values that
+    cannot be coerced become null (missing), which the OOD/missingness
+    signals see - never a silent wrong number.
+    """
+    exprs = []
+    for c in selected:
+        kind = schema.get(c, "numeric")
+        col = pl.col(c)
+        if kind == "numeric":
+            e = (
+                col.cast(pl.Utf8, strict=False).str.strip_chars()
+                .replace({"NA": None, "": None})
+                .cast(pl.Float64, strict=False)
+            )
+        elif kind == "date":
+            base = col.cast(pl.Utf8, strict=False).str.strip_chars()
+            e = None
+            for fmt in _DATE_FORMATS:
+                p = base.str.strptime(pl.Date, fmt, strict=False)
+                e = p if e is None else e.fill_null(p)
+        else:  # categorical
+            e = (
+                col.cast(pl.Utf8, strict=False).str.strip_chars()
+                .replace({"NA": None, "": None})
+            )
+        exprs.append(e.alias(c))
+    return rows.select(exprs)
+
+
 def _matrix_from_rows(rows: pl.DataFrame, bundle: dict[str, Any]) -> np.ndarray:
     """Build the kept-feature matrix from raw-named input columns.
 
     Missing SELECTED features raise SchemaError (never silent zero-fill);
-    unknown extra columns are ignored.
+    unknown extra columns are ignored; categorical codes come from the
+    TRAINED mappings frozen in the bundle (unseen category -> -1).
     """
     from muleguard.features.preprocessing import encode_dataframe
 
@@ -56,7 +94,8 @@ def _matrix_from_rows(rows: pl.DataFrame, bundle: dict[str, Any]) -> np.ndarray:
             f"required features missing from request: {missing[:8]}"
             + ("..." if len(missing) > 8 else "")
         )
-    X, _, _ = encode_dataframe(rows, selected)
+    canon = _canonicalize_request(rows, selected, bundle.get("feature_schema", {}))
+    X, _, _ = encode_dataframe(canon, selected, cat_maps=bundle.get("cat_maps"))
     return bundle["preprocessor"].transform(X)
 
 
@@ -69,8 +108,14 @@ def score_rows(rows: pl.DataFrame, bundle: dict[str, Any] | None = None,
 
     base_scores = {m: b["models"][m].predict_proba(Xp)[:, 1] for m in b["models"]}
     S = np.column_stack(list(base_scores.values()))
-    winner_key = "lightgbm"  # winner family; agreement uses all three
-    raw = base_scores[winner_key]
+    family = b.get("winner_family", "lightgbm")
+    if family == "ensemble" and b.get("stacker") is not None:
+        order = list(b["models"].keys())  # lightgbm, xgboost, catboost
+        Sb = np.column_stack([base_scores[m] for m in order])
+        Z = np.log(np.clip(Sb, 1e-7, 1 - 1e-7) / (1 - np.clip(Sb, 1e-7, 1 - 1e-7)))
+        raw = b["stacker"].predict_proba(Z)[:, 1]
+    else:
+        raw = base_scores.get(family, base_scores["lightgbm"])
     calibrated = np.clip(b["calibrator"].predict(raw), 0.0, 1.0)
     agreement = 1.0 - (S.max(axis=1) - S.min(axis=1))
     conf_sets = conformal.predict_set(calibrated)

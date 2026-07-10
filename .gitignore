@@ -49,3 +49,16 @@ Thumbs.db
 # --- Large model binaries kept out of git; manifests + hashes are committed ---
 artifacts/models/*.bin
 artifacts/models/*.cbm
+artifacts/models/*.joblib
+artifacts/tabpfn_cache/
+artifacts/predictions/
+
+# --- TypeScript ---
+*.tsbuildinfo
+
+# --- Git folders ---
+.git_new/
+.git_old/
+.git_to_delete/
+
+

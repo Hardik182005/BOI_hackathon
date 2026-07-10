@@ -115,22 +115,26 @@ class OllamaNarrator:
         return result
 
     def _call(self, model: str, ctx: NarratorInput) -> str | None:
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": build_user_prompt(ctx)},
+            ],
+            "stream": False,
+            "format": "json",
+            "options": {
+                "temperature": float(self.cfg["temperature"]),
+                "num_predict": int(self.cfg["max_tokens"]),
+            },
+        }
+        if model.startswith("qwen3"):
+            # thinking models never reach the JSON inside the token budget on CPU
+            payload["think"] = False
         try:
             r = httpx.post(
                 f"{self.cfg['base_url']}/api/chat",
-                json={
-                    "model": model,
-                    "messages": [
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": build_user_prompt(ctx)},
-                    ],
-                    "stream": False,
-                    "format": "json",
-                    "options": {
-                        "temperature": float(self.cfg["temperature"]),
-                        "num_predict": int(self.cfg["max_tokens"]),
-                    },
-                },
+                json=payload,
                 timeout=float(self.cfg["timeout_seconds"]),
             )
             r.raise_for_status()

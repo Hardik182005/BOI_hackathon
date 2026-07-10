@@ -1,0 +1,66 @@
+{
+  "generated_utc": "2026-07-10T20:54:00.893856+00:00",
+  "status": "STABLE",
+  "score_psi": 0.0,
+  "n_features_alert": 0,
+  "n_features_moderate": 0,
+  "worst_features": [
+    {
+      "feature": "F479",
+      "psi": 0.07420749595138836,
+      "missing_rate_shift": -0.003743766447129371
+    },
+    {
+      "feature": "F2595",
+      "psi": 0.07041617027633128,
+      "missing_rate_shift": 0.004385143910866862
+    },
+    {
+      "feature": "F2612",
+      "psi": 0.06884310542224129,
+      "missing_rate_shift": 0.004916419505386682
+    },
+    {
+      "feature": "F12",
+      "psi": 0.058282172046236966,
+      "missing_rate_shift": -0.0005998810233446283
+    },
+    {
+      "feature": "F474",
+      "psi": 0.030757040360177592,
+      "missing_rate_shift": 0.0008773316758988736
+    },
+    {
+      "feature": "F1813",
+      "psi": 0.016926956496741776,
+      "missing_rate_shift": -0.0005506607929515419
+    },
+    {
+      "feature": "F2386",
+      "psi": 0.016732317577014145,
+      "missing_rate_shift": 0.0036306356406565765
+    },
+    {
+      "feature": "F2489",
+      "psi": 0.016111062033773837,
+      "missing_rate_shift": -0.002881428010642506
+    },
+    {
+      "feature": "F158",
+      "psi": 0.014424357340003819,
+      "missing_rate_shift": -0.004981693103231044
+    },
+    {
+      "feature": "F3105",
+      "psi": 0.014102486028105496,
+      "missing_rate_shift": -0.005344256892649613
+    }
+  ],
+  "thresholds": {
+    "moderate": 0.1,
+    "alert": 0.25,
+    "note": "conventional PSI bands, not tuned results"
+  },
+  "n_rows_scored": 1818,
+  "note": "reference batch vs itself: score PSI trivially ~0; the informative signals on this first batch are the feature PSIs (dev-referenced)"
+}

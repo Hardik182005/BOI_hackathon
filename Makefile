@@ -43,7 +43,7 @@ test:
 	$(PY) -m pytest
 
 serve-api:
-	$(PY) -m uvicorn muleguard.api.main:app --host 127.0.0.1 --port 8000
+	$(PY) -m uvicorn muleguard.api.main:app --host 127.0.0.1 --port 8001
 
 serve-frontend:
 	cd frontend && npm run dev

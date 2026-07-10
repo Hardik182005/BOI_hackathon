@@ -42,14 +42,32 @@ def try_tabpfn(results: dict) -> None:
                 "a verified license + memory test)")
         return
     try:
+        import inspect
+        import os
+
+        # model checkpoints cached on E: (user requirement: nothing new on C:)
+        os.environ.setdefault(
+            "TABPFN_MODEL_CACHE_DIR", str(settings.ARTIFACTS_DIR / "tabpfn_cache")
+        )
+        # privacy posture: no usage telemetry from a bank-data environment
+        os.environ.setdefault("TABPFN_DISABLE_ANALYTICS", "1")
+        os.environ.setdefault("ANONYMIZED_TELEMETRY", "False")
         from tabpfn import TabPFNClassifier  # type: ignore
 
         from muleguard.models import baselines as bl
 
         compact = load_json(settings.FEATURES_DIR / "selected_features.json")["compact_sets"]["top_60"]
+        sig = inspect.signature(TabPFNClassifier.__init__).parameters
 
         def scorer(Xtr, ytr, Xva, seed):
-            clf = TabPFNClassifier(device="cpu", random_state=seed)
+            kwargs = {}
+            if "device" in sig:
+                kwargs["device"] = "cpu"
+            if "random_state" in sig:
+                kwargs["random_state"] = seed
+            if "ignore_pretraining_limits" in sig:
+                kwargs["ignore_pretraining_limits"] = True
+            clf = TabPFNClassifier(**kwargs)
             clf.fit(Xtr, ytr)
             return clf.predict_proba(Xva)[:, 1]
 

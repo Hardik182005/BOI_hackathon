@@ -38,10 +38,20 @@ def candidate_feature_columns(df: pl.DataFrame, quarantined: list[str]) -> list[
     return [c for c in df.columns if c not in banned]
 
 
-def encode_dataframe(df: pl.DataFrame, feat_cols: list[str]) -> tuple[np.ndarray, list[str], dict[str, list]]:
-    """Encode to float32 matrix. Non-numeric columns get stable ordinal codes
-    (sorted unique values); mapping returned so folds can re-apply it."""
-    arrays, cat_maps = [], {}
+def encode_dataframe(
+    df: pl.DataFrame,
+    feat_cols: list[str],
+    cat_maps: dict[str, list] | None = None,
+) -> tuple[np.ndarray, list[str], dict[str, list]]:
+    """Encode to float32 matrix. Non-numeric columns get stable ordinal codes.
+
+    When ``cat_maps`` is provided (scoring time), those trained mappings are
+    applied - unseen categories become -1, never a silently different code.
+    When absent (training time), mappings are built from sorted unique values
+    and returned for freezing into the bundle.
+    """
+    arrays = []
+    out_maps: dict[str, list] = {}
     for c in feat_cols:
         s = df[c]
         if s.dtype.is_numeric():
@@ -50,14 +60,17 @@ def encode_dataframe(df: pl.DataFrame, feat_cols: list[str]) -> tuple[np.ndarray
             # deterministic ordinal: days since epoch (fixed reference)
             arrays.append((s.cast(pl.Date).cast(pl.Int32)).cast(pl.Float32).to_numpy())
         else:
-            vals = sorted(v for v in s.unique().to_list() if v is not None)
+            if cat_maps is not None and c in cat_maps:
+                vals = cat_maps[c]
+            else:
+                vals = sorted(v for v in s.unique().to_list() if v is not None)
             mapping = {v: float(i) for i, v in enumerate(vals)}
-            cat_maps[c] = vals
+            out_maps[c] = vals
             arrays.append(
                 np.array([np.nan if v is None else mapping.get(v, -1.0) for v in s.to_list()],
                          dtype=np.float32)
             )
-    return np.column_stack(arrays).astype(np.float32), feat_cols, cat_maps
+    return np.column_stack(arrays).astype(np.float32), feat_cols, out_maps
 
 
 @dataclass

@@ -1,0 +1,25 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./artifacts:/app/artifacts
+      - ./data/interim:/app/data/interim:ro
+    environment:
+      - MULEGUARD_DB=/app/artifacts/muleguard.db
+      # Ollama on the host is optional; scoring works without it
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+    restart: unless-stopped

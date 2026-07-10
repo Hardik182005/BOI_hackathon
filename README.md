@@ -29,7 +29,7 @@ python -m venv .venv
 .venv\Scripts\python -m pytest
 
 # 4. Serve
-.venv\Scripts\python -m muleguard.cli.serve           # FastAPI on :8000
+.venv\Scripts\python -m muleguard.cli.serve           # FastAPI on :8001
 cd frontend && npm install && npm run dev             # dashboard on :5173
 ```
 

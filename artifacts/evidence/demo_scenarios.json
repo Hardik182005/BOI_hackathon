@@ -1,0 +1,429 @@
+{
+  "generated_utc": "2026-07-10T21:20:43.595866+00:00",
+  "note": "scenario rows come from the DEV set only; the OOD case is an explicitly labelled synthetic perturbation",
+  "scenarios": {
+    "high_risk_mule": {
+      "dev_row": 7256,
+      "why": "labelled mule with highest calibrated risk",
+      "result": {
+        "model_version": "1.0.0",
+        "raw_scores": {
+          "lightgbm": 0.998916524011487,
+          "xgboost": 0.99803227186203,
+          "catboost": 0.9999402672824355
+        },
+        "ensemble_score": 0.9989630210519841,
+        "calibrated_risk": 0.9999999716033127,
+        "model_agreement": 0.9980920045795946,
+        "conformal_status": "HIGH_RISK_SET",
+        "verifier_confirms_risk": true,
+        "verifier_probability": 0.999999589164567,
+        "anomaly_percentile": 76.04625550660793,
+        "ood_status": "IN_DISTRIBUTION",
+        "risk_tier": "CRITICAL_REVIEW",
+        "decision": "HUMAN_REVIEW_REQUIRED",
+        "reasons": [
+          "calibrated risk 1.000 in critical band"
+        ],
+        "policy_version": "1.0",
+        "auto_action": null,
+        "limitations": [
+          "Behavioural risk is not proof of criminal intent",
+          "Final action requires an authorised human analyst",
+          "Low risk means 'not currently flagged', never 'certified safe'"
+        ],
+        "top_reasons": [
+          {
+            "feature": "F3898",
+            "verified_semantic_name": null,
+            "value": 1.0,
+            "legitimate_cohort_median": 3.0,
+            "legitimate_percentile": 42.77777777777778,
+            "shap_contribution": 1.8706351724435242,
+            "direction": "INCREASES_RISK"
+          },
+          {
+            "feature": "F1813",
+            "verified_semantic_name": null,
+            "value": 83432.0,
+            "legitimate_cohort_median": 1627154.25,
+            "legitimate_percentile": 3.0155642023346303,
+            "shap_contribution": 1.1062973744791178,
+            "direction": "INCREASES_RISK"
+          },
+          {
+            "feature": "F3799",
+            "verified_semantic_name": null,
+            "value": 83432.0,
+            "legitimate_cohort_median": 1754770.5,
+            "legitimate_percentile": 2.0555555555555554,
+            "shap_contribution": 1.0636918238553121,
+            "direction": "INCREASES_RISK"
+          },
+          {
+            "feature": "F3914",
+            "verified_semantic_name": null,
+            "value": 0.0,
+            "legitimate_cohort_median": 0.0,
+            "legitimate_percentile": 67.83333333333333,
+            "shap_contribution": 1.0530560668559472,
+            "direction": "INCREASES_RISK"
+          },
+          {
+            "feature": "F2489",
+            "verified_semantic_name": null,
+            "value": 0.0,
+            "legitimate_cohort_median": 1.4900000095367432,
+            "legitimate_percentile": 3.849557522123894,
+            "shap_contribution": 0.759383386460986,
+            "direction": "INCREASES_RISK"
+          }
+        ]
+      }
+    },
+    "business_lookalike": {
+      "dev_row": 2806,
+      "why": "legitimate account with high screener score where the hard-negative verifier disagrees - Lens 2 routes to review instead of punishment",
+      "result": {
+        "model_version": "1.0.0",
+        "raw_scores": {
+          "lightgbm": 0.6803981535958458,
+          "xgboost": 0.7432680726051331,
+          "catboost": 0.9227422371565431
+        },
+        "ensemble_score": 0.7821361544525073,
+        "calibrated_risk": 0.960187583909551,
+        "model_agreement": 0.7576559164393026,
+        "conformal_status": "HIGH_RISK_SET",
+        "verifier_confirms_risk": false,
+        "verifier_probability": 0.00012897596488455662,
+        "anomaly_percentile": 57.158590308370044,
+        "ood_status": "IN_DISTRIBUTION",
+        "risk_tier": "URGENT_REVIEW",
+        "decision": "HUMAN_REVIEW_REQUIRED",
+        "reasons": [
+          "calibrated risk 0.960 in urgent band"
+        ],
+        "policy_version": "1.0",
+        "auto_action": null,
+        "limitations": [
+          "Behavioural risk is not proof of criminal intent",
+          "Final action requires an authorised human analyst",
+          "Low risk means 'not currently flagged', never 'certified safe'"
+        ],
+        "top_reasons": [
+          {
+            "feature": "F3898",
+            "verified_semantic_name": null,
+            "value": 0.0,
+            "legitimate_cohort_median": 3.0,
+            "legitimate_percentile": 30.166666666666668,
+            "shap_contribution": 1.7764699063222873,
+            "direction": "INCREASES_RISK"
+          },
+          {
+            "feature": "F3914",
+            "verified_semantic_name": null,
+            "value": 0.0,
+            "legitimate_cohort_median": 0.0,
+            "legitimate_percentile": 67.83333333333333,
+            "shap_contribution": 0.9490925285733179,
+            "direction": "INCREASES_RISK"
+          },
+          {
+            "feature": "F3799",
+            "verified_semantic_name": null,
+            "value": 349760.90625,
+            "legitimate_cohort_median": 1754770.5,
+            "legitimate_percentile": 14.694444444444445,
+            "shap_contribution": 0.941777964102609,
+            "direction": "INCREASES_RISK"
+          },
+          {
+            "feature": "F3484",
+            "verified_semantic_name": null,
+            "value": 0.07000000029802322,
+            "legitimate_cohort_median": 0.019999999552965164,
+            "legitimate_percentile": 100.0,
+            "shap_contribution": 0.6891545226042805,
+            "direction": "INCREASES_RISK"
+          },
+          {
+            "feature": "F1813",
+            "verified_semantic_name": null,
+            "value": 520707.8125,
+            "legitimate_cohort_median": 1627154.25,
+            "legitimate_percentile": 21.748193440800446,
+            "shap_contribution": 0.6164917085736186,
+            "direction": "INCREASES_RISK"
+          }
+        ]
+      }
+    },
+    "model_disagreement": {
+      "dev_row": 258,
+      "why": "supervised score low but anomaly challenger in the top percentile - escalated to review, never certified clean",
+      "result": {
+        "model_version": "1.0.0",
+        "raw_scores": {
+          "lightgbm": 3.5179886260411017e-05,
+          "xgboost": 0.00041344770579598844,
+          "catboost": 0.0004675709100786988
+        },
+        "ensemble_score": 0.0003053995007116994,
+        "calibrated_risk": 5.60569752649096e-08,
+        "model_agreement": 0.9995676089761817,
+        "conformal_status": "LOW_RISK_SET",
+        "verifier_confirms_risk": false,
+        "verifier_probability": 2.8157759320742785e-07,
+        "anomaly_percentile": 99.09140969162996,
+        "ood_status": "IN_DISTRIBUTION",
+        "risk_tier": "STANDARD_REVIEW",
+        "decision": "HUMAN_REVIEW_REQUIRED",
+        "reasons": [
+          "calibrated risk 0.000 below review bands",
+          "anomaly challenger disagrees (percentile 99.1); second-opinion review"
+        ],
+        "policy_version": "1.0",
+        "auto_action": null,
+        "limitations": [
+          "Behavioural risk is not proof of criminal intent",
+          "Final action requires an authorised human analyst",
+          "Low risk means 'not currently flagged', never 'certified safe'"
+        ],
+        "top_reasons": [
+          {
+            "feature": "F3914",
+            "verified_semantic_name": null,
+            "value": 1.0,
+            "legitimate_cohort_median": 0.0,
+            "legitimate_percentile": 100.0,
+            "shap_contribution": -0.9193831582323589,
+            "direction": "DECREASES_RISK"
+          },
+          {
+            "feature": "F3898",
+            "verified_semantic_name": null,
+            "value": 0.0,
+            "legitimate_cohort_median": 3.0,
+            "legitimate_percentile": 30.166666666666668,
+            "shap_contribution": 0.8777510809192456,
+            "direction": "INCREASES_RISK"
+          },
+          {
+            "feature": "F3640",
+            "verified_semantic_name": null,
+            "value": -1.0,
+            "legitimate_cohort_median": 0.18000000715255737,
+            "legitimate_percentile": 25.090302861906085,
+            "shap_contribution": -0.46587493389466317,
+            "direction": "DECREASES_RISK"
+          },
+          {
+            "feature": "F1863",
+            "verified_semantic_name": null,
+            "value": 999144.0,
+            "legitimate_cohort_median": 172664.734375,
+            "legitimate_percentile": 88.35464146748194,
+            "shap_contribution": -0.3995571570692054,
+            "direction": "DECREASES_RISK"
+          },
+          {
+            "feature": "F3811",
+            "verified_semantic_name": null,
+            "value": 2684000.0,
+            "legitimate_cohort_median": 864808.5,
+            "legitimate_percentile": 74.61111111111111,
+            "shap_contribution": -0.2739145763501553,
+            "direction": "DECREASES_RISK"
+          }
+        ]
+      }
+    },
+    "monitor_low_risk": {
+      "dev_row": 9,
+      "why": "not currently flagged; monitoring continues (never 'certified safe')",
+      "result": {
+        "model_version": "1.0.0",
+        "raw_scores": {
+          "lightgbm": 1.515974458958237e-05,
+          "xgboost": 5.356912515708245e-05,
+          "catboost": 5.6638819618526615e-05
+        },
+        "ensemble_score": 4.178922978839714e-05,
+        "calibrated_risk": 8.96092919163539e-10,
+        "model_agreement": 0.9999585209249711,
+        "conformal_status": "LOW_RISK_SET",
+        "verifier_confirms_risk": false,
+        "verifier_probability": 2.6492487113475928e-08,
+        "anomaly_percentile": 44.20429515418502,
+        "ood_status": "IN_DISTRIBUTION",
+        "risk_tier": "MONITOR",
+        "decision": "NOT_CURRENTLY_FLAGGED",
+        "reasons": [
+          "calibrated risk 0.000 below review bands"
+        ],
+        "policy_version": "1.0",
+        "auto_action": null,
+        "limitations": [
+          "Behavioural risk is not proof of criminal intent",
+          "Final action requires an authorised human analyst",
+          "Low risk means 'not currently flagged', never 'certified safe'"
+        ],
+        "top_reasons": [
+          {
+            "feature": "F3898",
+            "verified_semantic_name": null,
+            "value": 3.0,
+            "legitimate_cohort_median": 3.0,
+            "legitimate_percentile": 98.625,
+            "shap_contribution": -0.9782927159956308,
+            "direction": "DECREASES_RISK"
+          },
+          {
+            "feature": "F1246",
+            "verified_semantic_name": null,
+            "value": 1.0,
+            "legitimate_cohort_median": 0.0,
+            "legitimate_percentile": 100.0,
+            "shap_contribution": -0.40029842438700736,
+            "direction": "DECREASES_RISK"
+          },
+          {
+            "feature": "F3640",
+            "verified_semantic_name": null,
+            "value": 0.9200000166893005,
+            "legitimate_cohort_median": 0.18000000715255737,
+            "legitimate_percentile": 91.49763823284246,
+            "shap_contribution": 0.29089143700385783,
+            "direction": "INCREASES_RISK"
+          },
+          {
+            "feature": "F3914",
+            "verified_semantic_name": null,
+            "value": 0.0,
+            "legitimate_cohort_median": 0.0,
+            "legitimate_percentile": 67.83333333333333,
+            "shap_contribution": 0.28075351455062936,
+            "direction": "INCREASES_RISK"
+          },
+          {
+            "feature": "F1863",
+            "verified_semantic_name": null,
+            "value": 517678.0,
+            "legitimate_cohort_median": 172664.734375,
+            "legitimate_percentile": 71.34519177320733,
+            "shap_contribution": -0.1719918418679963,
+            "direction": "DECREASES_RISK"
+          }
+        ]
+      }
+    },
+    "ood_synthetic": {
+      "base_dev_row": 9,
+      "why": "SYNTHETIC perturbation of a real account: selected features pushed far outside the training range - system must route to OOD_REVIEW",
+      "synthetic": true,
+      "result": {
+        "model_version": "1.0.0",
+        "raw_scores": {
+          "lightgbm": 1.8705641560091556e-05,
+          "xgboost": 7.872519199736416e-05,
+          "catboost": 0.0002353459068152527
+        },
+        "ensemble_score": 0.00011092558012423614,
+        "calibrated_risk": 1.4600208000923261e-08,
+        "model_agreement": 0.9997833597347449,
+        "conformal_status": "LOW_RISK_SET",
+        "verifier_confirms_risk": false,
+        "verifier_probability": 3.203540128078175e-08,
+        "anomaly_percentile": 93.51596916299559,
+        "ood_status": "OUT_OF_DISTRIBUTION",
+        "risk_tier": "OOD_REVIEW",
+        "decision": "HUMAN_REVIEW_REQUIRED",
+        "reasons": [
+          "input unlike training data; score not trusted"
+        ],
+        "policy_version": "1.0",
+        "auto_action": null,
+        "limitations": [
+          "Behavioural risk is not proof of criminal intent",
+          "Final action requires an authorised human analyst",
+          "Low risk means 'not currently flagged', never 'certified safe'"
+        ],
+        "top_reasons": [
+          {
+            "feature": "F3898",
+            "verified_semantic_name": null,
+            "value": 1000000000.0,
+            "legitimate_cohort_median": 3.0,
+            "legitimate_percentile": 100.0,
+            "shap_contribution": -0.8710678522351287,
+            "direction": "DECREASES_RISK"
+          },
+          {
+            "feature": "F1246",
+            "verified_semantic_name": null,
+            "value": 1.0,
+            "legitimate_cohort_median": 0.0,
+            "legitimate_percentile": 100.0,
+            "shap_contribution": -0.4873301070240389,
+            "direction": "DECREASES_RISK"
+          },
+          {
+            "feature": "F3640",
+            "verified_semantic_name": null,
+            "value": 1000000000.0,
+            "legitimate_cohort_median": 0.18000000715255737,
+            "legitimate_percentile": 100.0,
+            "shap_contribution": 0.43903432809546317,
+            "direction": "INCREASES_RISK"
+          },
+          {
+            "feature": "F3908",
+            "verified_semantic_name": null,
+            "value": 1000000000.0,
+            "legitimate_cohort_median": 0.0,
+            "legitimate_percentile": 100.0,
+            "shap_contribution": 0.22665260454876504,
+            "direction": "INCREASES_RISK"
+          },
+          {
+            "feature": "F3914",
+            "verified_semantic_name": null,
+            "value": 1000000000.0,
+            "legitimate_cohort_median": 0.0,
+            "legitimate_percentile": 100.0,
+            "shap_contribution": -0.22362235732607594,
+            "direction": "DECREASES_RISK"
+          }
+        ]
+      }
+    }
+  },
+  "llm_scenes": {
+    "deterministic_narrative_works_without_ollama": {
+      "summary": "Account DEMO-ACC-6 requires highest-priority human review. Calibrated behavioural risk is 0.91 with model agreement 0.86; conformal status HIGH_RISK_SET, input status IN_DISTRIBUTION. Main technical drivers: F1702 is at the 99.2th percentile of the legitimate cohort and increases the model score.",
+      "risk_tier": "CRITICAL_REVIEW",
+      "verified_risk_score": 0.91,
+      "reason_codes": [
+        "F1702:+0.210"
+      ],
+      "recommended_checks": [
+        "VERIFY_KYC",
+        "CHECK_DEVICE_HISTORY",
+        "CHECK_REGISTRY",
+        "ANALYST_REVIEW"
+      ],
+      "limitations": [
+        "Behavioural risk is not proof of criminal intent",
+        "Final action requires human review"
+      ]
+    },
+    "hallucination_rejected": {
+      "planted_output": "{\"summary\": \"Account DEMO-ACC-6 moved Rs. 4,50,000 through F999 and the holder is guilty of laundering.\", \"risk_tier\": \"MONITOR\", \"verified_risk_score\": 0.05, \"reason_codes\": [], \"recommended_checks\": [\"FREEZE_ACCOUNT_NOW\"], \"limitations\": []}",
+      "rejection_reasons": [
+        "schema violation: List should have at least 1 item after validation, not 0 at ('limitations',)"
+      ]
+    }
+  }
+}

@@ -1,0 +1,10 @@
+MuleGuard no-MCP / no-browser-agent scan - 2026-07-10T21:36:50Z
+commit: cd6f9c83d821ffbdae9c4fabd4825bfe8e7abd9c
+
+Patterns: mcp, claude-in-chrome, browser agent, puppeteer, playwright, anthropic, extension
+
+--- application source (src/, frontend/src/, configs/, package manifests) ---
+NO MATCHES - application code has zero MCP/browser-agent/LLM-API dependencies
+
+--- dependency check: no anthropic/openai/browser-driver packages installed ---
+NONE FOUND in venv

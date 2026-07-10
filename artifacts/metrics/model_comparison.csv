@@ -1,0 +1,11 @@
+model,status,n_features,pr_auc_mean,pr_auc_std,roc_auc_mean,n_repeats,runtime_s
+REJECTED_leakage_lgbm_with_F3912,"REJECTED LEAKAGE - evidence only, never a candidate model","",0.9419,0.0119,0.9933,2,176.1
+catboost_tuned_top60,candidate,60,0.8077,0.045,0.9648,5,142.2
+lightgbm_tuned_top60,candidate,60,0.7717,0.0528,0.9614,5,51.5
+lightgbm_tuned_full,candidate,full_clean,0.7637,0.0223,0.9602,5,710.2
+lightgbm_tuned_top30,candidate,30,0.7562,0.0255,0.9647,5,51.9
+xgboost_tuned_top60,candidate,60,0.756,0.0658,0.9483,5,57.3
+lightgbm_tuned_top15,candidate,15,0.644,0.042,0.9515,5,39.4
+lightgbm_baseline,candidate,"",0.6142,0.0474,0.9359,5,736.0
+logistic_l2,candidate,"",0.2328,0.012,0.9202,5,70.1
+dummy_prevalence,candidate,"",0.0087,0.0,0.4938,5,59.6

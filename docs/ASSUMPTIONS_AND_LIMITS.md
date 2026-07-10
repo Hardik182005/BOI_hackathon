@@ -18,7 +18,7 @@ Every item is labelled: **[MEASURED]** re-verified from raw data by this pipelin
 9. **[ASSUMPTION]** Locked test = 20% stratified, seed 42, frozen to parquet before any model training; touched exactly once at the end. If duplicate feature-rows span dev/test, whole duplicate groups are kept on one side (group-aware split).
 10. **[ASSUMPTION]** With ~81 positives total, per-fold calibration data is tiny; simpler calibrators (Platt) are preferred over isotonic when isotonic shows overfit (selected by OOF Brier/ECE, never on locked test).
 11. **[LIMIT]** Confidence intervals are bootstrap-based and wide by nature at 0.89% prevalence; they are reported, not hidden.
-12. **[LIMIT]** Out-of-time stress testing depends on whether `F2230` is verifiably a chronological snapshot month; if ordering cannot be established from data alone it is reported as unverified and no temporal claim is made.
+12. **[MEASURED → LIMIT]** Out-of-time stress testing is **invalid on this file**: the audit found `F2230` (snapshot month) perfectly separates the classes — all 9,001 negatives are the 2025-10 snapshot, all 81 positives are Sep/Nov/Dec snapshots. Time ≡ label, so any "train on earlier months, test on later" split would be testing the leak, not the model. Documented in `artifacts/metrics/temporal_stress_metrics.json` as NOT_VALID with evidence; `F2230` is quarantined.
 
 ## Product / safety
 

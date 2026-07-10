@@ -1,0 +1,14 @@
+{
+  "status": "NOT_VALID",
+  "reason": "Out-of-time evaluation is impossible on this dataset: the snapshot-month column F2230 deterministically separates the classes. Measured from the raw file: all 9,001 negative accounts belong to the 2025-10 snapshot; all 81 positive accounts belong to the 2025-09 (48), 2025-11 (23) and 2025-12 (10) snapshots. Balanced label reconstruction from F2230 alone = 1.0. A 'train on earlier months, test on later months' split would therefore measure the label-collection artifact, not model generalisation.",
+  "evidence": {
+    "target_by_month": {
+      "2025-09": {"positives": 48, "n": 48},
+      "2025-10": {"positives": 0, "n": 9001},
+      "2025-11": {"positives": 23, "n": 23},
+      "2025-12": {"positives": 10, "n": 10}
+    },
+    "disposition": "F2230 quarantined (configs/leakage_quarantine.yaml); primary evaluation uses stratified locked test + repeated stratified CV at natural prevalence"
+  },
+  "note": "Recorded instead of fabricating a temporal metric; see docs/LEAKAGE_AUDIT.md"
+}

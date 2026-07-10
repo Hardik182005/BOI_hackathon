@@ -1,0 +1,8 @@
+{
+  "critical_risk": 0.9638304837100166,
+  "urgent_risk": 0.048153197236171764,
+  "standard_risk": 0.017246147513913988,
+  "anomaly_escalation_pct": 99.0,
+  "policy_version": "1.0",
+  "derived_from": "dev OOF calibrated distribution"
+}
