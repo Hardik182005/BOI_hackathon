@@ -1,0 +1,127 @@
+"""Deterministic scoring service over the frozen bundle.
+
+Given raw feature rows (dict or DataFrame with original column names), produce
+the complete Trinetra output: base scores, calibrated risk, agreement,
+conformal set, verifier verdict, anomaly percentile, OOD status, policy tier
+and SHAP reason codes. Pure function of (bundle, input) - no randomness, no
+network, no LLM.
+"""
+from __future__ import annotations
+
+from typing import Any
+
+import joblib
+import numpy as np
+import polars as pl
+
+from muleguard import settings
+from muleguard.action.policy import PolicyThresholds, decide
+from muleguard.explain.reason_codes import counterfactual_sensitivity, shap_reason_codes
+from muleguard.logging import get_logger
+from muleguard.models.calibration import PlattCalibrator  # noqa: F401 (unpickle)
+from muleguard.models.conformal import MondrianConformal
+
+log = get_logger("models.scoring")
+
+_BUNDLE_CACHE: dict[str, Any] | None = None
+
+
+def load_bundle(path=None) -> dict[str, Any]:
+    global _BUNDLE_CACHE
+    if _BUNDLE_CACHE is None or path is not None:
+        p = path or settings.MODELS_DIR / "final_bundle.joblib"
+        _BUNDLE_CACHE = joblib.load(p)
+        log.info("bundle loaded: winner=%s sha-fp=%s",
+                 _BUNDLE_CACHE["winner_oof_name"],
+                 _BUNDLE_CACHE["data_fingerprint_sha256"][:12])
+    return _BUNDLE_CACHE
+
+
+class SchemaError(ValueError):
+    """Raised when required selected features are missing from a request."""
+
+
+def _matrix_from_rows(rows: pl.DataFrame, bundle: dict[str, Any]) -> np.ndarray:
+    """Build the kept-feature matrix from raw-named input columns.
+
+    Missing SELECTED features raise SchemaError (never silent zero-fill);
+    unknown extra columns are ignored.
+    """
+    from muleguard.features.preprocessing import encode_dataframe
+
+    selected = bundle["feature_list_selected"]
+    missing = [c for c in selected if c not in rows.columns]
+    if missing:
+        raise SchemaError(
+            f"required features missing from request: {missing[:8]}"
+            + ("..." if len(missing) > 8 else "")
+        )
+    X, _, _ = encode_dataframe(rows, selected)
+    return bundle["preprocessor"].transform(X)
+
+
+def score_rows(rows: pl.DataFrame, bundle: dict[str, Any] | None = None,
+               with_explanations: bool = True) -> list[dict[str, Any]]:
+    b = bundle or load_bundle()
+    Xp = _matrix_from_rows(rows, b)
+    thresholds = PolicyThresholds.from_dict(b["policy_thresholds"])
+    conformal = MondrianConformal.from_dict(b["conformal"])
+
+    base_scores = {m: b["models"][m].predict_proba(Xp)[:, 1] for m in b["models"]}
+    S = np.column_stack(list(base_scores.values()))
+    winner_key = "lightgbm"  # winner family; agreement uses all three
+    raw = base_scores[winner_key]
+    calibrated = np.clip(b["calibrator"].predict(raw), 0.0, 1.0)
+    agreement = 1.0 - (S.max(axis=1) - S.min(axis=1))
+    conf_sets = conformal.predict_set(calibrated)
+    verifier_flags, verifier_probs = b["verifier"].confirms_risk(Xp)
+    anom_pct = b["anomaly"].anomaly_percentile(Xp)
+    ood_status, ood_detail = b["ood"].status(Xp)
+    # rank percentile vs dev OOF calibrated distribution is approximated by
+    # the anomaly dev reference; we use calibrated risk directly for ranks
+    reasons = None
+    if with_explanations:
+        reasons = shap_reason_codes(
+            b["models"]["lightgbm"].booster_, Xp, b["feature_list_kept"], b["cohort"]
+        )
+
+    out = []
+    for i in range(len(Xp)):
+        pol = decide(
+            calibrated_risk=float(calibrated[i]),
+            conformal_set=conf_sets[i],
+            ood_status=ood_status[i],
+            anomaly_percentile=float(anom_pct[i]),
+            model_agreement=float(agreement[i]),
+            verifier_flag=bool(verifier_flags[i]),
+            thresholds=thresholds,
+        )
+        rec: dict[str, Any] = {
+            "model_version": b["version"],
+            "raw_scores": {m: float(base_scores[m][i]) for m in base_scores},
+            "ensemble_score": float(S[i].mean()),
+            "calibrated_risk": float(calibrated[i]),
+            "model_agreement": float(agreement[i]),
+            "conformal_status": conf_sets[i],
+            "verifier_confirms_risk": bool(verifier_flags[i]),
+            "verifier_probability": float(verifier_probs[i]),
+            "anomaly_percentile": float(anom_pct[i]),
+            "ood_status": ood_status[i],
+            "ood_detail": ood_detail[i],
+            **pol,
+        }
+        if reasons is not None:
+            rec["top_reasons"] = reasons[i]
+        out.append(rec)
+    return out
+
+
+def counterfactual_for_row(row_matrix: np.ndarray, reason_rows: list[dict],
+                           bundle: dict[str, Any] | None = None) -> list[dict]:
+    b = bundle or load_bundle()
+    thresholds = PolicyThresholds.from_dict(b["policy_thresholds"])
+    booster = b["models"]["lightgbm"].booster_
+    return counterfactual_sensitivity(
+        booster, row_matrix, b["feature_list_kept"], reason_rows,
+        b["cohort"], threshold=thresholds.standard_risk,
+    )

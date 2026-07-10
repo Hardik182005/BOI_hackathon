@@ -1,0 +1,16 @@
+{
+  "generated_utc": "2026-07-10T19:16:26.663543+00:00",
+  "without_f3912": {
+    "model": "lightgbm_baseline",
+    "pr_auc_mean": 0.6141642026800002,
+    "pr_auc_std": 0.04737398924678847,
+    "status": "ACCEPTED (leakage-free)"
+  },
+  "with_f3912": {
+    "model": "REJECTED_leakage_lgbm_with_F3912",
+    "pr_auc_mean": 0.9418964496190211,
+    "pr_auc_std": 0.011857199514170413,
+    "status": "REJECTED LEAKAGE - never used"
+  },
+  "note": "F3912 is quarantined; this comparison exists only as evidence of why. The inflated number is not a model result."
+}

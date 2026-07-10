@@ -1,0 +1,44 @@
+{
+  "locked_test": {
+    "created_utc": "2026-07-10T18:58:47.246429+00:00",
+    "seed": 42,
+    "test_fraction_config": 0.2,
+    "n_rows_total": 9082,
+    "n_test_rows": 1818,
+    "n_test_positives": 17,
+    "n_dev_rows": 7264,
+    "n_dev_positives": 64,
+    "test_prevalence": 0.009351,
+    "dev_prevalence": 0.008811,
+    "group_aware": true
+  },
+  "cv": {
+    "n_splits": 5,
+    "n_repeats": 5,
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "positives_per_fold_repeat0": [
+      13,
+      13,
+      13,
+      13,
+      12
+    ],
+    "group_aware": true
+  },
+  "duplicate_feature_rows": {
+    "n_rows_in_multi_groups": 0,
+    "n_groups_gt1": 0,
+    "largest_group": 1
+  },
+  "files": {
+    "locked_test": "E:\\BOI\\BOI_hackathon\\data\\splits\\locked_test_indices.parquet",
+    "cv_folds": "E:\\BOI\\BOI_hackathon\\data\\splits\\cv_folds.parquet",
+    "duplicate_groups": "E:\\BOI\\BOI_hackathon\\data\\splits\\duplicate_row_groups.parquet"
+  }
+}

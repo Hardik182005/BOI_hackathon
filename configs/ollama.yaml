@@ -1,0 +1,17 @@
+# Local LLM narrator configuration. The LLM is OPTIONAL and can only narrate
+# verified structured facts; it can never compute or change scores/tiers.
+enabled: true
+base_url: "http://localhost:11434"
+# Preferred model order: first available wins. qwen3.5 not present locally;
+# qwen3:8b is the installed equivalent (documented substitution).
+model_preference:
+  - "qwen3:8b"
+  - "llama3.2:3b"
+  - "phi4-mini:latest"
+temperature: 0.0
+max_tokens: 700
+timeout_seconds: 45
+retries: 1
+circuit_breaker:
+  failure_threshold: 3      # consecutive failures -> open circuit
+  cooldown_seconds: 300
