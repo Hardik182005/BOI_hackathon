@@ -1,0 +1,26 @@
+{
+  "generated_utc": "2026-07-10T18:56:07.145448+00:00",
+  "policy": "quarantined features are excluded from every model, ensemble, selector, calibration and explanation; ablation runs that include them are labelled REJECTED LEAKAGE evidence only",
+  "quarantine": [
+    {
+      "feature": "F3924",
+      "reason": "target variable (F3924)",
+      "disposition": "EXCLUDED_FROM_ALL_TRAINING"
+    },
+    {
+      "feature": "F3912",
+      "reason": "target leak: measured |corr|=0.97, single-feature CV PR-AUC=0.94, balanced label reconstruction=0.99",
+      "disposition": "EXCLUDED_FROM_ALL_TRAINING"
+    },
+    {
+      "feature": "F2230",
+      "reason": "snapshot-month label artifact: ALL 9,001 negatives are the 2025-10 snapshot, ALL 81 positives are Sep/Nov/Dec snapshots - the month deterministically reconstructs the target (balanced reconstruction 1.0). Also invalidates any out-of-time split on this column.",
+      "disposition": "EXCLUDED_FROM_ALL_TRAINING"
+    },
+    {
+      "feature": "__UNNAMED__0",
+      "reason": "row-index / identifier column",
+      "disposition": "EXCLUDED_FROM_ALL_TRAINING"
+    }
+  ]
+}

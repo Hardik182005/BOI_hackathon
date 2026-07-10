@@ -30,17 +30,25 @@ log = get_logger("data.leakage")
 # Columns that are never features, regardless of statistics.
 ALWAYS_QUARANTINED_REASONS = {
     settings.TARGET_COLUMN: "target variable (F3924)",
-    "F3912": "suspected target leak flagged in submission; re-verified by this audit",
+    "F3912": "target leak: measured |corr|=0.97, single-feature CV PR-AUC=0.94, "
+             "balanced label reconstruction=0.99",
+    "F2230": "snapshot-month label artifact: ALL 9,001 negatives are the 2025-10 "
+             "snapshot, ALL 81 positives are Sep/Nov/Dec snapshots - the month "
+             "deterministically reconstructs the target (balanced reconstruction 1.0). "
+             "Also invalidates any out-of-time split on this column.",
 }
 
 
 def numeric_feature_matrix(df: pl.DataFrame) -> tuple[np.ndarray, list[str]]:
-    """Float32 matrix of all numeric columns except the target."""
-    cols = [
-        c for c in df.columns
-        if c != settings.TARGET_COLUMN and df.schema[c].is_numeric()
-    ]
-    X = df.select([pl.col(c).cast(pl.Float32) for c in cols]).to_numpy()
+    """Float32 matrix of ALL feature columns except the target.
+
+    Numeric passes through; temporal becomes epoch-days; categoricals get
+    stable ordinal codes - so the leakage audit covers every column.
+    """
+    from muleguard.features.preprocessing import encode_dataframe
+
+    cols = [c for c in df.columns if c != settings.TARGET_COLUMN]
+    X, cols, _ = encode_dataframe(df, cols)
     return X, cols
 
 
@@ -133,11 +141,21 @@ def binned_mutual_information(X: np.ndarray, y: np.ndarray, n_bins: int = 10) ->
     return np.clip(mi, 0.0, h_y if h_y > 0 else None)
 
 
-def exact_label_reconstruction(X: np.ndarray, y: np.ndarray) -> np.ndarray:
-    """Fraction of non-missing rows where the (binarised) feature equals y.
+MAX_RECONSTRUCTION_CARDINALITY = 25
 
-    Detects exact copies and affine recodings of the target among two-valued
-    columns. Returns match rate per column (0 where not two-valued).
+
+def exact_label_reconstruction(X: np.ndarray, y: np.ndarray) -> np.ndarray:
+    """BALANCED label-reconstruction rate for low-cardinality columns.
+
+    For each column with <= MAX_RECONSTRUCTION_CARDINALITY unique values, map
+    every category to its majority class and score the mapping by BALANCED
+    accuracy (mean of per-class match rates). Balanced scoring is essential
+    at 0.9% prevalence: a raw match rate of ~0.99 is what any near-constant
+    column achieves trivially (majority-class baseline), while a true target
+    recoding scores ~1.0 on BOTH classes. Detects exact copies, affine
+    recodings and multi-category encodings of the target (e.g. a snapshot
+    month whose values separate the classes perfectly).
+    Returns 0 for high-cardinality/degenerate columns.
     """
     n_cols = X.shape[1]
     rate = np.zeros(n_cols)
@@ -145,14 +163,19 @@ def exact_label_reconstruction(X: np.ndarray, y: np.ndarray) -> np.ndarray:
         x = X[:, j].astype(np.float64)
         miss = np.isnan(x)
         vals = np.unique(x[~miss])
-        if len(vals) != 2:
+        if len(vals) < 2 or len(vals) > MAX_RECONSTRUCTION_CARDINALITY:
             continue
-        lo, hi = vals
-        for mapping in ((lo, hi), (hi, lo)):  # try both polarity mappings
-            yhat = np.where(x == mapping[1], 1, 0)
-            m = (~miss)
-            r = (yhat[m] == y[m]).mean() if m.any() else 0.0
-            rate[j] = max(rate[j], r)
+        ym, xm = y[~miss], x[~miss]
+        if (ym == 1).sum() == 0 or (ym == 0).sum() == 0:
+            continue
+        # majority-class mapping per category
+        yhat = np.zeros(len(xm), dtype=int)
+        for v in vals:
+            sel = xm == v
+            yhat[sel] = 1 if ym[sel].mean() >= 0.5 else 0
+        pos_match = (yhat[ym == 1] == 1).mean()
+        neg_match = (yhat[ym == 0] == 0).mean()
+        rate[j] = (pos_match + neg_match) / 2.0
     return rate
 
 
@@ -172,12 +195,14 @@ def run_leakage_audit(df: pl.DataFrame) -> tuple[pl.DataFrame, dict[str, Any]]:
     mi = binned_mutual_information(X, y)
     recon = exact_label_reconstruction(X, y)
 
-    n_rows = df.height
-    n_unique = np.array([df[c].drop_nulls().n_unique() for c in cols])
-    n_nonnull = np.array([n_rows - df[c].null_count() for c in cols])
+    n_unique = np.zeros(len(cols), dtype=np.int64)
+    n_nonnull = np.zeros(len(cols), dtype=np.int64)
     int_valued = np.zeros(len(cols), dtype=bool)
-    for j, c in enumerate(cols):
-        v = df[c].drop_nulls().cast(pl.Float64).to_numpy()
+    for j in range(len(cols)):
+        v = X[:, j].astype(np.float64)
+        v = v[~np.isnan(v)]
+        n_nonnull[j] = len(v)
+        n_unique[j] = len(np.unique(v))
         int_valued[j] = len(v) > 0 and bool(np.all(v == np.round(v)))
     id_like = int_valued & (n_unique / np.maximum(n_nonnull, 1) >= float(cfg["identifier_unique_ratio"])) & (n_unique > 1000)
 
@@ -196,7 +221,7 @@ def run_leakage_audit(df: pl.DataFrame) -> tuple[pl.DataFrame, dict[str, Any]]:
     audit = audit.with_columns([
         (pl.col("target_corr").abs() >= sus_corr).alias("flag_high_corr"),
         (pl.col("single_feature_cv_pr_auc") >= sus_ap).alias("flag_high_single_ap"),
-        (pl.col("label_reconstruction_rate") >= 0.99).alias("flag_label_copy"),
+        (pl.col("label_reconstruction_rate") >= 0.95).alias("flag_label_copy"),
         ((pl.col("single_feature_cv_roc_auc") >= 0.999) | (pl.col("single_feature_cv_roc_auc") <= 0.001)).alias("flag_perfect_separation"),
         pl.col("identifier_like").alias("flag_identifier"),
     ])

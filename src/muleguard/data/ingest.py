@@ -94,9 +94,86 @@ def convert_to_parquet(force: bool = False) -> dict[str, Any]:
     }
 
 
-def load_dataset() -> pl.DataFrame:
+def load_raw_parquet() -> pl.DataFrame:
     cfg = settings.load_config("data")
     return pl.read_parquet(settings.REPO_ROOT / cfg["interim"]["parquet"])
+
+
+# Date formats observed in F3888 (account opening date): true date cells are
+# rendered ISO by calamine; text cells use month-day-year with hyphens.
+_F3888_FORMATS = ["%Y-%m-%d %H:%M:%S", "%m-%d-%Y", "%Y-%m-%d", "%d-%m-%Y"]
+
+
+def canonicalize(df: pl.DataFrame) -> tuple[pl.DataFrame, dict[str, Any]]:
+    """Deterministic, target-blind canonicalisation of the raw parquet.
+
+    - the literal string ``"NA"`` is the workbook's missing marker -> null
+    - string columns whose non-NA values all parse as numbers -> Float64
+    - ``F3888`` (opening date, mixed text formats) -> Date
+    - remaining string columns stay Utf8 (true categoricals)
+    - datetime columns pass through unchanged
+
+    Returns the canonical frame and a parse report (per-column NA counts and
+    parse failures; any unexpected failure is loud in the report).
+    """
+    report: dict[str, Any] = {"na_string_nulls": {}, "parse_failures": {}, "coerced_numeric": [],
+                              "parsed_dates": [], "kept_categorical": []}
+    exprs: list[pl.Expr] = []
+    for c in df.columns:
+        dt_ = df.schema[c]
+        if dt_.is_numeric() or dt_.is_temporal():
+            exprs.append(pl.col(c))
+            continue
+        s = df[c].cast(pl.Utf8).str.strip_chars()
+        na_count = int((s == "NA").sum())
+        cleaned = pl.col(c).cast(pl.Utf8).str.strip_chars()
+        cleaned = pl.when(cleaned == "NA").then(None).otherwise(cleaned)
+        non_na = s.filter((s != "NA") & s.is_not_null())
+        as_num = non_na.cast(pl.Float64, strict=False)
+        n_unparseable = int(as_num.null_count())
+        if na_count:
+            report["na_string_nulls"][c] = na_count
+        if c == "F3888":
+            parsed = None
+            for fmt in _F3888_FORMATS:
+                trial = non_na.str.strptime(pl.Date, fmt, strict=False)
+                parsed = trial if parsed is None else parsed.fill_null(trial)
+            date_expr = None
+            for fmt in _F3888_FORMATS:
+                e = cleaned.str.strptime(pl.Date, fmt, strict=False)
+                date_expr = e if date_expr is None else date_expr.fill_null(e)
+            fails = int(parsed.null_count()) if parsed is not None else len(non_na)
+            report["parse_failures"][c] = fails
+            report["parsed_dates"].append(c)
+            exprs.append(date_expr.alias(c))
+        elif n_unparseable == 0:
+            report["coerced_numeric"].append(c)
+            exprs.append(cleaned.cast(pl.Float64, strict=False).alias(c))
+        else:
+            report["kept_categorical"].append(c)
+            exprs.append(cleaned.alias(c))
+    out = df.select(exprs)
+    return out, report
+
+
+def load_dataset() -> pl.DataFrame:
+    """Canonical analysis dataset (cached parquet next to the raw one)."""
+    cfg = settings.load_config("data")
+    canon_path = settings.REPO_ROOT / cfg["interim"]["parquet"]
+    canon_path = canon_path.with_name("dataset_canonical.parquet")
+    if canon_path.exists():
+        return pl.read_parquet(canon_path)
+    df, report = canonicalize(load_raw_parquet())
+    df.write_parquet(canon_path, compression="zstd")
+    save_json(report, canon_path.with_name("canonicalization_report.json"))
+    return df
+
+
+def _parses_close(text: str, number: float) -> bool:
+    try:
+        return math.isclose(float(text.strip()), number, rel_tol=1e-9, abs_tol=1e-12)
+    except (ValueError, AttributeError):
+        return False
 
 
 def _spot_check_targets(n_rows: int, n_cols: int, n_cells: int, seed: int) -> list[tuple[int, int]]:
@@ -116,7 +193,7 @@ def validate_against_independent_engine() -> dict[str, Any]:
 
     cfg = settings.load_config("data")
     raw_copy = settings.REPO_ROOT / cfg["raw"]["raw_copy"]
-    df = load_dataset()
+    df = load_raw_parquet()  # validates the CONVERSION; canonicalisation has its own report
     n_cells = int(cfg["audit"]["spot_check_cells"])
     targets = _spot_check_targets(df.height, df.width, n_cells, settings.GLOBAL_SEED)
     wanted_rows: dict[int, list[int]] = {}
@@ -189,13 +266,33 @@ def validate_against_independent_engine() -> dict[str, Any]:
     mismatched_cells = []
     for (r, c), raw_val in spot_values.items():
         pq_val = df[r, c]
+        # Workbook convention: the literal string "NA" is the missing marker.
+        # calamine maps it to null in numeric-inferred columns; both readings
+        # denote the same missing cell.
+        raw_is_na = raw_val is None or (isinstance(raw_val, str) and raw_val.strip() == "NA")
+        pq_is_na = pq_val is None or (isinstance(pq_val, str) and pq_val.strip() == "NA")
         ok = (
-            (raw_val is None and pq_val is None)
+            (raw_is_na and pq_is_na)
             or (raw_val == pq_val)
             or (
                 isinstance(raw_val, (int, float))
                 and isinstance(pq_val, (int, float))
                 and math.isclose(float(raw_val), float(pq_val), rel_tol=1e-9, abs_tol=1e-12)
+            )
+            # numeric stored as text in one engine, number in the other
+            or (
+                isinstance(raw_val, str) and isinstance(pq_val, (int, float))
+                and _parses_close(raw_val, float(pq_val))
+            )
+            or (
+                isinstance(pq_val, str) and isinstance(raw_val, (int, float))
+                and _parses_close(pq_val, float(raw_val))
+            )
+            # datetime cell vs its string rendering
+            or (str(raw_val) == str(pq_val))
+            or (
+                isinstance(raw_val, dt.datetime)
+                and str(pq_val).startswith(str(raw_val.date()))
             )
         )
         if not ok:
@@ -221,7 +318,7 @@ def build_fingerprint(raw_info: dict[str, Any], validation: dict[str, Any]) -> d
     """Assemble and persist the immutable dataset fingerprint."""
     cfg = settings.load_config("data")
     parquet_path = settings.REPO_ROOT / cfg["interim"]["parquet"]
-    df = load_dataset()
+    df = load_raw_parquet()
     tgt = df[settings.TARGET_COLUMN]
     n_pos = int((tgt == 1).sum())
     n_neg = int((tgt == 0).sum())

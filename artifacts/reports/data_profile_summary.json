@@ -1,0 +1,17 @@
+{
+  "n_rows": 9082,
+  "n_cols_total": 3925,
+  "n_feature_cols": 3924,
+  "n_missing_cells": 9847086,
+  "missing_cell_rate": 0.27631,
+  "n_cols_with_missing": 3835,
+  "n_constant": 359,
+  "n_quasi_constant": 1078,
+  "n_exact_duplicate_cols": 977,
+  "dtype_counts": {
+    "Float64": 3916,
+    "String": 6,
+    "Date": 1,
+    "Datetime(time_unit='ms', time_zone=None)": 1
+  }
+}

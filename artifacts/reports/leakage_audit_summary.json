@@ -1,0 +1,56 @@
+{
+  "audited_utc": "2026-07-10T18:56:07.120214+00:00",
+  "n_numeric_features_audited": 3924,
+  "thresholds": {
+    "abs_corr": 0.95,
+    "single_feature_cv_ap": 0.9
+  },
+  "n_flagged": 3,
+  "flagged": [
+    {
+      "feature": "__UNNAMED__0",
+      "target_corr": 0.16284222311502222,
+      "single_feature_cv_pr_auc": 1.0,
+      "single_feature_cv_roc_auc": 1.0,
+      "mutual_information_bits": 0.03014964814352064,
+      "label_reconstruction_rate": 0.0,
+      "identifier_like": true,
+      "flag_high_corr": false,
+      "flag_high_single_ap": true,
+      "flag_label_copy": false,
+      "flag_perfect_separation": true,
+      "flag_identifier": true,
+      "suspicious": true
+    },
+    {
+      "feature": "F3912",
+      "target_corr": 0.9690659702864177,
+      "single_feature_cv_pr_auc": 0.943275759260651,
+      "single_feature_cv_roc_auc": 0.9877009803921568,
+      "mutual_information_bits": 0.0,
+      "label_reconstruction_rate": 0.9874876728374489,
+      "identifier_like": false,
+      "flag_high_corr": true,
+      "flag_high_single_ap": true,
+      "flag_label_copy": true,
+      "flag_perfect_separation": false,
+      "flag_identifier": false,
+      "suspicious": true
+    },
+    {
+      "feature": "F2230",
+      "target_corr": -0.040421432987073694,
+      "single_feature_cv_pr_auc": 0.594490824694077,
+      "single_feature_cv_roc_auc": 0.5911764705882353,
+      "mutual_information_bits": 0.038884092071840556,
+      "label_reconstruction_rate": 1.0,
+      "identifier_like": false,
+      "flag_high_corr": false,
+      "flag_high_single_ap": false,
+      "flag_label_copy": true,
+      "flag_perfect_separation": false,
+      "flag_identifier": false,
+      "suspicious": true
+    }
+  ]
+}

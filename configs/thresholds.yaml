@@ -1,0 +1,36 @@
+# Deterministic decision-policy configuration.
+# Thresholds are DERIVED FROM DEV OOF DATA by muleguard.cli.build_lenses and
+# written into artifacts/model_registry/policy_snapshot.json at freeze time;
+# the values here define the derivation targets, not hardcoded cutoffs.
+policy_version: "1.0"
+
+conformal:
+  alpha: 0.10           # 90% target coverage per class
+
+tiers:
+  # calibrated-risk quantile targets on dev OOF distribution
+  critical_review:
+    method: top_k_rate          # highest-risk share sized to analyst capacity
+    daily_alert_capacity: 25    # top-N per scoring batch ~ CRITICAL
+  urgent_review:
+    method: top_k_rate
+    daily_alert_capacity: 100   # next tier
+  standard_review:
+    method: recall_target       # threshold achieving this dev OOF recall
+    recall_target: 0.90
+
+ood:
+  missingness_z_threshold: 4.0
+  range_violation_share_threshold: 0.20
+  knn_quantile: 0.999           # distance beyond dev q99.9 -> OOD
+  mahalanobis_quantile: 0.999
+
+anomaly:
+  isolation_forest:
+    n_estimators: 300
+    contamination: 0.01         # tuned on dev only; never uses locked-test labels
+  disagreement_percentile: 99.0 # anomaly percentile that triggers review escalation
+
+human_review:
+  freeze_recommendation_requires: ["analyst_id", "reason", "case_id"]
+  auto_actions_allowed: false   # nothing punitive happens automatically, ever
