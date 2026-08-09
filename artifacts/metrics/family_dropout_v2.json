@@ -1,0 +1,119 @@
+{
+  "model": "xgboost_top_120",
+  "n_repeats": 2,
+  "baseline_pr_auc": 0.77798,
+  "families_tested": 13,
+  "per_family": [
+    {
+      "family_removed": "TOTAL_ALL_RAILS",
+      "n_features_removed": 11,
+      "n_features_remaining": 109,
+      "pr_auc": 0.68344,
+      "delta": -0.09453,
+      "relative_drop": 0.1215
+    },
+    {
+      "family_removed": "UPI",
+      "n_features_removed": 16,
+      "n_features_remaining": 104,
+      "pr_auc": 0.71167,
+      "delta": -0.0663,
+      "relative_drop": 0.0852
+    },
+    {
+      "family_removed": "NON_CASH_CHQ",
+      "n_features_removed": 46,
+      "n_features_remaining": 74,
+      "pr_auc": 0.72559,
+      "delta": -0.05239,
+      "relative_drop": 0.0673
+    },
+    {
+      "family_removed": "BALANCE",
+      "n_features_removed": 2,
+      "n_features_remaining": 118,
+      "pr_auc": 0.73354,
+      "delta": -0.04444,
+      "relative_drop": 0.0571
+    },
+    {
+      "family_removed": "LOAN",
+      "n_features_removed": 8,
+      "n_features_remaining": 112,
+      "pr_auc": 0.73747,
+      "delta": -0.0405,
+      "relative_drop": 0.0521
+    },
+    {
+      "family_removed": "ENGINEERED_META",
+      "n_features_removed": 3,
+      "n_features_remaining": 117,
+      "pr_auc": 0.73979,
+      "delta": -0.03819,
+      "relative_drop": 0.0491
+    },
+    {
+      "family_removed": "ELEC_XFER",
+      "n_features_removed": 2,
+      "n_features_remaining": 118,
+      "pr_auc": 0.73981,
+      "delta": -0.03816,
+      "relative_drop": 0.0491
+    },
+    {
+      "family_removed": "MOBILE_BANKING",
+      "n_features_removed": 3,
+      "n_features_remaining": 117,
+      "pr_auc": 0.74661,
+      "delta": -0.03137,
+      "relative_drop": 0.0403
+    },
+    {
+      "family_removed": "CASH",
+      "n_features_removed": 4,
+      "n_features_remaining": 116,
+      "pr_auc": 0.74984,
+      "delta": -0.02813,
+      "relative_drop": 0.0362
+    },
+    {
+      "family_removed": "NET_BANKING",
+      "n_features_removed": 3,
+      "n_features_remaining": 117,
+      "pr_auc": 0.76258,
+      "delta": -0.01539,
+      "relative_drop": 0.0198
+    },
+    {
+      "family_removed": "GST",
+      "n_features_removed": 7,
+      "n_features_remaining": 113,
+      "pr_auc": 0.76569,
+      "delta": -0.01229,
+      "relative_drop": 0.0158
+    },
+    {
+      "family_removed": "ATM",
+      "n_features_removed": 2,
+      "n_features_remaining": 118,
+      "pr_auc": 0.76802,
+      "delta": -0.00996,
+      "relative_drop": 0.0128
+    },
+    {
+      "family_removed": "UPI_XFER",
+      "n_features_removed": 10,
+      "n_features_remaining": 110,
+      "pr_auc": 0.78728,
+      "delta": 0.00931,
+      "relative_drop": -0.012
+    }
+  ],
+  "worst_family": "TOTAL_ALL_RAILS",
+  "worst_relative_drop": 0.1215,
+  "interpretation": "a small worst-case drop means no single semantic family carries the model; the detector should therefore survive a hidden set that is missing or sparse in one rail",
+  "generated_utc": "2026-08-12T08:55:47.876112+00:00",
+  "champion": "xgboost_top_120",
+  "champion_oof_pr_auc": 0.76904,
+  "runtime_seconds": 564.3
+}

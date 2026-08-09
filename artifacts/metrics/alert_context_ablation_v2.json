@@ -1,0 +1,38 @@
+{
+  "variants": {
+    "behavioral_profile_only": {
+      "n_candidates": 3905,
+      "n_selected": 60,
+      "availability_classes": [
+        "BEHAVIORAL",
+        "PROFILE"
+      ],
+      "pr_auc_mean": 0.70093,
+      "pr_auc_std": 0.05773,
+      "n_alert_context_selected": 0
+    },
+    "with_alert_context": {
+      "n_candidates": 3925,
+      "n_selected": 60,
+      "availability_classes": [
+        "BEHAVIORAL",
+        "PROFILE",
+        "ALERT_CONTEXT"
+      ],
+      "pr_auc_mean": 0.74082,
+      "pr_auc_std": 0.04981,
+      "n_alert_context_selected": 1
+    }
+  },
+  "n_repeats": 3,
+  "top_k": 60,
+  "delta": 0.03989,
+  "relative_gain": 0.0569,
+  "verdict": "ALERT_CONTEXT contributes a modest, plausible gain and is retained",
+  "note": "Alert fields are written when the queue is populated, i.e. before the resolution decision, so they are admissible. This ablation exists to prove the model is not simply relaying an analyst's prior suspicion.",
+  "model_family": "xgboost",
+  "generated_utc": "2026-08-12T09:09:49.290898+00:00",
+  "champion": "xgboost_top_120",
+  "champion_oof_pr_auc": 0.76904,
+  "runtime_seconds": 603.0
+}

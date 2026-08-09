@@ -1,0 +1,39 @@
+{
+  "model": "xgboost_top_120",
+  "rounds": 15,
+  "removal_fraction": 0.125,
+  "positives_removed_per_round_mean": 30.0,
+  "reference_pr_auc": 0.74927,
+  "positive_removal_pr_auc_mean": 0.72398,
+  "positive_removal_pr_auc_std": 0.03545,
+  "positive_removal_pr_auc_min": 0.64135,
+  "positive_removal_pr_auc_relative_drop": 0.0337,
+  "positive_removal_recall_std": {
+    "25": 0.00531,
+    "50": 0.02834,
+    "100": 0.04029
+  },
+  "positive_removal_recall_mean": {
+    "25": 0.38854,
+    "50": 0.63542,
+    "100": 0.74271
+  },
+  "prediction_rank_stability": 0.3694,
+  "prediction_rank_stability_definition": "mean Spearman correlation between rounds over ALL development rows. This is the figure the published robustness thresholds are defined on and it is reported unchanged.",
+  "prediction_rank_stability_caveat": "roughly 99% of these rows are negatives whose calibrated scores sit in a narrow band near zero, so their relative order is close to arbitrary and moves freely between rounds without any account changing review status. A low all-row figure is therefore weak evidence on its own; top_budget_rank_stability below measures the part of the ranking an analyst actually works through.",
+  "top_budget_rank_stability": {
+    "25": 0.608,
+    "50": 0.6771,
+    "100": 0.4493
+  },
+  "top_budget_rank_stability_definition": "mean Jaccard overlap between rounds of the top-K accounts at each analyst budget. This is a diagnostic reported alongside the badge, not an input to it - the badge thresholds were fixed before any of these experiments ran and are not being redefined to suit a result.",
+  "feature_rank_stability": 0.7696,
+  "feature_top20_overlap": 0.6805,
+  "feature_stability_measurable": true,
+  "note": "the evaluation fold is identical in every round; only the training positives change, so the spread is attributable to label scarcity and nothing else",
+  "feature_rank_note": "feature_rank_stability is the mean Spearman correlation between rounds of the fold-averaged gain importances, and feature_top20_overlap the mean share of the top 20 that two rounds agree on. Together they answer whether the model keeps citing the same evidence when the mules it learned from change - a detector whose reasons rewrite themselves cannot be explained to an analyst.",
+  "generated_utc": "2026-08-12T08:46:20.371361+00:00",
+  "champion": "xgboost_top_120",
+  "champion_oof_pr_auc": 0.76904,
+  "runtime_seconds": 502.0
+}
