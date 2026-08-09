@@ -6,18 +6,38 @@ Authoritative artifacts: `artifacts/features/final_selected_features.json`,
 plot `artifacts/plots/final_feature_stability.png`. Method detail:
 `docs/FEATURE_SELECTION_REPORT.md`.
 
-## Subset ablation (measured, 5-repeat OOF, tuned models)
+> **SUPERSEDED.** The ablation below was measured on the pre-firewall pool.
+> The top-60 set it calls "production" contained the post-resolution columns
+> `F3898`, `F3913`, `F3914` and the undetermined `F3916`, so **0.8077 is
+> retired as leakage-inflated**. The current leakage-free subset ablation is
+> §3.1 of `docs/UPGRADE_GAP_ANALYSIS.md` and §3 of
+> `docs/FINAL_ACCURACY_AND_MODEL_SELECTION_REPORT.md`; the production set is
+> now **top-120, `xgboost_top_120`, 0.7690 ± 0.0266**
+> (`artifacts/features/selected_features_v2.json`,
+> `artifacts/metrics/tournament_v2.json`).
+
+## Subset ablation (RETIRED — pre-firewall pool, 5-repeat OOF, tuned models)
 
 | Subset | PR-AUC (mean ± std) | Note |
 |---|---|---|
-| top-60 (production) | **0.8077 ± 0.0450** (CatBoost) / 0.7717 ± 0.0528 (LGBM) | best |
-| full cleaned matrix (~2,900 cols after in-fold hygiene) | 0.7637 ± 0.0223 (LGBM) | compact beats full |
-| top-30 | 0.7562 ± 0.0255 | −0.02 vs top-60 (LGBM) |
-| top-15 | 0.6440 ± 0.0420 | signal loss visible |
+| top-60 (then production) | **0.8077 ± 0.0450** (CatBoost) / 0.7717 ± 0.0528 (LGBM) | **RETIRED — leakage-inflated** |
+| full cleaned matrix (~2,900 cols after in-fold hygiene) | 0.7637 ± 0.0223 (LGBM) | retired |
+| top-30 | 0.7562 ± 0.0255 | retired |
+| top-15 | 0.6440 ± 0.0420 | retired |
 | top-100 | not run — bracketed by top-60 (better) and full (worse); skip recorded, not hidden |
 
-Latency scales with width: top-60 inference is ~14× faster per fold than the
-full matrix (52 s vs 710 s per full CV pass).
+Leakage-free replacement (3 repeats, firewall-admitted pool):
+top-120 **0.7690 ± 0.0266** (XGBoost) > top-60 0.7408 ± 0.0498 (XGBoost) >
+top-30 0.6897 ± 0.0122 (XGBoost) > top-250 0.6442 ± 0.0300 (LGBM) >
+full pool 0.5874 ± 0.0276 (LGBM) > top-15 0.3357 ± 0.1399 (LGBM). Compact still
+beats the full matrix; the optimum moved from 60 to 120 once the leaked columns
+stopped doing the work.
+
+Latency scales with width: in the retired run, top-60 evaluation was ~14×
+faster than the full matrix (52 s vs 710 s per full CV pass). In the
+leakage-free run the same relationship holds at the new operating point:
+`xgboost_top_120` 32.3 s vs `lightgbm_full_pool` 409.4 s per evaluation
+(`artifacts/metrics/model_comparison_v2.csv`).
 
 ## Verified selection hygiene
 
@@ -25,12 +45,20 @@ full matrix (52 s vs 710 s per full CV pass).
   (LightGBM gain + L1 logistic over 40 stratified subsamples) run **inside
   training folds**; the headline compact numbers come from fold-local
   selection, so they carry no selection bias.
-- The frozen production list (top-60) is versioned in the bundle +
-  `final_selected_features.json`; missing selected features at inference are
-  a hard `SCHEMA_ERROR`.
+- The frozen production list is versioned in the bundle; missing selected
+  features at inference are a hard `SCHEMA_ERROR`. **The list is now the
+  120-feature set in `artifacts/features/selected_features_v2.json`**, not the
+  top-60 in `final_selected_features.json`.
 - Fold-to-fold top-60 overlap 0.54 (honest churn in the tail with 51
-  positives/fold); the freq ≥ 0.8 head (9 features: F3898, F3908, F3914,
-  F3913, F1863, F158, F2074, F3886, F3640) is highly stable.
+  positives/fold). **The freq ≥ 0.8 head reported for the retired run
+  (F3898, F3908, F3914, F3913, F1863, F158, F2074, F3886, F3640) is retired:
+  three of those nine — F3898, F3913, F3914 — are post-resolution columns now
+  hard-quarantined.** Their stability was the stability of the leak. The
+  current 120-feature set was verified to contain **0 quarantined columns**;
+  its head is F3642, F3136, F364, F3091, F3493, F950, F3805, F3748, F3486,
+  F3810, and it includes three interpretable meta-features
+  (`MG_RAIL_FRAGMENTATION`, `MG_PASSTHROUGH_7D`, `MG_ALERT_CONVERGENCE`).
+- Overlap between the retired top-60 and the leakage-free top-60: **12 of 60**.
 - Every top feature was cross-checked against the leakage audit: the
   strongest selected feature has single-feature CV PR-AUC ≤ 0.06 — the model
   works through feature *combinations*, not one suspicious column.
