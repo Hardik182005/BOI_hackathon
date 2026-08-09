@@ -1,0 +1,62 @@
+{
+  "hidden_validation_robustness": "LOW",
+  "thresholds_used": {
+    "HIGH": {
+      "positive_removal_pr_auc_rel_drop_max": 0.15,
+      "positive_removal_pr_auc_std_max": 0.06,
+      "prediction_rank_stability_min": 0.9,
+      "family_dropout_worst_rel_drop_max": 0.3
+    },
+    "MEDIUM": {
+      "positive_removal_pr_auc_rel_drop_max": 0.3,
+      "positive_removal_pr_auc_std_max": 0.12,
+      "prediction_rank_stability_min": 0.75,
+      "family_dropout_worst_rel_drop_max": 0.5
+    }
+  },
+  "measured": {
+    "positive_removal_pr_auc_relative_drop": 0.0337,
+    "positive_removal_pr_auc_std": 0.03545,
+    "prediction_rank_stability": 0.3694,
+    "family_dropout_worst_relative_drop": 0.1215
+  },
+  "criteria_by_level": {
+    "HIGH": {
+      "positive_removal_pr_auc_rel_drop": true,
+      "positive_removal_pr_auc_std": true,
+      "prediction_rank_stability": false,
+      "family_dropout_worst_rel_drop": true
+    },
+    "MEDIUM": {
+      "positive_removal_pr_auc_rel_drop": true,
+      "positive_removal_pr_auc_std": true,
+      "prediction_rank_stability": false,
+      "family_dropout_worst_rel_drop": true
+    }
+  },
+  "criteria_met_at_high": [
+    "positive_removal_pr_auc_rel_drop",
+    "positive_removal_pr_auc_std",
+    "family_dropout_worst_rel_drop"
+  ],
+  "limiting_criteria": [
+    "prediction_rank_stability"
+  ],
+  "grade_is_limited_by_a_single_criterion": true,
+  "how_to_read_this": "The grade is the worst of its criteria, not their average: a model that passes three checks at HIGH and fails one at MEDIUM is graded LOW. 'limiting_criteria' names what actually decided it, so the badge can be reported honestly without implying the model failed everywhere.",
+  "graded_utc": "2026-08-12T09:09:49.299417+00:00",
+  "policy": "thresholds are fixed in muleguard.models.robustness before the experiments run; the grade is read off them, never chosen. They were not revised after seeing these results.",
+  "champion": "xgboost_top_120",
+  "inputs": {
+    "stress": "stability_stress_v2.json",
+    "family_dropout": "family_dropout_v2.json",
+    "seed_variance": "seed_variance_v2.json",
+    "alert_context_ablation": "alert_context_ablation_v2.json"
+  },
+  "seed_spread": 0.0905,
+  "differences_below_this_are_noise": 0.0905,
+  "alert_context_relative_gain": 0.0569,
+  "alert_context_verdict": "ALERT_CONTEXT contributes a modest, plausible gain and is retained",
+  "feature_rank_stability": 0.7696,
+  "display_rule": "Show as 'Hidden Validation Robustness: <grade>'. The grade is read off fixed thresholds published in muleguard.models.robustness; it is never chosen, and it is never inferred from a metric the thresholds do not name."
+}
