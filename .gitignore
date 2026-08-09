@@ -62,3 +62,15 @@ artifacts/predictions/
 .git_to_delete/
 
 
+
+# --- Dry-run + sealed payloads: derived from the raw workbook, large, regenerable ---
+artifacts/dry_run/
+artifacts/sealed_validation/
+
+# --- Local run logs ---
+logs/
+
+# --- Working notes / scratch specs (not part of the deliverable) ---
+MuleGuard_Trinetra_Aug2026_Winning_Upgrade_Prompt.md
+updates.md
+updates1.md
