@@ -33,6 +33,36 @@ train-advanced:
 build-lenses:
 	$(PY) -m muleguard.cli.build_lenses
 
+# --- addendum (competitor-driven upgrades) ---------------------------------
+# Run in this order: the tournament reopens champion selection, the shield and
+# robustness suites judge the champion it picks, and the verifier and label
+# audit are read-only observations layered on top. None of them retrains
+# against validation data.
+train-select-v2:
+	$(PY) -m muleguard.cli.tournament_v2
+
+build-lenses-v2:
+	$(PY) -m muleguard.cli.build_lenses_v2
+
+shield:
+	$(PY) -m muleguard.cli.shield_v2
+
+robustness:
+	$(PY) -m muleguard.cli.robustness_v2
+
+merchant-verifier:
+	$(PY) -m muleguard.cli.merchant_verifier
+
+audit-labels:
+	$(PY) -m muleguard.cli.audit_labels
+
+addendum: train-select-v2 build-lenses-v2 shield robustness merchant-verifier audit-labels
+
+# Section 42. Needs a backend on :8001 - it goes over HTTP on purpose, because
+# the organiser will too.
+dry-run:
+	$(PY) -m muleguard.cli.dry_run
+
 evaluate-locked-test:
 	$(PY) -m muleguard.cli.evaluate
 

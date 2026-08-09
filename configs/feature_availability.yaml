@@ -1,0 +1,181 @@
+# Feature Availability Firewall
+# =============================================================================
+# Every column of DataSet.xlsx is assigned exactly one availability class that
+# answers a single question:
+#
+#     "At the moment an analyst must decide whether to escalate this alert,
+#      is this value already knowable?"
+#
+# If the answer is no, the value cannot be an input - regardless of how
+# predictive it looks in cross-validation. A model that consumes post-decision
+# information scores brilliantly on a historical extract and is worthless in
+# production, because at inference time the field is empty or not yet written.
+#
+# Classes are derived mechanically from Description.xlsx by
+# muleguard.features.dictionary; this file declares the POLICY applied to each
+# class and is the authority consulted by muleguard.features.firewall.
+# -----------------------------------------------------------------------------
+policy_version: "2.0"
+source_registry: artifacts/features/feature_dictionary.json
+
+classes:
+  BEHAVIORAL:
+    admitted: true
+    description: >-
+      Windowed transaction and balance aggregates (ratios, deviations, minima,
+      maxima, averages, counts, amounts) measured over the 7/14/31-day windows
+      preceding the alert. These are the intended signal of the problem
+      statement.
+    rationale: Measured strictly before the alert decision point.
+
+  PROFILE:
+    admitted: true
+    description: >-
+      Static customer/account attributes - product, tenure, account open date
+      and age bucket, area category, occupation, gender, segmentation class,
+      customer age.
+    rationale: Known at account opening; available at scoring time.
+    caveats:
+      - GENDER (F3892) is additionally excluded by the fairness policy below.
+      - Demographic fields may never be the sole reason for an escalation.
+
+  ALERT_CONTEXT:
+    admitted: true
+    description: >-
+      Properties of the alert that triggered the review - incident scores,
+      alert-description flags (high-value UPI debit, multiple debits, risky
+      country, unusual time, one-to-many UPI, failed UPI, password change then
+      large transfer, ...), alert counts and time-of-day alert counts.
+    rationale: >-
+      These describe why the case reached an analyst. They exist at the moment
+      the queue is populated, i.e. strictly before the resolution decision.
+    caveats:
+      - Admitted only after the alert-context ablation (docs/LEAKAGE_AUDIT.md)
+        shows no implausible jump in performance.
+      - Must never include the OUTCOME of the alert - see POST_RESOLUTION_LEAKAGE.
+
+  PRE_EXISTING_RISK_CONTEXT:
+    admitted: false
+    default_disposition: QUARANTINE_UNTIL_PROVEN_PRE_DECISION
+    description: Customer risk level flags L1/L2/L3 (F3916, F3917, F3918).
+    rationale: >-
+      The data dictionary states only "Customer risk level flag". It does not
+      state whether the level was assigned during periodic KYC risk
+      categorisation (legitimately available before the alert) or as an
+      OUTPUT of this very investigation (post-decision). Because the timing is
+      undetermined, they are held out of the accepted model and evaluated only
+      as a labelled ablation.
+    promote_if: >-
+      The bank confirms these are periodic-KYC risk categories written
+      independently of alert resolution.
+
+  POST_RESOLUTION_LEAKAGE:
+    admitted: false
+    default_disposition: EXCLUDED_FROM_ALL_TRAINING
+    description: >-
+      Fields that only exist because a human already closed the alert -
+      resolution status flags and resolution turnaround days.
+    rationale: >-
+      FRAUD_SUSPECTED / OTHER_RESOLUTION / FALSE_POSITIVE / UNATTENDED are the
+      four mutually-exclusive outcomes of the review the model is supposed to
+      perform. MIN/MAX_RESOLVE_DAYS measure how long that review took. All six
+      are written after the decision this model must make.
+
+  TARGET:
+    admitted: false
+    default_disposition: EXCLUDED_FROM_ALL_TRAINING
+    description: F3924 FRAUD_TGT - the label.
+
+  INDEX_OR_ID:
+    admitted: false
+    default_disposition: EXCLUDED_FROM_ALL_TRAINING
+    description: Row identity and data-assembly artifacts.
+    rationale: >-
+      Carry no account behaviour. F2230 (MNTH, "Month of the data") is included
+      here: in the supplied extract every negative row is the 2025-10 snapshot
+      and every positive row is a Sep/Nov/Dec snapshot, so the month alone
+      reconstructs the label. That is an artifact of how the sample was drawn,
+      not a property of mule accounts. It also makes any out-of-time split on
+      this column invalid.
+
+  UNKNOWN_REVIEW:
+    admitted: false
+    default_disposition: QUARANTINE_UNTIL_REVIEWED
+    description: Columns present in data but absent from Description.xlsx.
+    rationale: A feature with no established meaning cannot be defended to a judge.
+
+# -----------------------------------------------------------------------------
+# Hard quarantine. The release gate FAILS if any of these reaches the accepted
+# model. Listed explicitly so the guarantee does not depend on parser behaviour.
+# -----------------------------------------------------------------------------
+hard_quarantine:
+  - feature: F3924
+    reason: target variable (FRAUD_TGT)
+  - feature: F3912
+    reason: resolution status flag FRAUD_SUSPECTED - the outcome being predicted
+  - feature: F3913
+    reason: resolution status flag OTHER_RESOLUTION - post-decision outcome
+  - feature: F3914
+    reason: resolution status flag FALSE_POSITIVE - post-decision outcome
+  - feature: F3915
+    reason: resolution status flag UNATTENDED - post-decision outcome
+  - feature: F3898
+    reason: MIN_RESOLVE_DAYS - measures the duration of the review being predicted
+  - feature: F3899
+    reason: MAX_RESOLVE_DAYS - measures the duration of the review being predicted
+  - feature: F2230
+    reason: MNTH snapshot month - deterministically reconstructs the label in this extract
+  - feature: __UNNAMED__0
+    reason: unnamed leading row-index column
+
+# Held out of the accepted model, evaluated only as a labelled ablation.
+conditional_quarantine:
+  - feature: F3916
+    reason: L3_FLG - customer risk level, time-of-availability undetermined
+  - feature: F3917
+    reason: L2_FLG - customer risk level, time-of-availability undetermined
+  - feature: F3918
+    reason: L1_FLG - customer risk level, time-of-availability undetermined
+
+# -----------------------------------------------------------------------------
+# Fairness policy (section 24). Excluded from the accepted model by default.
+# -----------------------------------------------------------------------------
+fairness:
+  excluded_by_default:
+    - feature: F3892
+      reason: >-
+        GENDER is a protected attribute with no defensible causal link to mule
+        behaviour. Excluded unless a documented, approved justification exists.
+  contextual_only:
+    - F3894   # AGE_IN_YRS
+    - F3891   # CUST_OCCP
+    - F3890   # AREA_CATEGORY
+  rules:
+    - A demographic feature may never be the sole driver of an escalation.
+    - Models are trained and reported both with and without contextual
+      demographics; the variant is recorded in the model registry.
+    - Performance slices are audited wherever sample counts permit.
+
+# -----------------------------------------------------------------------------
+# Model views (section 9.2). Each view declares which availability classes it
+# may draw from; the firewall enforces the intersection with the quarantine.
+# -----------------------------------------------------------------------------
+views:
+  A_broad_behavioral:
+    classes: [BEHAVIORAL]
+    description: All cleaned behavioural aggregates, data-driven selection.
+  B_stable_compact:
+    classes: [BEHAVIORAL, PROFILE]
+    description: Top-K features by cross-fold stability selection.
+  C_bank_prior:
+    classes: [BEHAVIORAL, PROFILE]
+    restrict_to_bank_finalized: true
+    description: The bank's finalized variable list plus safe profile fields.
+  D_alert_context:
+    classes: [ALERT_CONTEXT, PROFILE]
+    description: Pre-decision alert evidence only.
+  E_profile_merchant:
+    classes: [PROFILE, BEHAVIORAL]
+    families: [POS_MERCHANT, GST, BALANCE, LOAN, STANDING_INSTRUCTION,
+               FEES_AND_CHARGES, TOTAL_ALL_RAILS]
+    description: Merchant/business legitimacy context and balance profile.
