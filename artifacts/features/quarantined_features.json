@@ -1,26 +1,112 @@
 {
-  "generated_utc": "2026-07-10T18:56:07.145448+00:00",
-  "policy": "quarantined features are excluded from every model, ensemble, selector, calibration and explanation; ablation runs that include them are labelled REJECTED LEAKAGE evidence only",
+  "policy_version": "2.0",
+  "policy": "Quarantined features are excluded from every model, ensemble, selector, calibrator, explanation and export. Ablations that include them are labelled REJECTED LEAKAGE evidence and are never candidate models.",
   "quarantine": [
     {
       "feature": "F3924",
-      "reason": "target variable (F3924)",
+      "variable_name": "FRAUD_TGT",
+      "availability_class": "TARGET",
+      "reason": "target variable (FRAUD_TGT)",
       "disposition": "EXCLUDED_FROM_ALL_TRAINING"
     },
     {
       "feature": "F3912",
-      "reason": "target leak: measured |corr|=0.97, single-feature CV PR-AUC=0.94, balanced label reconstruction=0.99",
+      "variable_name": "FRAUD_SUSPECTED",
+      "availability_class": "POST_RESOLUTION_LEAKAGE",
+      "reason": "resolution status flag FRAUD_SUSPECTED - the outcome being predicted",
+      "disposition": "EXCLUDED_FROM_ALL_TRAINING"
+    },
+    {
+      "feature": "F3913",
+      "variable_name": "OTHER_RESOLUTION",
+      "availability_class": "POST_RESOLUTION_LEAKAGE",
+      "reason": "resolution status flag OTHER_RESOLUTION - post-decision outcome",
+      "disposition": "EXCLUDED_FROM_ALL_TRAINING"
+    },
+    {
+      "feature": "F3914",
+      "variable_name": "FALSE_POSITIVE",
+      "availability_class": "POST_RESOLUTION_LEAKAGE",
+      "reason": "resolution status flag FALSE_POSITIVE - post-decision outcome",
+      "disposition": "EXCLUDED_FROM_ALL_TRAINING"
+    },
+    {
+      "feature": "F3915",
+      "variable_name": "UNATTENDED",
+      "availability_class": "POST_RESOLUTION_LEAKAGE",
+      "reason": "resolution status flag UNATTENDED - post-decision outcome",
+      "disposition": "EXCLUDED_FROM_ALL_TRAINING"
+    },
+    {
+      "feature": "F3898",
+      "variable_name": "MIN_RESOLVE_DAYS",
+      "availability_class": "POST_RESOLUTION_LEAKAGE",
+      "reason": "MIN_RESOLVE_DAYS - measures the duration of the review being predicted",
+      "disposition": "EXCLUDED_FROM_ALL_TRAINING"
+    },
+    {
+      "feature": "F3899",
+      "variable_name": "MAX_RESOLVE_DAYS",
+      "availability_class": "POST_RESOLUTION_LEAKAGE",
+      "reason": "MAX_RESOLVE_DAYS - measures the duration of the review being predicted",
       "disposition": "EXCLUDED_FROM_ALL_TRAINING"
     },
     {
       "feature": "F2230",
-      "reason": "snapshot-month label artifact: ALL 9,001 negatives are the 2025-10 snapshot, ALL 81 positives are Sep/Nov/Dec snapshots - the month deterministically reconstructs the target (balanced reconstruction 1.0). Also invalidates any out-of-time split on this column.",
+      "variable_name": "MNTH",
+      "availability_class": "INDEX_OR_ID",
+      "reason": "MNTH snapshot month - deterministically reconstructs the label in this extract",
       "disposition": "EXCLUDED_FROM_ALL_TRAINING"
     },
     {
       "feature": "__UNNAMED__0",
-      "reason": "row-index / identifier column",
+      "variable_name": "__UNNAMED__0",
+      "availability_class": "UNKNOWN_REVIEW",
+      "reason": "unnamed leading row-index column",
       "disposition": "EXCLUDED_FROM_ALL_TRAINING"
+    },
+    {
+      "feature": "F3916",
+      "variable_name": "L3_FLG",
+      "availability_class": "PRE_EXISTING_RISK_CONTEXT",
+      "reason": "L3_FLG - customer risk level, time-of-availability undetermined",
+      "disposition": "QUARANTINE_UNTIL_PROVEN_PRE_DECISION"
+    },
+    {
+      "feature": "F3917",
+      "variable_name": "L2_FLG",
+      "availability_class": "PRE_EXISTING_RISK_CONTEXT",
+      "reason": "L2_FLG - customer risk level, time-of-availability undetermined",
+      "disposition": "QUARANTINE_UNTIL_PROVEN_PRE_DECISION"
+    },
+    {
+      "feature": "F3918",
+      "variable_name": "L1_FLG",
+      "availability_class": "PRE_EXISTING_RISK_CONTEXT",
+      "reason": "L1_FLG - customer risk level, time-of-availability undetermined",
+      "disposition": "QUARANTINE_UNTIL_PROVEN_PRE_DECISION"
+    },
+    {
+      "feature": "F3892",
+      "variable_name": "GENDER",
+      "availability_class": "PROFILE",
+      "reason": "GENDER is a protected attribute with no defensible causal link to mule behaviour. Excluded unless a documented, approved justification exists.",
+      "disposition": "EXCLUDED_BY_FAIRNESS_POLICY"
     }
+  ],
+  "present_in_dataset": [
+    "F3924",
+    "F3912",
+    "F3913",
+    "F3914",
+    "F3915",
+    "F3898",
+    "F3899",
+    "F2230",
+    "__UNNAMED__0",
+    "F3916",
+    "F3917",
+    "F3918",
+    "F3892"
   ]
 }
