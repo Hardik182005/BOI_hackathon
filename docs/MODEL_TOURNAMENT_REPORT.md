@@ -1,6 +1,24 @@
 # Model Tournament Report
 
-Measured leaderboard (single source of truth):
+> **This document describes the RETIRED, pre-firewall tournament.** Its
+> leaderboard was computed on a pool that still contained the post-resolution
+> columns `F3898`, `F3899`, `F3913`, `F3914`, `F3915`, and its winner
+> `catboost_tuned_top60` selected four of the inadmissible columns. Its
+> headline **0.8077 is retired**.
+>
+> The current tournament is `src/muleguard/cli/tournament_v2.py` →
+> `artifacts/metrics/tournament_v2.json` /
+> `artifacts/metrics/model_comparison_v2.csv`, narrated in
+> `docs/FINAL_ACCURACY_AND_MODEL_SELECTION_REPORT.md`. Promoted model:
+> **`xgboost_top_120`, OOF PR-AUC 0.7690 ± 0.0266** over 3 repeats.
+>
+> The protocol description below still applies, with these changes: 3 repeats
+> rather than 5; every matrix is built through
+> `features/frame.build_model_frame()` so the firewall cannot be bypassed;
+> and five availability views (A–E) are contested alongside the full admitted
+> pool.
+
+Measured leaderboard of the retired run:
 `artifacts/metrics/model_comparison.csv`, full per-repeat detail in
 `artifacts/metrics/oof_metrics.json`, plot
 `artifacts/plots/model_comparison.png`. Headline numbers are also assembled
@@ -53,10 +71,22 @@ not a silent omission).
    best single model on ≥ n−1 repeats (`ensemble_decision.json` records the
    verdict either way; model correlations included).
 
+All three findings survive the leakage-free re-run, with different numbers:
+compact still beats the full matrix (top-120 0.7690 vs full pool 0.5874);
+leakage still inflates (the retired 0.8077 is the evidence); and the ensemble
+is still evidence-gated (`ensemble_v2.json`, decision `SINGLE_MODEL_KEPT`,
+with the addendum's literal criteria and our stricter per-repeat criterion
+both recorded).
+
 ## Selection of the shipped model
 
 The winner is the highest mean OOF PR-AUC among non-rejected candidates that
 is also stable across repeats (std reported, per-repeat values inspected).
 It is retrained on the full dev split with its tuned parameters and frozen
 into `artifacts/models/final_bundle.joblib` (SHA-256 in the manifest);
-XGBoost and CatBoost ride along as agreement models for the policy engine.
+the runner-up families ride along as agreement models for the policy engine.
+
+Under the re-run this rule promoted `xgboost_top_120`, formalised by the
+addendum UPDATE 13 generalization score applied inside a 0.01 PR-AUC band of
+the leader (`artifacts/metrics/promotion_decision_v2.json`; the band contained
+only the leader, so `tie_break_applied` is `false`).
