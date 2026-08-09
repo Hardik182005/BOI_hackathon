@@ -1,0 +1,37 @@
+{
+  "model": "xgboost_top_120",
+  "n_seeds": 5,
+  "n_repeats_per_seed": 2,
+  "pr_auc_mean": 0.76294,
+  "pr_auc_std": 0.03222,
+  "pr_auc_min": 0.71618,
+  "pr_auc_max": 0.80668,
+  "spread": 0.0905,
+  "per_seed": [
+    {
+      "seed_offset": 0,
+      "pr_auc_mean": 0.77798
+    },
+    {
+      "seed_offset": 7919,
+      "pr_auc_mean": 0.75423
+    },
+    {
+      "seed_offset": 15838,
+      "pr_auc_mean": 0.76067
+    },
+    {
+      "seed_offset": 23757,
+      "pr_auc_mean": 0.75225
+    },
+    {
+      "seed_offset": 31676,
+      "pr_auc_mean": 0.76959
+    }
+  ],
+  "interpretation": "differences between candidate models smaller than this spread are not real differences",
+  "generated_utc": "2026-08-12T08:59:46.178960+00:00",
+  "champion": "xgboost_top_120",
+  "champion_oof_pr_auc": 0.76904,
+  "runtime_seconds": 235.5
+}
