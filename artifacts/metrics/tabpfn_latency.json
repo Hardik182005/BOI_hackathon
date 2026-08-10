@@ -1,0 +1,19 @@
+{
+  "n_train": 7264,
+  "n_features": 60,
+  "fit_seconds": 1.21,
+  "batches": {
+    "1": {
+      "seconds": 438.1,
+      "seconds_per_row": 438.105
+    },
+    "10": {
+      "seconds": 499.21,
+      "seconds_per_row": 49.921
+    },
+    "100": {
+      "seconds": 530.58,
+      "seconds_per_row": 5.306
+    }
+  }
+}

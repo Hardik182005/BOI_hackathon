@@ -1,0 +1,127 @@
+{
+  "generated_utc": "2026-08-12T11:00:52.823597+00:00",
+  "rule": "addendum UPDATE 1 - champion selection reopened; TabPFN is a challenger until measured over >= 3 independent fold seeds",
+  "champion": {
+    "model": "xgboost_top_120",
+    "n_repeats": 3,
+    "pr_auc_mean": 0.7690395605299595,
+    "pr_auc_std": 0.026626183481957486,
+    "pr_auc_per_repeat": [
+      0.74927,
+      0.80668,
+      0.75117
+    ],
+    "roc_auc_mean": 0.957709056712963,
+    "recall_at_k": {
+      "25": {
+        "mean": 0.390625,
+        "std": 0.0
+      },
+      "50": {
+        "mean": 0.6458333333333334,
+        "std": 0.03210632293213009
+      },
+      "100": {
+        "mean": 0.78125,
+        "std": 0.02209708691207961
+      }
+    }
+  },
+  "challenger": {
+    "model": "tabpfn_top_60",
+    "n_repeats": 3,
+    "pr_auc_mean": 0.9110049318422057,
+    "pr_auc_std": 0.004360419127421432,
+    "pr_auc_per_repeat": [
+      0.90709,
+      0.91709,
+      0.90883
+    ],
+    "roc_auc_mean": 0.992377025462963,
+    "recall_at_k": {
+      "25": {
+        "mean": 0.390625,
+        "std": 0.0
+      },
+      "50": {
+        "mean": 0.7708333333333334,
+        "std": 0.00736569563735987
+      },
+      "100": {
+        "mean": 0.9114583333333334,
+        "std": 0.00736569563735987
+      }
+    }
+  },
+  "leakage_controls": {
+    "shared_feature_control": {
+      "challenger": "tabpfn_top_60",
+      "control": "xgboost_top_60",
+      "identical_feature_set": true,
+      "challenger_pr_auc": 0.911,
+      "control_pr_auc": 0.74082,
+      "verdict": "ESTIMATOR_NOT_DATA",
+      "reading": "both models saw the same 60 admitted columns over the same folds; a leaking column would have lifted the control too"
+    },
+    "quarantine_overlap": [],
+    "fold_independence": {
+      "pairwise_same_fold_fraction": [
+        0.2025,
+        0.2026,
+        0.1989
+      ],
+      "chance_level": 0.2,
+      "verdict": "INDEPENDENT"
+    },
+    "fold_contract": [
+      "median imputation is fitted on the training fold only",
+      "TabPFN.fit receives training rows and labels; predict_proba receives validation rows with no labels",
+      "the locked test was not touched by any candidate in this tournament"
+    ]
+  },
+  "rank_blend": {
+    "method": "mean of within-repeat normalised ranks (UPDATE 2)",
+    "pr_auc_mean": 0.8627079908968956,
+    "pr_auc_std": 0.014286420395157153,
+    "beats_best_member": false,
+    "spearman_between_models": {
+      "mean": 0.22163877967752596,
+      "std": 0.04737561447463904
+    },
+    "reading": "the blend sits between the two members rather than above them, so there is no ensembling case here; the low rank correlation is kept as a disagreement signal, not as a reason to raise risk"
+  },
+  "update_1_gates": {
+    "three_independent_fold_seeds": true,
+    "no_quarantined_feature": true,
+    "beats_champion_on_pr_auc": true,
+    "at_least_as_stable": true
+  },
+  "all_gates_passed": true,
+  "serving_cost": {
+    "measured": true,
+    "fit_seconds": 1.21,
+    "single_row_seconds": 438.1,
+    "hundred_row_seconds": 530.58,
+    "cost_is_per_call_not_per_row": true,
+    "model_agnostic_proofgraph_seconds": 26724,
+    "model_agnostic_proofgraph_hours": 7.4,
+    "reading": "one interactive score takes 438 s. The champion answers the same request in milliseconds. Because TabPFN exposes no SHAP path, a section 17 ProofGraph would have to be built from 61 forward passes, or about 7.4 hours per explained case"
+  },
+  "decision": {
+    "promoted": false,
+    "served_champion": "xgboost_top_120",
+    "challenger_status": "VERIFIED_NOT_PROMOTED",
+    "update_1_gates_passed": true,
+    "reason": "Every UPDATE 1 gate passes and no leakage was found, so the tabpfn_top_60 result is accepted as real. It is not promoted for operational reasons that are independent of accuracy: a single interactive score costs 438 s against milliseconds for the champion, and the model exposes no attribution path, so the section 17 ProofGraph - the evidence surface this system is built around - could not be produced for a served case. A more accurate score that cannot be explained or returned in time is not a better product.",
+    "explicitly_not_the_reason": [
+      "the challenger's PR-AUC is disputed - it is not",
+      "leakage was found - none was",
+      "the folds were correlated - they were at chance"
+    ],
+    "would_be_promoted_if": [
+      "a GPU brings single-row inference under about one second, and",
+      "a faithful per-feature attribution for TabPFN becomes available, so that a served score can still be proved"
+    ],
+    "meanwhile": "the challenger is kept as a recorded second opinion. Its disagreement with the champion (Spearman 0.222) is reported as uncertainty in the Model Courtroom, never as a reason to raise a risk score (UPDATE 6)."
+  }
+}
