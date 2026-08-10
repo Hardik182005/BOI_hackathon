@@ -47,22 +47,63 @@ class CohortReference:
         return float(100.0 * np.searchsorted(s, value, side="right") / len(s))
 
 
+def tree_shap(model: Any, family: str, X_rows: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Exact TreeSHAP contributions from the model that produced the score.
+
+    Dispatching on family matters more than it looks. Explaining one model
+    while a different one decides the case would put fabricated evidence in
+    front of an analyst: the reasons would be internally consistent and simply
+    not be the reasons the alert was raised. Each library computes exact
+    TreeSHAP in raw-margin space, so the returned contributions mean the same
+    thing whichever family won the tournament.
+
+    Returns ``(contributions, base_value)`` with shapes ``(n, n_features)``
+    and ``(n,)``.
+    """
+    if family == "lightgbm":
+        contrib = model.booster_.predict(X_rows, pred_contrib=True)
+    elif family == "xgboost":
+        import xgboost as xgb
+
+        booster = model.get_booster()
+        dm = xgb.DMatrix(X_rows, feature_names=booster.feature_names)
+        contrib = booster.predict(dm, pred_contribs=True)
+    elif family == "catboost":
+        from catboost import Pool
+
+        contrib = model.get_feature_importance(Pool(X_rows), type="ShapValues")
+    else:
+        raise RuntimeError(f"no TreeSHAP path for model family {family!r}")
+
+    contrib = np.asarray(contrib)
+    if contrib.ndim != 2 or contrib.shape[1] != X_rows.shape[1] + 1:
+        raise RuntimeError(
+            f"{family} returned SHAP of shape {contrib.shape}; expected "
+            f"(n, {X_rows.shape[1] + 1})")
+    return contrib[:, :-1], contrib[:, -1]
+
+
+def _proba(model: Any, X: np.ndarray) -> np.ndarray:
+    """Positive-class probability, uniform across the three families."""
+    return np.asarray(model.predict_proba(X))[:, 1]
+
+
 def shap_reason_codes(
     model: Any,
     X_rows: np.ndarray,
     feature_names: list[str],
     cohort: CohortReference,
     top_k: int = 5,
+    family: str = "lightgbm",
 ) -> list[list[dict[str, Any]]]:
     """Per-row top-k signed SHAP contributions with cohort percentiles.
 
-    Uses LightGBM's native TreeSHAP (pred_contrib) - exact for tree models.
+    ``model`` is the fitted estimator of ``family`` - the one whose score the
+    alert is based on - not a bare booster.
     """
-    contrib = model.predict(X_rows, pred_contrib=True) if hasattr(model, "predict") else None
-    if contrib is None or contrib.shape[1] != len(feature_names) + 1:
-        raise RuntimeError("pred_contrib unavailable or shape mismatch")
-    shap_vals = contrib[:, :-1]
-    base = contrib[:, -1]
+    shap_vals, base = tree_shap(model, family, X_rows)
+    if shap_vals.shape[1] != len(feature_names):
+        raise RuntimeError("SHAP width does not match the kept feature list")
 
     out: list[list[dict[str, Any]]] = []
     for i in range(X_rows.shape[0]):
@@ -92,6 +133,7 @@ def counterfactual_sensitivity(
     cohort: CohortReference,
     threshold: float,
     max_features: int = 3,
+    family: str = "lightgbm",
 ) -> list[dict[str, Any]]:
     """Model-sensitivity examples: move top INCREASES_RISK features to the
     legitimate cohort median, rescore, report the score change.
@@ -112,8 +154,8 @@ def counterfactual_sensitivity(
             continue
         x_mod = x_row.copy()
         x_mod[j] = med
-        p_orig = float(model.predict(x_row.reshape(1, -1))[0])
-        p_mod = float(model.predict(x_mod.reshape(1, -1))[0])
+        p_orig = float(_proba(model, x_row.reshape(1, -1))[0])
+        p_mod = float(_proba(model, x_mod.reshape(1, -1))[0])
         results.append({
             "kind": "model sensitivity example (not a causal statement)",
             "feature": r["feature"],

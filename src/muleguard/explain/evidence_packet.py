@@ -11,9 +11,15 @@ import html
 from typing import Any
 
 
+# The leading characters Excel, LibreOffice and Sheets will read as the start
+# of a formula. The carriage return is easy to miss and is the one that gets
+# through a naive filter: Excel strips it, then evaluates what follows.
+FORMULA_LEADS = ("=", "+", "-", "@", "\t", "\r")
+
+
 def csv_safe(value: Any) -> Any:
     """Prefix risky leading characters so spreadsheet apps treat cells as text."""
-    if isinstance(value, str) and value[:1] in ("=", "+", "-", "@", "\t"):
+    if isinstance(value, str) and value[:1] in FORMULA_LEADS:
         return "'" + value
     return value
 
