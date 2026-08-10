@@ -1,0 +1,70 @@
+{
+  "generated_utc": "2026-08-12T08:39:18.362549+00:00",
+  "thresholds": {
+    "positive_percentile_max": 50.0,
+    "positive_agreement_min": 0.8,
+    "negative_percentile_min": 99.5,
+    "negative_agreement_min": 0.8,
+    "model_pr_auc_floor": 0.5
+  },
+  "consensus_models": [
+    "xgboost_top_120",
+    "xgboost_top_60",
+    "lightgbm_top_60",
+    "catboost_top_60",
+    "xgboost_top_30",
+    "lightgbm_top_120",
+    "lightgbm_top_30",
+    "lightgbm_viewA_top_60",
+    "catboost_top_120",
+    "lightgbm_viewB_top_60",
+    "lightgbm_top_250",
+    "lightgbm_full_pool",
+    "catboost_top_30"
+  ],
+  "n_consensus_models": 13,
+  "n_model_repeat_runs": 39,
+  "n_rows_audited": 7264,
+  "n_positives": 64,
+  "n_negatives": 7200,
+  "possible_label_noise": {
+    "flag": "POSSIBLE_LABEL_NOISE",
+    "definition": "labelled mule ranked at or below the 50th percentile in at least 80% of model-repeat runs",
+    "count": 1,
+    "share_of_positives": 0.0156,
+    "rows": [
+      {
+        "row_index": 9067,
+        "flag": "POSSIBLE_LABEL_NOISE",
+        "label": 1,
+        "mean_percentile": 25.076,
+        "min_percentile": 0.427,
+        "max_percentile": 77.265,
+        "mean_score": 0.014237,
+        "agreement": 0.821,
+        "n_evaluations": 39,
+        "action": "HUMAN_REVIEW_ONLY"
+      }
+    ]
+  },
+  "high_scoring_negatives": {
+    "flag": "HIGH_SCORING_NEGATIVE",
+    "definition": "labelled legitimate ranked at or above the 99.5th percentile in at least 80% of model-repeat runs",
+    "count": 0,
+    "share_of_negatives": 0.0,
+    "reading": "these are candidate false positives as much as candidate missed mules; the audit does not claim to distinguish them",
+    "rows": []
+  },
+  "positive_percentile_distribution": {
+    "p10": 79.88,
+    "median": 99.25,
+    "p90": 99.8
+  },
+  "caveat": "A mule the model cannot rank is not necessarily mislabelled. The same evidence is equally consistent with a genuine mule whose behaviour is not represented in the available features, or with a pattern too rare for 64 training positives to teach. Removing these rows would raise every metric in this repository while making the detector strictly worse on the hidden validation set.",
+  "policy": "This audit reports only. Labels are never flipped, rows are never removed, and no model in this project is trained, calibrated or thresholded on a filtered version of the label set. A flagged positive is a request for human review, not a verdict about the account or the analyst who labelled it.",
+  "guarantees": [
+    "no label was modified",
+    "no row was removed from any training, calibration or evaluation set",
+    "no downstream component reads this artifact as a filter"
+  ]
+}
