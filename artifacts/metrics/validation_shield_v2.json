@@ -1,0 +1,1685 @@
+{
+  "generated_utc": "2026-08-12T09:00:54.477904+00:00",
+  "champion": "xgboost_top_120",
+  "champion_oof_pr_auc": 0.76904,
+  "n_features": 120,
+  "feature_stability_report": {
+    "generated_utc": "2026-08-12T09:00:54.476397+00:00",
+    "n_features": 120,
+    "counts": {
+      "STABLE": 54,
+      "WATCH": 66,
+      "SHIFT_PRONE": 0,
+      "LEAKAGE": 0
+    },
+    "thresholds": {
+      "selection_frequency_stable_min": 0.4,
+      "importance_cv_max": 1.25,
+      "missingness_range_max": 0.15,
+      "distribution_psi_max": 0.25,
+      "psi_watch": 0.1
+    },
+    "policy": "SHIFT_PRONE is a measurement instruction, not a deletion order. The tournament reports the model with and without these features and keeps whichever is reproducibly better.",
+    "features": [
+      {
+        "feature": "F114",
+        "variable_name": "R_NON_CASH_CHQ_AMT_DB_L14_31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00188,
+        "cross_fold_psi_max": 0.0092,
+        "missingness_range": 0.0145,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F148",
+        "variable_name": "R_GST_AMT_L14_31D",
+        "feature_family": "GST",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00152,
+        "cross_fold_psi_max": 0.0043,
+        "missingness_range": 0.0255,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F150",
+        "variable_name": "R_GST_AMT_DB_L14_31D",
+        "feature_family": "GST",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00097,
+        "cross_fold_psi_max": 0.0062,
+        "missingness_range": 0.0255,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F163",
+        "variable_name": "R_NET_BNKING_TXN_L14_31D",
+        "feature_family": "NET_BANKING",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00137,
+        "cross_fold_psi_max": 0.0129,
+        "missingness_range": 0.0509,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F193",
+        "variable_name": "R_LOAN_TXN_L14_31D",
+        "feature_family": "LOAN",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00159,
+        "cross_fold_psi_max": 0.0299,
+        "missingness_range": 0.0172,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F261",
+        "variable_name": "R_ELEC_XFER_TXN_DB_L7_31D",
+        "feature_family": "ELEC_XFER",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00169,
+        "cross_fold_psi_max": 0.0225,
+        "missingness_range": 0.0392,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F264",
+        "variable_name": "R_ELEC_XFER_AMT_DB_L7_31D",
+        "feature_family": "ELEC_XFER",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00133,
+        "cross_fold_psi_max": 0.0387,
+        "missingness_range": 0.0392,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F364",
+        "variable_name": "RA_UPI_XFER_TXN_L7_14D",
+        "feature_family": "UPI_XFER",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00361,
+        "cross_fold_psi_max": 0.0172,
+        "missingness_range": 0.0447,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F366",
+        "variable_name": "RA_UPI_TXN_DB_L7_14D",
+        "feature_family": "UPI",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00336,
+        "cross_fold_psi_max": 0.0214,
+        "missingness_range": 0.0457,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F422",
+        "variable_name": "RA_NON_CASH_CHQ_AMT_CR_L14_31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00176,
+        "cross_fold_psi_max": 0.0142,
+        "missingness_range": 0.0089,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F468",
+        "variable_name": "RA_UPI_TXN_DB_L14_31D",
+        "feature_family": "UPI",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.001,
+        "cross_fold_psi_max": 0.0193,
+        "missingness_range": 0.0477,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F499",
+        "variable_name": "RA_LOAN_AMT_L14_31D",
+        "feature_family": "LOAN",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00154,
+        "cross_fold_psi_max": 0.0349,
+        "missingness_range": 0.0172,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F950",
+        "variable_name": "MAX_NON_CASH_CHQ_AMT_CR_L7D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00195,
+        "cross_fold_psi_max": 0.0147,
+        "missingness_range": 0.0028,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F956",
+        "variable_name": "MAX_CI_NON_CASH_CHQ_AMT_CR_L7D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.0013,
+        "cross_fold_psi_max": 0.0096,
+        "missingness_range": 0.0028,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F1045",
+        "variable_name": "MAX_CASH_AMT_L14D",
+        "feature_family": "CASH",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00102,
+        "cross_fold_psi_max": 0.003,
+        "missingness_range": 0.0021,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F1171",
+        "variable_name": "MAX_CI_NON_CASH_CHQ_AMT_L31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00069,
+        "cross_fold_psi_max": 0.0124,
+        "missingness_range": 0.0007,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F1249",
+        "variable_name": "MAX_LOAN_AMT_L31D",
+        "feature_family": "LOAN",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00164,
+        "cross_fold_psi_max": 0.0064,
+        "missingness_range": 0.0007,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F1274",
+        "variable_name": "MM_NON_CASH_CHQ_AMT_CR_L7D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00151,
+        "cross_fold_psi_max": 0.0143,
+        "missingness_range": 0.0028,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F1491",
+        "variable_name": "MM_NON_CASH_CHQ_AMT_DB_L31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00138,
+        "cross_fold_psi_max": 0.0113,
+        "missingness_range": 0.0007,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F1703",
+        "variable_name": "NON_CASH_CHQ_TXNS_CR_L14D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00151,
+        "cross_fold_psi_max": 0.0131,
+        "missingness_range": 0.0021,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F1705",
+        "variable_name": "NON_CASH_CHQ_AMT_L14D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00123,
+        "cross_fold_psi_max": 0.0147,
+        "missingness_range": 0.0021,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F1816",
+        "variable_name": "CI_NON_CASH_CHQ_TXNS_L31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00182,
+        "cross_fold_psi_max": 0.0106,
+        "missingness_range": 0.0014,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F1897",
+        "variable_name": "LOAN_AMT_L31D",
+        "feature_family": "LOAN",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00138,
+        "cross_fold_psi_max": 0.0044,
+        "missingness_range": 0.0014,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F1922",
+        "variable_name": "AVG_NON_CASH_CHQ_AMT_CR_L7D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00263,
+        "cross_fold_psi_max": 0.0153,
+        "missingness_range": 0.0021,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F2032",
+        "variable_name": "AVG_CI_NON_CASH_CHQ_TXNS_L14D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00095,
+        "cross_fold_psi_max": 0.0104,
+        "missingness_range": 0.0021,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F2143",
+        "variable_name": "AVG_CI_NON_CASH_CHQ_AMT_L31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00093,
+        "cross_fold_psi_max": 0.0164,
+        "missingness_range": 0.0014,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F2182",
+        "variable_name": "AVG_UPI_XFER_TXNS_L31D",
+        "feature_family": "UPI_XFER",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00131,
+        "cross_fold_psi_max": 0.0147,
+        "missingness_range": 0.0014,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F2390",
+        "variable_name": "D_UPI_AMT_DB_L14_31D",
+        "feature_family": "UPI",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00232,
+        "cross_fold_psi_max": 0.0324,
+        "missingness_range": 0.0358,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F2637",
+        "variable_name": "DA_NON_CASH_CHQ_AMT_L14_31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00107,
+        "cross_fold_psi_max": 0.0109,
+        "missingness_range": 0.0076,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F2638",
+        "variable_name": "DA_NON_CASH_CHQ_AMT_CR_L14_31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00564,
+        "cross_fold_psi_max": 0.015,
+        "missingness_range": 0.0248,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F2681",
+        "variable_name": "DA_UPI_XFER_TXN_L14_31D",
+        "feature_family": "UPI_XFER",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.0015,
+        "cross_fold_psi_max": 0.0179,
+        "missingness_range": 0.0275,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F2736",
+        "variable_name": "DA_NON_CASH_CHQ_TXN_DB_L7_31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00143,
+        "cross_fold_psi_max": 0.0106,
+        "missingness_range": 0.0179,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F2738",
+        "variable_name": "DA_NON_CASH_CHQ_AMT_CR_L7_31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00183,
+        "cross_fold_psi_max": 0.0113,
+        "missingness_range": 0.0124,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3091",
+        "variable_name": "D_TA_GST_TXN_L31D",
+        "feature_family": "GST",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00198,
+        "cross_fold_psi_max": 0.048,
+        "missingness_range": 0.0303,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3093",
+        "variable_name": "D_TA_GST_TXN_DB_L31D",
+        "feature_family": "GST",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00106,
+        "cross_fold_psi_max": 0.0453,
+        "missingness_range": 0.031,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3136",
+        "variable_name": "D_TA_LOAN_TXN_L31D",
+        "feature_family": "LOAN",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00341,
+        "cross_fold_psi_max": 0.0683,
+        "missingness_range": 0.033,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3489",
+        "variable_name": "DA_NON_CASH_CHQ_AMT_DB_7D_OCC",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00062,
+        "cross_fold_psi_max": 0.0142,
+        "missingness_range": 0.0014,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3493",
+        "variable_name": "DA_CI_NON_CASH_CHQ_AMT_7D_OCC",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00226,
+        "cross_fold_psi_max": 0.0108,
+        "missingness_range": 0.0014,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3495",
+        "variable_name": "DA_CI_NON_CASH_CHQ_AMT_DB_7D_OCC",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00107,
+        "cross_fold_psi_max": 0.0119,
+        "missingness_range": 0.0014,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3601",
+        "variable_name": "DA_CI_NON_CASH_CHQ_AMT_14D_OC",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00097,
+        "cross_fold_psi_max": 0.0191,
+        "missingness_range": 0.0014,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3603",
+        "variable_name": "DA_CI_NON_CASH_CHQ_AMT_DB_14D_OC",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00168,
+        "cross_fold_psi_max": 0.0166,
+        "missingness_range": 0.0014,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3748",
+        "variable_name": "DA_UPI_XFER_TXN_31D_OC",
+        "feature_family": "UPI_XFER",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00417,
+        "cross_fold_psi_max": 0.0091,
+        "missingness_range": 0.0007,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3787",
+        "variable_name": "DA_LOAN_AMT_31D_OC",
+        "feature_family": "LOAN",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00121,
+        "cross_fold_psi_max": 0.007,
+        "missingness_range": 0.0007,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3796",
+        "variable_name": "TOT_TXNS_L31D",
+        "feature_family": "TOTAL_ALL_RAILS",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00224,
+        "cross_fold_psi_max": 0.0179,
+        "missingness_range": 0.0,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3802",
+        "variable_name": "TOT_TXNS_L14D",
+        "feature_family": "TOTAL_ALL_RAILS",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00201,
+        "cross_fold_psi_max": 0.0142,
+        "missingness_range": 0.0,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3804",
+        "variable_name": "TOT_TXNS_DB_L14D",
+        "feature_family": "TOTAL_ALL_RAILS",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00201,
+        "cross_fold_psi_max": 0.0101,
+        "missingness_range": 0.0,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3810",
+        "variable_name": "TOT_TXNS_DB_L7D",
+        "feature_family": "TOTAL_ALL_RAILS",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00517,
+        "cross_fold_psi_max": 0.0137,
+        "missingness_range": 0.0,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3835",
+        "variable_name": "AVG_BAL_7DAYS",
+        "feature_family": "BALANCE",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00019,
+        "cross_fold_psi_max": 0.0164,
+        "missingness_range": 0.0,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3873",
+        "variable_name": "MAX_MIN_31DAYS",
+        "feature_family": "BALANCE",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00136,
+        "cross_fold_psi_max": 0.0138,
+        "missingness_range": 0.0007,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3886",
+        "variable_name": "PRODUCT_NAME",
+        "feature_family": "PROFILE",
+        "availability_class": "PROFILE",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00139,
+        "cross_fold_psi_max": 0.0035,
+        "missingness_range": 0.0,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3908",
+        "variable_name": "MULTI_UPI_DB_TXNS",
+        "feature_family": "UPI",
+        "availability_class": "ALERT_CONTEXT",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00157,
+        "cross_fold_psi_max": 0.0,
+        "missingness_range": 0.0,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F3921",
+        "variable_name": "AFTERNOON_ALERTS",
+        "feature_family": "ALERT_CONTEXT",
+        "availability_class": "ALERT_CONTEXT",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.0003,
+        "cross_fold_psi_max": 0.0024,
+        "missingness_range": 0.0,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "MG_RAIL_FRAGMENTATION",
+        "variable_name": "MG_RAIL_FRAGMENTATION",
+        "feature_family": "ENGINEERED_META",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00137,
+        "cross_fold_psi_max": 0.0095,
+        "missingness_range": 0.0,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F1573",
+        "variable_name": "MM_LOAN_AMT_L31D",
+        "feature_family": "LOAN",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 0.9,
+        "mean_gain_share": 0.00112,
+        "cross_fold_psi_max": 0.006,
+        "missingness_range": 0.0007,
+        "flag": "STABLE",
+        "reasons": []
+      },
+      {
+        "feature": "F120",
+        "variable_name": "R_CI_NON_CASH_CHQ_AMT_DB_L14_31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00818,
+        "cross_fold_psi_max": 0.0118,
+        "missingness_range": 0.0179,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.14"
+        ]
+      },
+      {
+        "feature": "F158",
+        "variable_name": "R_UPI_TXN_CR_L14_31D",
+        "feature_family": "UPI",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00118,
+        "cross_fold_psi_max": 0.0148,
+        "missingness_range": 0.0296,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.64"
+        ]
+      },
+      {
+        "feature": "F164",
+        "variable_name": "R_NET_BNKING_TXN_CR_L14_31D",
+        "feature_family": "NET_BANKING",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00391,
+        "cross_fold_psi_max": 0.016,
+        "missingness_range": 0.0523,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.84"
+        ]
+      },
+      {
+        "feature": "F456",
+        "variable_name": "RA_GST_TXN_DB_L14_31D",
+        "feature_family": "GST",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00254,
+        "cross_fold_psi_max": 0.021,
+        "missingness_range": 0.0255,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.43"
+        ]
+      },
+      {
+        "feature": "F466",
+        "variable_name": "RA_UPI_XFER_TXN_L14_31D",
+        "feature_family": "UPI_XFER",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00617,
+        "cross_fold_psi_max": 0.0243,
+        "missingness_range": 0.0379,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.79"
+        ]
+      },
+      {
+        "feature": "F471",
+        "variable_name": "RA_UPI_AMT_DB_L14_31D",
+        "feature_family": "UPI",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00487,
+        "cross_fold_psi_max": 0.0151,
+        "missingness_range": 0.0477,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.97"
+        ]
+      },
+      {
+        "feature": "F570",
+        "variable_name": "RA_UPI_TXN_DB_L7_31D",
+        "feature_family": "UPI",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00733,
+        "cross_fold_psi_max": 0.0321,
+        "missingness_range": 0.0478,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.54"
+        ]
+      },
+      {
+        "feature": "F949",
+        "variable_name": "MAX_NON_CASH_CHQ_AMT_L7D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.0037,
+        "cross_fold_psi_max": 0.0133,
+        "missingness_range": 0.0028,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.31"
+        ]
+      },
+      {
+        "feature": "F1057",
+        "variable_name": "MAX_NON_CASH_CHQ_AMT_L14D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.01345,
+        "cross_fold_psi_max": 0.0113,
+        "missingness_range": 0.0021,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.31"
+        ]
+      },
+      {
+        "feature": "F1165",
+        "variable_name": "MAX_NON_CASH_CHQ_AMT_L31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00156,
+        "cross_fold_psi_max": 0.0136,
+        "missingness_range": 0.0007,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.29"
+        ]
+      },
+      {
+        "feature": "F1166",
+        "variable_name": "MAX_NON_CASH_CHQ_AMT_CR_L31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.03291,
+        "cross_fold_psi_max": 0.013,
+        "missingness_range": 0.0007,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.93"
+        ]
+      },
+      {
+        "feature": "F1273",
+        "variable_name": "MM_NON_CASH_CHQ_AMT_L7D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.02531,
+        "cross_fold_psi_max": 0.0117,
+        "missingness_range": 0.0028,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.76"
+        ]
+      },
+      {
+        "feature": "F1323",
+        "variable_name": "MM_UPI_AMT_DB_L7D",
+        "feature_family": "UPI",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.012,
+        "cross_fold_psi_max": 0.009,
+        "missingness_range": 0.0028,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.78"
+        ]
+      },
+      {
+        "feature": "F1495",
+        "variable_name": "MM_CI_NON_CASH_CHQ_AMT_L31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.0039,
+        "cross_fold_psi_max": 0.0172,
+        "missingness_range": 0.0007,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.91"
+        ]
+      },
+      {
+        "feature": "F1596",
+        "variable_name": "NON_CASH_CHQ_TXNS_DB_L7D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00575,
+        "cross_fold_psi_max": 0.0141,
+        "missingness_range": 0.0021,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.29"
+        ]
+      },
+      {
+        "feature": "F1597",
+        "variable_name": "NON_CASH_CHQ_AMT_L7D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.06004,
+        "cross_fold_psi_max": 0.0162,
+        "missingness_range": 0.0021,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.98"
+        ]
+      },
+      {
+        "feature": "F1602",
+        "variable_name": "CI_NON_CASH_CHQ_TXNS_DB_L7D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00677,
+        "cross_fold_psi_max": 0.0136,
+        "missingness_range": 0.0021,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.68"
+        ]
+      },
+      {
+        "feature": "F1710",
+        "variable_name": "CI_NON_CASH_CHQ_TXNS_DB_L14D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00371,
+        "cross_fold_psi_max": 0.0121,
+        "missingness_range": 0.0021,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.32"
+        ]
+      },
+      {
+        "feature": "F1810",
+        "variable_name": "NON_CASH_CHQ_TXNS_L31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.0075,
+        "cross_fold_psi_max": 0.0125,
+        "missingness_range": 0.0014,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.21"
+        ]
+      },
+      {
+        "feature": "F1813",
+        "variable_name": "NON_CASH_CHQ_AMT_L31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.03506,
+        "cross_fold_psi_max": 0.014,
+        "missingness_range": 0.0014,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.08"
+        ]
+      },
+      {
+        "feature": "F1815",
+        "variable_name": "NON_CASH_CHQ_AMT_DB_L31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.08241,
+        "cross_fold_psi_max": 0.0166,
+        "missingness_range": 0.0014,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.63"
+        ]
+      },
+      {
+        "feature": "F1819",
+        "variable_name": "CI_NON_CASH_CHQ_AMT_L31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.0316,
+        "cross_fold_psi_max": 0.0143,
+        "missingness_range": 0.0014,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.86"
+        ]
+      },
+      {
+        "feature": "F1831",
+        "variable_name": "ATM_AMT_L31D",
+        "feature_family": "ATM",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00056,
+        "cross_fold_psi_max": 0.001,
+        "missingness_range": 0.0014,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.33"
+        ]
+      },
+      {
+        "feature": "F1861",
+        "variable_name": "UPI_XFER_AMT_L31D",
+        "feature_family": "UPI_XFER",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00543,
+        "cross_fold_psi_max": 0.0131,
+        "missingness_range": 0.0014,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.09"
+        ]
+      },
+      {
+        "feature": "F1863",
+        "variable_name": "UPI_AMT_DB_L31D",
+        "feature_family": "UPI",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00466,
+        "cross_fold_psi_max": 0.0123,
+        "missingness_range": 0.0014,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.66"
+        ]
+      },
+      {
+        "feature": "F1924",
+        "variable_name": "AVG_CI_NON_CASH_CHQ_TXNS_L7D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00028,
+        "cross_fold_psi_max": 0.005,
+        "missingness_range": 0.0021,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.38"
+        ]
+      },
+      {
+        "feature": "F2029",
+        "variable_name": "AVG_NON_CASH_CHQ_AMT_L14D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.01859,
+        "cross_fold_psi_max": 0.0177,
+        "missingness_range": 0.0021,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.77"
+        ]
+      },
+      {
+        "feature": "F2184",
+        "variable_name": "AVG_UPI_TXNS_DB_L31D",
+        "feature_family": "UPI",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00464,
+        "cross_fold_psi_max": 0.0149,
+        "missingness_range": 0.0014,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.10"
+        ]
+      },
+      {
+        "feature": "F2350",
+        "variable_name": "D_CI_NON_CASH_CHQ_AMT_DB_L14_31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00828,
+        "cross_fold_psi_max": 0.0128,
+        "missingness_range": 0.0213,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.03"
+        ]
+      },
+      {
+        "feature": "F2397",
+        "variable_name": "D_MOB_BNKING_TXN_L14_31D",
+        "feature_family": "MOBILE_BANKING",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00641,
+        "cross_fold_psi_max": 0.0616,
+        "missingness_range": 0.0145,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.77"
+        ]
+      },
+      {
+        "feature": "F2489",
+        "variable_name": "D_UPI_AMT_DB_L7_31D",
+        "feature_family": "UPI",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00321,
+        "cross_fold_psi_max": 0.0216,
+        "missingness_range": 0.0337,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.52"
+        ]
+      },
+      {
+        "feature": "F2581",
+        "variable_name": "DA_UPI_XFER_TXN_L7_14D",
+        "feature_family": "UPI_XFER",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00922,
+        "cross_fold_psi_max": 0.0155,
+        "missingness_range": 0.028,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.49"
+        ]
+      },
+      {
+        "feature": "F2598",
+        "variable_name": "DA_MBNKING_AMT_DB_L7_14D",
+        "feature_family": "MOBILE_BANKING",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00358,
+        "cross_fold_psi_max": 0.1065,
+        "missingness_range": 0.0185,
+        "flag": "WATCH",
+        "reasons": [
+          "cross-fold PSI 0.11",
+          "importance CV 2.80"
+        ]
+      },
+      {
+        "feature": "F2624",
+        "variable_name": "DA_CASH_TXN_DB_L14_31D",
+        "feature_family": "CASH",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00454,
+        "cross_fold_psi_max": 0.061,
+        "missingness_range": 0.0241,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.33"
+        ]
+      },
+      {
+        "feature": "F2671",
+        "variable_name": "DA_GST_TXN_DB_L14_31D",
+        "feature_family": "GST",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00136,
+        "cross_fold_psi_max": 0.1323,
+        "missingness_range": 0.0164,
+        "flag": "WATCH",
+        "reasons": [
+          "cross-fold PSI 0.13",
+          "importance CV 1.89"
+        ]
+      },
+      {
+        "feature": "F2672",
+        "variable_name": "DA_GST_AMT_L14_31D",
+        "feature_family": "GST",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00383,
+        "cross_fold_psi_max": 0.1281,
+        "missingness_range": 0.0151,
+        "flag": "WATCH",
+        "reasons": [
+          "cross-fold PSI 0.13",
+          "importance CV 1.61"
+        ]
+      },
+      {
+        "feature": "F2685",
+        "variable_name": "DA_UPI_AMT_CR_L14_31D",
+        "feature_family": "UPI",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00508,
+        "cross_fold_psi_max": 0.0163,
+        "missingness_range": 0.0275,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.17"
+        ]
+      },
+      {
+        "feature": "F2686",
+        "variable_name": "DA_UPI_AMT_DB_L14_31D",
+        "feature_family": "UPI",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00613,
+        "cross_fold_psi_max": 0.0291,
+        "missingness_range": 0.0358,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.61"
+        ]
+      },
+      {
+        "feature": "F2691",
+        "variable_name": "DA_NET_BNKING_AMT_CR_L14_31D",
+        "feature_family": "NET_BANKING",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00269,
+        "cross_fold_psi_max": 0.0252,
+        "missingness_range": 0.0447,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.55"
+        ]
+      },
+      {
+        "feature": "F2999",
+        "variable_name": "D_TA_UPI_TXN_DB_L14D",
+        "feature_family": "UPI",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.03793,
+        "cross_fold_psi_max": 0.0163,
+        "missingness_range": 0.0358,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.97"
+        ]
+      },
+      {
+        "feature": "F3061",
+        "variable_name": "D_TA_CI_NON_CASH_CHQ_TXN_L31D",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00354,
+        "cross_fold_psi_max": 0.014,
+        "missingness_range": 0.0103,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.15"
+        ]
+      },
+      {
+        "feature": "F3073",
+        "variable_name": "D_TA_ATM_TXN_L31D",
+        "feature_family": "ATM",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00632,
+        "cross_fold_psi_max": 0.0747,
+        "missingness_range": 0.0206,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.09"
+        ]
+      },
+      {
+        "feature": "F3103",
+        "variable_name": "D_TA_UPI_XFER_TXN_L31D",
+        "feature_family": "UPI_XFER",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.04253,
+        "cross_fold_psi_max": 0.0181,
+        "missingness_range": 0.031,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.83"
+        ]
+      },
+      {
+        "feature": "F3105",
+        "variable_name": "D_TA_UPI_TXN_DB_L31D",
+        "feature_family": "UPI",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.0432,
+        "cross_fold_psi_max": 0.0217,
+        "missingness_range": 0.0372,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.74"
+        ]
+      },
+      {
+        "feature": "F3486",
+        "variable_name": "DA_NON_CASH_CHQ_TXN_DB_7D_OCC",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00373,
+        "cross_fold_psi_max": 0.0125,
+        "missingness_range": 0.0014,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.50"
+        ]
+      },
+      {
+        "feature": "F3487",
+        "variable_name": "DA_NON_CASH_CHQ_AMT_7D_OCC",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00264,
+        "cross_fold_psi_max": 0.0103,
+        "missingness_range": 0.0014,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.27"
+        ]
+      },
+      {
+        "feature": "F3492",
+        "variable_name": "DA_CI_NON_CASH_CHQ_TXN_DB_7D_OCC",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00941,
+        "cross_fold_psi_max": 0.017,
+        "missingness_range": 0.0014,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.70"
+        ]
+      },
+      {
+        "feature": "F3518",
+        "variable_name": "DA_CI_FEES_CHRGS_AMT_CR_7D_OCC",
+        "feature_family": "FEES_AND_CHARGES",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00079,
+        "cross_fold_psi_max": 0.0,
+        "missingness_range": 0.0021,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.61"
+        ]
+      },
+      {
+        "feature": "F3535",
+        "variable_name": "DA_UPI_XFER_AMT_7D_OCC",
+        "feature_family": "UPI_XFER",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00409,
+        "cross_fold_psi_max": 0.0146,
+        "missingness_range": 0.0014,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.84"
+        ]
+      },
+      {
+        "feature": "F3592",
+        "variable_name": "DA_NON_CASH_CHQ_TXN_14D_OC",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00727,
+        "cross_fold_psi_max": 0.011,
+        "missingness_range": 0.0014,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.44"
+        ]
+      },
+      {
+        "feature": "F3640",
+        "variable_name": "DA_UPI_XFER_TXN_14D_OC",
+        "feature_family": "UPI_XFER",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.01323,
+        "cross_fold_psi_max": 0.0129,
+        "missingness_range": 0.0014,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.26"
+        ]
+      },
+      {
+        "feature": "F3642",
+        "variable_name": "DA_UPI_TXN_DB_14D_OC",
+        "feature_family": "UPI",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00885,
+        "cross_fold_psi_max": 0.0079,
+        "missingness_range": 0.0014,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.47"
+        ]
+      },
+      {
+        "feature": "F3711",
+        "variable_name": "DA_CI_NON_CASH_CHQ_AMT_DB_31D_OC",
+        "feature_family": "NON_CASH_CHQ",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00158,
+        "cross_fold_psi_max": 0.0105,
+        "missingness_range": 0.0007,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.34"
+        ]
+      },
+      {
+        "feature": "F3784",
+        "variable_name": "DA_LOAN_TXN_31D_OC",
+        "feature_family": "LOAN",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00309,
+        "cross_fold_psi_max": 0.0059,
+        "missingness_range": 0.0007,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.78"
+        ]
+      },
+      {
+        "feature": "F3799",
+        "variable_name": "TOT_TXNAMT_L31D",
+        "feature_family": "TOTAL_ALL_RAILS",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.01397,
+        "cross_fold_psi_max": 0.0186,
+        "missingness_range": 0.0,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.49"
+        ]
+      },
+      {
+        "feature": "F3801",
+        "variable_name": "TOT_TXNAMT_DB_L31D",
+        "feature_family": "TOTAL_ALL_RAILS",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.03095,
+        "cross_fold_psi_max": 0.0138,
+        "missingness_range": 0.0,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.89"
+        ]
+      },
+      {
+        "feature": "F3805",
+        "variable_name": "TOT_TXNAMT_L14D",
+        "feature_family": "TOTAL_ALL_RAILS",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.05764,
+        "cross_fold_psi_max": 0.0119,
+        "missingness_range": 0.0,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.98"
+        ]
+      },
+      {
+        "feature": "F3807",
+        "variable_name": "TOT_TXNAMT_DB_L14D",
+        "feature_family": "TOTAL_ALL_RAILS",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.05365,
+        "cross_fold_psi_max": 0.0152,
+        "missingness_range": 0.0,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.06"
+        ]
+      },
+      {
+        "feature": "F3808",
+        "variable_name": "TOT_TXNS_L7D",
+        "feature_family": "TOTAL_ALL_RAILS",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00215,
+        "cross_fold_psi_max": 0.013,
+        "missingness_range": 0.0,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.70"
+        ]
+      },
+      {
+        "feature": "F3811",
+        "variable_name": "TOT_TXNAMT_L7D",
+        "feature_family": "TOTAL_ALL_RAILS",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.06383,
+        "cross_fold_psi_max": 0.0144,
+        "missingness_range": 0.0,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.96"
+        ]
+      },
+      {
+        "feature": "F3813",
+        "variable_name": "TOT_TXNAMT_DB_L7D",
+        "feature_family": "TOTAL_ALL_RAILS",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.0213,
+        "cross_fold_psi_max": 0.0221,
+        "missingness_range": 0.0,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.77"
+        ]
+      },
+      {
+        "feature": "MG_PASSTHROUGH_7D",
+        "variable_name": "MG_PASSTHROUGH_7D",
+        "feature_family": "ENGINEERED_META",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00499,
+        "cross_fold_psi_max": 0.0146,
+        "missingness_range": 0.0,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.51"
+        ]
+      },
+      {
+        "feature": "MG_ALERT_CONVERGENCE",
+        "variable_name": "MG_ALERT_CONVERGENCE",
+        "feature_family": "ENGINEERED_META",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 1.0,
+        "mean_gain_share": 0.00741,
+        "cross_fold_psi_max": 0.004,
+        "missingness_range": 0.0,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.68"
+        ]
+      },
+      {
+        "feature": "F2527",
+        "variable_name": "DA_CASH_AMT_DB_L7_14D",
+        "feature_family": "CASH",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 0.9,
+        "mean_gain_share": 0.00681,
+        "cross_fold_psi_max": 0.0886,
+        "missingness_range": 0.033,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 1.27"
+        ]
+      },
+      {
+        "feature": "F2595",
+        "variable_name": "DA_MBNKING_TXN_DB_L7_14D",
+        "feature_family": "MOBILE_BANKING",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 0.9,
+        "mean_gain_share": 4e-05,
+        "cross_fold_psi_max": 0.0817,
+        "missingness_range": 0.0185,
+        "flag": "WATCH",
+        "reasons": [
+          "importance CV 2.13"
+        ]
+      },
+      {
+        "feature": "F2831",
+        "variable_name": "D_TA_CASH_TXN_DB_L7D",
+        "feature_family": "CASH",
+        "availability_class": "BEHAVIORAL",
+        "selection_frequency": 0.9,
+        "mean_gain_share": 0.00854,
+        "cross_fold_psi_max": 0.1019,
+        "missingness_range": 0.033,
+        "flag": "WATCH",
+        "reasons": [
+          "cross-fold PSI 0.10",
+          "importance CV 1.67"
+        ]
+      }
+    ],
+    "shift_prone": [],
+    "watch": [
+      "F120",
+      "F158",
+      "F164",
+      "F456",
+      "F466",
+      "F471",
+      "F570",
+      "F949",
+      "F1057",
+      "F1165",
+      "F1166",
+      "F1273",
+      "F1323",
+      "F1495",
+      "F1596",
+      "F1597",
+      "F1602",
+      "F1710",
+      "F1810",
+      "F1813",
+      "F1815",
+      "F1819",
+      "F1831",
+      "F1861",
+      "F1863",
+      "F1924",
+      "F2029",
+      "F2184",
+      "F2350",
+      "F2397",
+      "F2489",
+      "F2581",
+      "F2598",
+      "F2624",
+      "F2671",
+      "F2672",
+      "F2685",
+      "F2686",
+      "F2691",
+      "F2999",
+      "F3061",
+      "F3073",
+      "F3103",
+      "F3105",
+      "F3486",
+      "F3487",
+      "F3492",
+      "F3518",
+      "F3535",
+      "F3592",
+      "F3640",
+      "F3642",
+      "F3711",
+      "F3784",
+      "F3799",
+      "F3801",
+      "F3805",
+      "F3807",
+      "F3808",
+      "F3811",
+      "F3813",
+      "MG_PASSTHROUGH_7D",
+      "MG_ALERT_CONVERGENCE",
+      "F2527",
+      "F2595",
+      "F2831"
+    ]
+  },
+  "shift_prone_ablation": {
+    "n_shift_prone": 0,
+    "decision": "NO_ABLATION_NEEDED",
+    "reason": "no feature in the champion's set was flagged SHIFT_PRONE, so there is no candidate removal to measure"
+  },
+  "leakage_flagged_features": [],
+  "release_blocker": false,
+  "release_blocker_reason": null,
+  "what_this_does_not_do": [
+    "it does not delete a feature because a flag was raised",
+    "it does not read the locked test set or any hidden validation label",
+    "it does not modify any prediction, threshold or calibrated risk"
+  ],
+  "runtime_seconds": 33.2
+}
