@@ -1,0 +1,135 @@
+{
+  "generated_utc": "2026-08-12T08:56:44.498166+00:00",
+  "view": "E_profile_merchant",
+  "n_features": 1331,
+  "n_features_in_view_before_exclusion": 1376,
+  "excluded_families": [
+    "TOTAL_ALL_RAILS"
+  ],
+  "exclusion_rationale": "TOTAL_ALL_RAILS carries aggregate debit/credit volume across every payment rail, which is the primary mule signal rather than evidence of a legitimate business. Exculpatory evidence is only worth anything if it is independent of the accusation, so the family is dropped from this model even though it would raise its PR-AUC.",
+  "n_dev_rows": 7264,
+  "n_positives": 64,
+  "prevalence": 0.008811,
+  "oof_pr_auc": 0.63604,
+  "oof_roc_auc": 0.97461,
+  "lift_over_prevalence": 72.19,
+  "band_counts": {
+    "STRONG_BUSINESS_EVIDENCE": 1452,
+    "SOME_BUSINESS_EVIDENCE": 2180,
+    "LITTLE_BUSINESS_EVIDENCE": 3632
+  },
+  "bands_measured_on": "out_of_fold_predictions",
+  "top_evidence_drivers": [
+    {
+      "feature": "F3041",
+      "family": "STANDING_INSTRUCTION",
+      "direction": "CREDIT",
+      "gain": 38015.7
+    },
+    {
+      "feature": "F2368",
+      "family": "FEES_AND_CHARGES",
+      "direction": "CREDIT",
+      "gain": 28795.5
+    },
+    {
+      "feature": "F814",
+      "family": "LOAN",
+      "direction": "BOTH",
+      "gain": 25934.1
+    },
+    {
+      "feature": "F1188",
+      "family": "FEES_AND_CHARGES",
+      "direction": "DEBIT",
+      "gain": 24079.9
+    },
+    {
+      "feature": "F2766",
+      "family": "FEES_AND_CHARGES",
+      "direction": "DEBIT",
+      "gain": 21524.8
+    },
+    {
+      "feature": "F1736",
+      "family": "FEES_AND_CHARGES",
+      "direction": "CREDIT",
+      "gain": 16641.8
+    },
+    {
+      "feature": "F41",
+      "family": "FEES_AND_CHARGES",
+      "direction": "BOTH",
+      "gain": 15570.4
+    },
+    {
+      "feature": "F2363",
+      "family": "FEES_AND_CHARGES",
+      "direction": "DEBIT",
+      "gain": 12184.3
+    },
+    {
+      "feature": "F386",
+      "family": "POS_MERCHANT",
+      "direction": "CREDIT",
+      "gain": 11913.4
+    },
+    {
+      "feature": "F760",
+      "family": "FEES_AND_CHARGES",
+      "direction": "BOTH",
+      "gain": 8982.6
+    },
+    {
+      "feature": "F1309",
+      "family": "GST",
+      "direction": "BOTH",
+      "gain": 8659.8
+    },
+    {
+      "feature": "F2982",
+      "family": "FEES_AND_CHARGES",
+      "direction": "BOTH",
+      "gain": 8412.5
+    },
+    {
+      "feature": "F2975",
+      "family": "FEES_AND_CHARGES",
+      "direction": "DEBIT",
+      "gain": 7902.2
+    },
+    {
+      "feature": "F2308",
+      "family": "POS_MERCHANT",
+      "direction": "BOTH",
+      "gain": 6871.0
+    },
+    {
+      "feature": "F3039",
+      "family": "STANDING_INSTRUCTION",
+      "direction": "DEBIT",
+      "gain": 3690.1
+    }
+  ],
+  "strong_business_evidence": {
+    "n_accounts": 1452,
+    "n_mules_among_them": 0,
+    "mule_prevalence": 0.0,
+    "book_prevalence": 0.008811,
+    "relative_prevalence": 0.0
+  },
+  "verdict": "USEFUL_AS_EXCULPATORY_CONTEXT",
+  "interpretation": "Mules are rarer among accounts with strong business evidence than in the book overall, so the band carries genuine exculpatory information.",
+  "what_this_model_may_do": [
+    "lower the confidence attached to an automatic escalation",
+    "appear as exculpatory evidence in the ProofGraph defence panel"
+  ],
+  "what_this_model_may_never_do": [
+    "modify the calibrated risk, the model score or any threshold",
+    "remove an account from a review queue",
+    "act as a merchant whitelist",
+    "apply a fixed multiplier to any score"
+  ],
+  "replaces": "the competitor pattern of multiplying a merchant's risk score by a hand-picked constant such as 0.70, which is unmeasurable and silently turns a calibrated probability into a non-probability",
+  "model_path": "merchant_verifier.joblib"
+}
