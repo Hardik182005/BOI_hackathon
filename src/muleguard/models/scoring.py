@@ -81,6 +81,11 @@ def _canonicalize_request(rows: pl.DataFrame, selected: list[str],
 def _matrix_from_rows(rows: pl.DataFrame, bundle: dict[str, Any]) -> np.ndarray:
     """Build the kept-feature matrix from raw-named input columns.
 
+    MG_* meta-features are derived here when the bundle needs them: they are
+    row-wise functions of raw columns, so a caller supplies raw data and the
+    block is recomputed rather than uploaded. Nothing about that derivation
+    consults the training set.
+
     Missing SELECTED features raise SchemaError (never silent zero-fill);
     unknown extra columns are ignored; categorical codes come from the
     TRAINED mappings frozen in the bundle (unseen category -> -1).
@@ -88,6 +93,13 @@ def _matrix_from_rows(rows: pl.DataFrame, bundle: dict[str, Any]) -> np.ndarray:
     from muleguard.features.preprocessing import encode_dataframe
 
     selected = bundle["feature_list_selected"]
+    needs_meta = [c for c in bundle.get("meta_features_required", [])
+                  if c not in rows.columns]
+    if needs_meta:
+        from muleguard.features.frame import attach_meta
+
+        rows = attach_meta(rows)
+
     missing = [c for c in selected if c not in rows.columns]
     if missing:
         raise SchemaError(
@@ -124,10 +136,16 @@ def score_rows(rows: pl.DataFrame, bundle: dict[str, Any] | None = None,
     ood_status, ood_detail = b["ood"].status(Xp)
     # rank percentile vs dev OOF calibrated distribution is approximated by
     # the anomaly dev reference; we use calibrated risk directly for ranks
+    # Explain the model that produced `raw`, not a convenient stand-in. When an
+    # ensemble wins there is no single tree to attribute the stacked score to,
+    # so we explain the strongest base model and say so in the record rather
+    # than presenting its reasons as the ensemble's.
+    explain_family = family if family in b["models"] else "lightgbm"
     reasons = None
     if with_explanations:
         reasons = shap_reason_codes(
-            b["models"]["lightgbm"].booster_, Xp, b["feature_list_kept"], b["cohort"]
+            b["models"][explain_family], Xp, b["feature_list_kept"], b["cohort"],
+            family=explain_family,
         )
 
     out = []
@@ -153,6 +171,9 @@ def score_rows(rows: pl.DataFrame, bundle: dict[str, Any] | None = None,
             "anomaly_percentile": float(anom_pct[i]),
             "ood_status": ood_status[i],
             "ood_detail": ood_detail[i],
+            "scoring_model": family,
+            "explanation_model": explain_family,
+            "explanation_is_of_the_scoring_model": bool(explain_family == family),
             **pol,
         }
         if reasons is not None:
