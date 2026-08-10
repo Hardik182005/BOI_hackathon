@@ -1,0 +1,105 @@
+{
+  "generated_utc": "2026-08-12T07:41:04.927594+00:00",
+  "members": [
+    "xgboost_top_120",
+    "xgboost_top_60",
+    "lightgbm_viewA_top_60",
+    "lightgbm_viewB_top_60"
+  ],
+  "best_single_model": "xgboost_top_120",
+  "per_repeat": [
+    {
+      "repeat": 0,
+      "best_single": 0.7492712911631468,
+      "best_single_recall_at_100": 0.75,
+      "rank_mean": 0.7415023458592233,
+      "rank_mean_recall_at_100": 0.75,
+      "logit_mean": 0.7589171701101513,
+      "logit_mean_recall_at_100": 0.78125,
+      "borda": 0.7415023458592231,
+      "borda_recall_at_100": 0.75,
+      "stacker": 0.7316861191656038,
+      "stacker_recall_at_100": 0.765625
+    },
+    {
+      "repeat": 1,
+      "best_single": 0.8066787328624693,
+      "best_single_recall_at_100": 0.796875,
+      "rank_mean": 0.7474395832866031,
+      "rank_mean_recall_at_100": 0.765625,
+      "logit_mean": 0.7983053342098503,
+      "logit_mean_recall_at_100": 0.8125,
+      "borda": 0.7474395832866033,
+      "borda_recall_at_100": 0.765625,
+      "stacker": 0.7648234206715698,
+      "stacker_recall_at_100": 0.78125
+    },
+    {
+      "repeat": 2,
+      "best_single": 0.7511686575642623,
+      "best_single_recall_at_100": 0.796875,
+      "rank_mean": 0.7176291212522251,
+      "rank_mean_recall_at_100": 0.734375,
+      "logit_mean": 0.751148095031517,
+      "logit_mean_recall_at_100": 0.765625,
+      "borda": 0.7176260098207299,
+      "borda_recall_at_100": 0.734375,
+      "stacker": 0.7315632470422283,
+      "stacker_recall_at_100": 0.765625
+    }
+  ],
+  "mean_pr_auc": {
+    "best_single": 0.7690395605299595,
+    "rank_mean": 0.7355236834660172,
+    "logit_mean": 0.7694568664505063,
+    "borda": 0.7355226463221856,
+    "stacker": 0.7426909289598007
+  },
+  "pr_auc_std_across_repeats": {
+    "best_single": 0.026626183481957486,
+    "rank_mean": 0.012883431599919991,
+    "logit_mean": 0.02064405000544226,
+    "borda": 0.012884872153451755,
+    "stacker": 0.015650115365247307
+  },
+  "mean_recall_at_100": {
+    "best_single": 0.78125,
+    "rank_mean": 0.75,
+    "logit_mean": 0.7864583333333334,
+    "borda": 0.75,
+    "stacker": 0.7708333333333334
+  },
+  "wins_over_best_single": {
+    "rank_mean": 0,
+    "logit_mean": 1,
+    "borda": 0,
+    "stacker": 0
+  },
+  "n_repeats": 3,
+  "acceptance_rule": "addendum UPDATE 2: accept rank aggregation only if PR-AUC improves or stays statistically comparable AND Recall@TopK improves AND fold-to-fold variance decreases",
+  "additional_rule_not_from_the_addendum": "the PR-AUC comparison is also required per repeat (win on at least n-1). At 3 repeats and 81 positives a mean-level edge of a few ten-thousandths is inside noise, and UPDATE 7 forbids adding complexity that does not improve measured performance. Recorded separately so the decision can be re-derived without it.",
+  "leading_blend": "logit_mean",
+  "acceptance_criteria": {
+    "pr_auc_not_worse": true,
+    "recall_at_100_improves": true,
+    "fold_variance_decreases": true,
+    "pr_auc_wins_on_n_minus_1_repeats": false
+  },
+  "acceptance_criteria_from_addendum": {
+    "pr_auc_not_worse": true,
+    "recall_at_100_improves": true,
+    "fold_variance_decreases": true
+  },
+  "acceptance_criteria_added_by_us": {
+    "pr_auc_wins_on_n_minus_1_repeats": false
+  },
+  "decision_under_addendum_text_alone": "ENSEMBLE_ACCEPTED:logit_mean",
+  "generalization_score_update_13": {
+    "best_single": 0.83385,
+    "rank_mean": 0.80408,
+    "logit_mean": 0.83778,
+    "borda": 0.80408,
+    "stacker": 0.81195
+  },
+  "decision": "SINGLE_MODEL_KEPT"
+}
