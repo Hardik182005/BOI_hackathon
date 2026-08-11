@@ -96,8 +96,69 @@ input, select, textarea {
 }
 .chart-box { width: 100%; height: 260px; }
 .footer-note { color: var(--muted); font-size: 11px; margin-top: 22px; border-top: 1px solid var(--border); padding-top: 10px; }
+
+/* ---------- Validation Lab ---------- */
+.cols-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.step-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.step-num {
+  flex: 0 0 26px; width: 26px; height: 26px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--panel-2);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 12.5px;
+}
+.step-title { font-size: 14px; font-weight: 700; }
+.verdict { padding: 2px 8px; border-radius: 5px; font-size: 11px; font-weight: 700; letter-spacing: 0.03em; }
+.verdict.PASS { background: #d1fae5; color: #065f46; }
+.verdict.WARN { background: #fef3c7; color: #92400e; }
+.verdict.FAIL { background: #fee2e2; color: #991b1b; }
+
+table.kv { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+table.kv td { padding: 4px 10px 4px 0; vertical-align: top; }
+table.kv td:first-child { color: var(--muted); width: 46%; }
+.mono { font-family: Consolas, "Courier New", monospace; font-size: 11.5px; word-break: break-all; }
+
+.meter { height: 8px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+.meter > span { display: block; height: 100%; background: var(--accent); }
+
+.sealed-note {
+  border: 1px solid var(--border); border-left: 3px solid var(--text);
+  background: var(--panel-2); padding: 10px 14px; border-radius: 0 8px 8px 0;
+  font-size: 12.5px; margin: 10px 0;
+}
+.no-metric {
+  border: 2px dashed var(--border); border-radius: 10px; padding: 28px;
+  text-align: center; color: var(--muted); margin-top: 12px;
+}
+.no-metric b { color: var(--text); display: block; font-size: 14px; margin-bottom: 5px; }
+
+/* ---------- Model Courtroom: two sides, identical weight ---------- */
+.court { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: stretch; }
+.court > .card { height: 100%; }
+.side-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 8px;
+}
+.side-head h4 { margin: 0; font-size: 12.5px; letter-spacing: 0.07em; text-transform: uppercase; }
+.arg { border-top: 1px solid var(--border); padding: 8px 0; }
+.arg:first-of-type { border-top: 0; }
+.arg .pt { font-weight: 600; font-size: 13px; }
+.arg .why { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+.arg .src { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+/* ---------- graph canvas ---------- */
+.tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--border); margin: 4px 0 14px; }
+.tabs button {
+  background: none; border: 0; border-bottom: 2px solid transparent;
+  padding: 8px 12px; font-size: 13px; color: var(--muted); cursor: pointer;
+}
+.tabs button.active { color: var(--text); border-bottom-color: var(--text); font-weight: 600; }
+.graph-canvas { width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: #ffffff; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 11.5px; color: var(--muted); margin-top: 8px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: middle; border: 1px solid; }
+
 @media (max-width: 900px) {
   .layout { flex-direction: column; }
   .sidebar { width: 100%; height: auto; position: static; }
   .nav { flex-direction: row; flex-wrap: wrap; }
+  .court { grid-template-columns: 1fr; }
 }
