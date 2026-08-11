@@ -6,6 +6,11 @@ import ModelPerformance from "./pages/ModelPerformance";
 import FeatureIntelligence from "./pages/FeatureIntelligence";
 import DriftMonitoring from "./pages/DriftMonitoring";
 import ModelCard from "./pages/ModelCard";
+import ValidationLab from "./pages/ValidationLab";
+import BusinessValue from "./pages/BusinessValue";
+import CapacityOptimizer from "./pages/CapacityOptimizer";
+import GraphLab from "./pages/GraphLab";
+import ProofGraph from "./pages/ProofGraph";
 
 const pages = [
   { to: "/", label: "Executive Overview", el: <Overview /> },
@@ -14,6 +19,10 @@ const pages = [
   { to: "/features", label: "Feature Intelligence", el: <FeatureIntelligence /> },
   { to: "/drift", label: "Drift & Monitoring", el: <DriftMonitoring /> },
   { to: "/model-card", label: "Model Card", el: <ModelCard /> },
+  { to: "/validation", label: "Validation Lab", el: <ValidationLab /> },
+  { to: "/value", label: "Business Value", el: <BusinessValue /> },
+  { to: "/capacity", label: "Analyst Capacity", el: <CapacityOptimizer /> },
+  { to: "/graph", label: "Graph Lab", el: <GraphLab /> },
 ];
 
 export default function App() {
@@ -41,6 +50,7 @@ export default function App() {
             <Route key={p.to} path={p.to} element={p.el} />
           ))}
           <Route path="/cases/:caseId" element={<CaseDetail />} />
+          <Route path="/proof/:caseId" element={<ProofGraph />} />
           <Route
             path="*"
             element={<div className="empty">Page not found - use the navigation.</div>}
