@@ -1,14 +1,14 @@
 {
-  "generated_utc": "2026-07-10T23:02:38.431266+00:00",
+  "generated_utc": "2026-08-12T10:21:00.998344+00:00",
   "backend": "http://127.0.0.1:8001",
-  "n_checks": 7,
-  "n_passed": 7,
+  "n_checks": 8,
+  "n_passed": 8,
   "all_passed": true,
   "checks": [
     {
       "check": "security_pytest_suite",
       "passed": true,
-      "detail": ".......                                                                  [100%]"
+      "detail": "49 passed, 1 warning in 4.41s"
     },
     {
       "check": "sql_injection_in_path_safe",
@@ -18,7 +18,12 @@
     {
       "check": "xss_notes_stored_as_data",
       "passed": true,
-      "detail": "API returns JSON only; frontend renders via React text nodes (auto-escaped)"
+      "detail": "decision=200 stored_verbatim=True content-type=application/json"
+    },
+    {
+      "check": "path_traversal_in_seal_id_blocked",
+      "passed": true,
+      "detail": "status=404"
     },
     {
       "check": "malformed_json_422",
@@ -38,7 +43,7 @@
     {
       "check": "upload_size_cap_enforced",
       "passed": true,
-      "detail": "MAX_UPLOAD_BYTES enforced; covered by pytest test_oversized_upload_rejected"
+      "detail": "status=413 for 65 MB"
     }
   ]
 }
