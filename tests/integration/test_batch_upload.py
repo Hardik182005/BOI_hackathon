@@ -135,3 +135,48 @@ def test_reordered_columns_score_identically(client, sample_frame):
     risks1 = [l.split(",")[1] for l in r1.text.strip().splitlines()[1:]]
     risks2 = [l.split(",")[1] for l in r2.text.strip().splitlines()[1:]]
     assert risks1 == risks2
+
+
+# --- schema inference on wide, ragged exports --------------------------------
+
+def test_late_non_numeric_value_does_not_reject_the_file():
+    """A column that turns non-numeric deep in the file must not 422 the upload.
+
+    Polars sniffs a fixed number of rows to pick dtypes. On a 3,924-column
+    export a column that is numeric for the first 200 rows and carries one
+    "N/A" at row 900 raised ComputeError and the whole upload was refused - the
+    organiser's file rejected over a single cell. This is the regression test
+    for that: the bad cell becomes a null, which the imputer already handles.
+    """
+    from muleguard.api.routes_upload import _read_csv_tolerantly
+
+    rows = [f"{i},1.5" for i in range(400)]
+    rows[350] = "N/A,1.5"          # past the 200-row sniff window
+    payload = ("F1,F2\n" + "\n".join(rows) + "\n").encode()
+
+    df = _read_csv_tolerantly(payload)
+    assert df.height == 400
+    assert df.width == 2
+
+
+def test_tolerant_reader_still_types_a_clean_file_numerically():
+    """The fallbacks must not cost normal files their dtypes.
+
+    Reading everything as text would "work" for every input and quietly turn a
+    well-formed export into strings, so the first attempt has to be the one
+    that wins here.
+    """
+    from muleguard.api.routes_upload import _read_csv_tolerantly
+
+    payload = b"F1,F2\n1,2.5\n3,4.5\n"
+    df = _read_csv_tolerantly(payload)
+    assert df["F1"].dtype.is_integer()
+    assert df["F2"].dtype.is_float()
+
+
+def test_na_spellings_become_null_not_text():
+    from muleguard.api.routes_upload import _read_csv_tolerantly
+
+    payload = b"F1,F2\n1,NA\n2,N/A\n3,null\n4,\n"
+    df = _read_csv_tolerantly(payload)
+    assert df["F2"].null_count() == 4

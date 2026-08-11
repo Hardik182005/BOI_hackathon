@@ -37,6 +37,39 @@ ALLOWED_SUFFIXES = {".csv", ".xlsx"}
 CHUNK_ROWS = 500
 
 
+def _read_csv_tolerantly(payload: bytes) -> pl.DataFrame:
+    """Parse an uploaded CSV without letting one odd cell reject the file.
+
+    Three attempts, weakest assumption last. Sniffing 200 rows is fast and
+    right for a well-formed export, but this file has 3,924 columns and 1,818
+    rows: a column that is numeric for the first 200 rows and carries a stray
+    "N/A" at row 900 aborts the entire upload with a ComputeError. That is the
+    organiser's file being refused over one cell, which is the worst failure
+    this route has.
+
+    So: scan the whole file for types, and if even that disagrees with the
+    data, read every column as text and let the model frame coerce. Coercion
+    downstream turns an unparseable cell into a null, which the imputer already
+    handles; a 422 turns it into no submission at all.
+    """
+    buf = io.BytesIO(payload)
+    for kwargs in (
+        {"infer_schema_length": 200},
+        {"infer_schema_length": None},
+        {"infer_schema": False},
+    ):
+        buf.seek(0)
+        try:
+            return pl.read_csv(buf, null_values=["NA", "N/A", "null", ""], **kwargs)
+        except Exception:  # noqa: BLE001 - the next attempt is the handler
+            continue
+    buf.seek(0)
+    # Last resort: tolerate ragged rows too. Anything that survives this is
+    # readable, and anything that does not is genuinely not a CSV.
+    return pl.read_csv(buf, infer_schema=False, truncate_ragged_lines=True,
+                       null_values=["NA", "N/A", "null", ""])
+
+
 def _parse_upload(filename: str, payload: bytes) -> pl.DataFrame:
     suffix = ("." + filename.rsplit(".", 1)[-1].lower()) if "." in filename else ""
     if suffix not in ALLOWED_SUFFIXES:
@@ -47,8 +80,7 @@ def _parse_upload(filename: str, payload: bytes) -> pl.DataFrame:
             names = [h.strip().strip('"') for h in header.split(",")]
             if len(names) != len(set(names)):
                 raise HTTPException(422, "duplicate column names in upload")
-            df = pl.read_csv(io.BytesIO(payload), infer_schema_length=200,
-                             null_values=["NA", ""])
+            df = _read_csv_tolerantly(payload)
         else:
             import fastexcel
 
