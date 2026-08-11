@@ -46,10 +46,21 @@ def test_column_order_invariance(env):
         assert a["calibrated_risk"] == pytest.approx(b["calibrated_risk"], abs=1e-9)
 
 
+def _numeric_raw_features(bundle, frame) -> list[str]:
+    """Selected features that exist as raw columns and are numeric.
+
+    The MG_* block is derived inside scoring rather than uploaded, so it is
+    absent from the raw frame. Perturbing raw columns and letting the block be
+    recomputed downstream is the faithful test: a real caller supplies raw data
+    and the meta-features move with it.
+    """
+    return [f for f in bundle["feature_list_selected"]
+            if f in frame.schema and frame.schema[f].is_numeric()]
+
+
 def test_extreme_values_route_to_ood(env):
     dev = env["dev"].head(3)
-    num_feats = [f for f in env["bundle"]["feature_list_selected"]
-                 if dev.schema[f].is_numeric()][:15]
+    num_feats = _numeric_raw_features(env["bundle"], dev)[:15]
     mod = dev.with_columns([pl.lit(1e9).alias(f) for f in num_feats])
     res = env["score_rows"](mod, bundle=env["bundle"], with_explanations=False)
     assert all(r["ood_status"] == "OUT_OF_DISTRIBUTION" for r in res)
@@ -70,8 +81,7 @@ def test_added_missingness_does_not_crash_and_shifts_ood_signal(env):
 
 def test_small_perturbations_keep_scores_stable(env):
     dev = env["dev"].head(8)
-    num_feats = [f for f in env["bundle"]["feature_list_selected"]
-                 if dev.schema[f].is_numeric()]
+    num_feats = _numeric_raw_features(env["bundle"], dev)
     rng = np.random.default_rng(0)
     mod = dev.with_columns([
         (pl.col(f) * (1 + 0.01 * float(rng.standard_normal()))).alias(f) for f in num_feats[:10]

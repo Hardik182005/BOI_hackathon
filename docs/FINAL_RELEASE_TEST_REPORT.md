@@ -15,21 +15,41 @@ Generated 2026-07-10T23:08:51.019460+00:00 · commit `c8e0d253acf8` · **Verdict
 ## Dataset (verified)
 
 9,082 rows × 3,925 cols · 81 positives (0.8919%) ·
-quarantined: F3924 (target), F3912 (leak), F2230 (month≡label), __UNNAMED__0 (index) ·
-60 selected features in production.
+quarantined at the time of this run: F3924 (target), F3912 (leak), F2230
+(month≡label), __UNNAMED__0 (index) · 60 selected features.
+
+**Superseded.** The quarantine is now 9 hard-quarantined columns (adding
+F3898, F3899, F3913, F3914, F3915) plus 3 conditionally quarantined
+(F3916/F3917/F3918) and the fairness exclusion F3892 —
+`configs/feature_availability.yaml`. Production feature count is 120.
 
 ## Model
 
+**The model rows below are RETIRED.** They describe the pre-firewall bundle
+`catboost_tuned_top60`, whose top-60 set contained the post-resolution columns
+`F3898`, `F3913`, `F3914` and the undetermined `F3916`; its PR-AUC was inflated
+by them. Current champion: **`xgboost_top_120`, OOF PR-AUC 0.7690 ± 0.0266**,
+bundle `d12914de5abee99a…` — see
+`docs/FINAL_ACCURACY_AND_MODEL_SELECTION_REPORT.md`. The QA-suite and release-gate
+sections below were run against the retired bundle and have not been re-run.
+
 | Item | Value |
 |---|---|
-| Best single (5-repeat OOF) | **catboost_tuned_top60** — PR-AUC 0.8077 ± 0.0450 |
-| Locked test (production scorer) | PR-AUC 0.8242 (95% CI 0.6536–0.9584) |
-| Calibration | Brier 0.00258, ECE 0.0027 |
-| Ensemble | rejected by pre-registered ≥4/5-repeats rule |
+| Best single (5-repeat OOF) | **catboost_tuned_top60** — PR-AUC 0.8077 ± 0.0450 — **RETIRED, leakage-inflated** |
+| Locked test (production scorer) | PR-AUC 0.8242 (95% CI 0.6536–0.9584) — **RETIRED bundle; not re-measured under the current champion** |
+| Calibration | Brier 0.00258, ECE 0.0027 — retired; current OOF values 0.003128 / 0.001489 |
+| Ensemble | rejected by pre-registered ≥4/5-repeats rule — superseded by `SINGLE_MODEL_KEPT` in `ensemble_v2.json` |
 | Challengers | tabpfn:RAN, tabicl:SKIPPED, autogluon:SKIPPED (TabPFN 1-repeat OOF 0.8969585278109471) |
 | Throughput | 687.7 rows/s CPU |
 
-### Recall / precision at analyst budgets (locked test)
+### Recall / precision at analyst budgets (locked test) — RETIRED BUNDLE
+
+The four rows below were measured on the retired bundle `04fafaee25ae82c7…`.
+They must not be attributed to the current champion, and the `top 100` row in
+particular ("100.0%") must not be quoted as a current result. The current
+model's measured recall at budget is reported out-of-fold in
+`docs/FINAL_ACCURACY_AND_MODEL_SELECTION_REPORT.md` §7 (top-100 recall
+0.828 calibrated OOF; 0.781 uncalibrated tournament mean).
 
 | Budget | Recall | Precision |
 |---|---|---|
@@ -56,9 +76,9 @@ quarantined: F3924 (target), F3912 (leak), F2230 (month≡label), __UNNAMED__0 (
 Plus: backend pytest **93 passed**, frontend vitest **3 passed**, one-command
 startup log `artifacts/testing/one_command_startup.log`.
 
-## ML release gate
+## ML release gate (run against the RETIRED bundle — see `docs/FINAL_RELEASE_GATE.md`)
 
-| no_target_or_f3912_leakage | PASS | 60 bundle features disjoint from 4 quarantined |
+| no_target_or_f3912_leakage | PASS **against the four-entry quarantine list only**; the same bundle fails under the firewall | 60 bundle features disjoint from 4 quarantined |
 | no_split_overlap | PASS | test=1818 dev=7264 overlap=0 |
 | locked_test_single_touch | PASS | touches=3 forced=0 |
 | metrics_trace_to_predictions | PASS | 11 models verified |
