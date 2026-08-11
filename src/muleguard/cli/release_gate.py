@@ -7,6 +7,7 @@ Writes docs/FINAL_RELEASE_GATE.md and artifacts/release_manifest.json.
 from __future__ import annotations
 
 import datetime as dt
+import re
 import subprocess
 from typing import Callable
 
@@ -165,12 +166,18 @@ def c11():
 
 @check("tests_pass", "full pytest suite green")
 def c12():
+    # No -q here: pyproject already sets it in addopts, and a second -q makes
+    # pytest quiet enough to drop the "N passed" line entirely - which is how
+    # this check came to report "no summary line" while genuinely passing.
     r = subprocess.run(
-        [str(settings.REPO_ROOT / ".venv/Scripts/python.exe"), "-m", "pytest", "-q", "--tb=no"],
+        [str(settings.REPO_ROOT / ".venv/Scripts/python.exe"), "-m", "pytest",
+         "--tb=no", "-p", "no:warnings"],
         cwd=settings.REPO_ROOT, capture_output=True, text=True, timeout=3600,
     )
-    tail = (r.stdout.strip().splitlines() or ["no output"])[-1]
-    return (r.returncode == 0, tail)
+    counts = [ln for ln in r.stdout.splitlines()
+              if re.search(r"\d+ (passed|failed|error)", ln)]
+    detail = counts[-1].strip() if counts else "no summary line"
+    return (r.returncode == 0, detail)
 
 
 @check("probabilities_bounded", "all stored predictions inside [0,1]")
@@ -209,6 +216,188 @@ def c14():
     ]
     missing = [str(p.relative_to(settings.REPO_ROOT)) for p in required if not p.exists()]
     return (not missing, f"missing={missing}" if missing else f"{len(required)} artifacts present")
+
+
+# --- addendum checks (UPDATE 1-13) --------------------------------------------
+# The gate above was written for the original build. These cover the upgrade,
+# and they exist for the same reason as the others: an artifact that is only
+# described in a document is a claim, and a claim is not evidence.
+
+
+@check("addendum_artifacts_complete", "every upgrade artifact was actually produced")
+def c15():
+    required = [
+        settings.METRICS_DIR / "tournament_v2.json",
+        settings.METRICS_DIR / "promotion_decision_v2.json",
+        settings.METRICS_DIR / "stability_stress_v2.json",
+        settings.METRICS_DIR / "family_dropout_v2.json",
+        settings.METRICS_DIR / "seed_variance_v2.json",
+        settings.METRICS_DIR / "alert_context_ablation_v2.json",
+        settings.METRICS_DIR / "robustness_grade_v2.json",
+        settings.METRICS_DIR / "validation_shield_v2.json",
+        settings.METRICS_DIR / "label_noise_audit_v2.json",
+        settings.METRICS_DIR / "merchant_verifier_v2.json",
+    ]
+    missing = [p.name for p in required if not p.exists()]
+    return (not missing, f"missing={missing}" if missing else
+            f"{len(required)} addendum artifacts present")
+
+
+@check("robustness_grade_not_hand_picked",
+       "the badge is recomputable from the published thresholds")
+def c16():
+    """Recompute the grade from the raw measurements and the fixed thresholds.
+
+    U4 says the status must come from documented thresholds and must not be
+    invented. The only way to prove that is to derive it again here rather than
+    read the stored string, so a grade edited by hand would fail this check.
+    """
+    from muleguard.models.robustness import robustness_grade
+
+    stored = load_json(settings.METRICS_DIR / "robustness_grade_v2.json")
+    fresh = robustness_grade(
+        load_json(settings.METRICS_DIR / "stability_stress_v2.json"),
+        load_json(settings.METRICS_DIR / "family_dropout_v2.json"),
+    )
+    same = fresh["hidden_validation_robustness"] == stored["hidden_validation_robustness"]
+    return (same, f"grade={stored['hidden_validation_robustness']} "
+                  f"limited_by={stored.get('limiting_criteria')}")
+
+
+@check("label_audit_changed_nothing", "no label flipped, no row removed (U5)")
+def c17():
+    audit = load_json(settings.METRICS_DIR / "label_noise_audit_v2.json")
+    flagged = audit["possible_label_noise"]["rows"] + audit["high_scoring_negatives"]["rows"]
+    every_row_review_only = all(r["action"] == "HUMAN_REVIEW_ONLY" for r in flagged)
+    guarantees = " ".join(audit["guarantees"])
+    return (every_row_review_only and "no label was modified" in guarantees
+            and "no row was removed" in guarantees,
+            f"{len(flagged)} rows flagged, all HUMAN_REVIEW_ONLY")
+
+
+@check("merchant_verifier_cannot_lower_risk",
+       "business evidence moves confidence, never the score (U9)")
+def c18():
+    """The 0.70-multiplier failure mode, tested rather than promised."""
+    from muleguard.models.merchant import MerchantVerdict, escalation_confidence
+
+    strong = MerchantVerdict(legitimacy=0.95, band="STRONG_BUSINESS_EVIDENCE",
+                             mule_probability_from_business_evidence=0.001,
+                             components={})
+    out = escalation_confidence(risk_tier="INVESTIGATE", calibrated_risk=0.91,
+                                conformal_set="HIGH_RISK_SET", model_agreement=1.0,
+                                merchant=strong)
+    unchanged = (out["calibrated_risk_unchanged"] == 0.91
+                 and out["risk_tier_unchanged"] == "INVESTIGATE")
+    lowered = out["auto_escalation_confidence"] != "HIGH"
+    audited = all("observed" in a and "rationale" in a for a in out["adjustments"])
+    return (unchanged and lowered and audited,
+            f"risk held at 0.91/INVESTIGATE; confidence -> "
+            f"{out['auto_escalation_confidence']}; {len(out['adjustments'])} "
+            "adjustments all carry their trigger values")
+
+
+@check("graph_never_fabricates_edges", "no graph without an uploaded edge file (U8)")
+def c19():
+    from muleguard.graph import adapter
+
+    u = adapter.unavailable()
+    contract = " ".join(adapter.CONTRACT)
+    return (u["status"] == "UNAVAILABLE"
+            and "does not fabricate edges from feature similarity" in u["what_we_refuse_to_do"]
+            and "none was derived from F-columns" in contract
+            and "no graph metric is an input to the mule model" in contract,
+            "default UNAVAILABLE; contract forbids derived edges")
+
+
+@check("shield_reports_no_leaked_feature",
+       "the champion's features all clear the availability firewall (U3)")
+def c20():
+    s = load_json(settings.METRICS_DIR / "validation_shield_v2.json")
+    counts = s["feature_stability_report"]["counts"]
+    return (counts["LEAKAGE"] == 0 and not s["release_blocker"],
+            f"{counts['STABLE']} STABLE / {counts['WATCH']} WATCH / "
+            f"{counts['SHIFT_PRONE']} SHIFT_PRONE / {counts['LEAKAGE']} LEAKAGE")
+
+
+@check("no_forbidden_verdict_vocabulary", "never GUILTY/CERTIFIED_CLEAN/AUTO_FREEZE")
+def c21():
+    """Scan shipped source for verdict words the specification forbids.
+
+    Matched case-sensitively as whole words so ordinary prose ("criminal
+    intent" in a disclaimer that negates it) does not trip the check while an
+    emitted label GUILTY would.
+    """
+    banned = ("GUILTY", "CRIMINAL", "PERMANENTLY_SAFE", "CERTIFIED_CLEAN",
+              "AUTO_FREEZE")
+    hits: list[str] = []
+    roots = [settings.REPO_ROOT / "src", settings.REPO_ROOT / "frontend/src"]
+    # This file and the tests that assert the same rule necessarily spell the
+    # words out in order to search for them; captured API fixtures are recorded
+    # backend output rather than shipped copy. None of the four emits a verdict.
+    exempt = {"release_gate.py", "test_policy.py"}
+    for root in roots:
+        for p in list(root.rglob("*.py")) + list(root.rglob("*.tsx")) + list(root.rglob("*.ts")):
+            if ("__fixtures__" in p.parts or p.name.endswith(".test.tsx")
+                    or p.name in exempt):
+                continue
+            text = p.read_text(encoding="utf-8", errors="ignore")
+            for word in banned:
+                if re.search(rf"\b{word}\b", text):
+                    hits.append(f"{p.name}:{word}")
+    return (not hits, f"hits={hits}" if hits else
+            f"{len(banned)} forbidden verdict words absent from shipped source")
+
+
+@check("attack_surface_covered",
+       "XSS, SQLi, path-traversal and CSV-injection tests exist and pass")
+def c22():
+    """The four named attack classes must each have a live test, not a comment.
+
+    Checked by collecting the security suite and matching test names, so
+    deleting a test file fails the gate rather than quietly shrinking coverage.
+    Presence and passing are separate facts: `tests_pass` above proves the
+    suite is green, this proves the suite still covers what it claims to.
+    """
+    r = subprocess.run(
+        [str(settings.REPO_ROOT / ".venv/Scripts/python.exe"), "-m", "pytest",
+         "tests/security", "--collect-only", "-p", "no:warnings"],
+        capture_output=True, text=True, cwd=settings.REPO_ROOT, timeout=300)
+    collected = r.stdout
+    required = {
+        "sqli": "sql_injection",
+        "xss": "xss",
+        "path_traversal": "traversal",
+        "csv_injection": "formula",
+    }
+    missing = [k for k, needle in required.items() if needle not in collected]
+    n = len([ln for ln in collected.splitlines() if "::" in ln])
+    return (not missing and r.returncode == 0,
+            f"missing={missing}" if missing else
+            f"{n} security tests collected covering {', '.join(required)}")
+
+
+@check("organiser_dry_run_passed",
+       "the section 42 rehearsal scored every malformed export without moving the model")
+def c23():
+    """The rehearsal has to have been run, and to have passed for the right reason.
+
+    Three separate facts, because any one of them alone is satisfiable by a
+    broken harness: every variant scored, the quarantined-column variants
+    produced byte-identical predictions, and the sensitivity control did *not* -
+    which is what proves the probe reached the scorer at all.
+    """
+    p = settings.METRICS_DIR / "organiser_dry_run.json"
+    if not p.exists():
+        return False, "artifacts/metrics/organiser_dry_run.json is missing; run `make dry-run`"
+    d = load_json(p)
+    inv = d.get("prediction_invariance", {})
+    ok = (d.get("verdict") == "PASS" and d.get("accepted_model_unchanged")
+          and inv.get("sound"))
+    return ok, (f"{d.get('variants_passed')} variants, invariance sound="
+                f"{inv.get('sound')}, model unchanged="
+                f"{d.get('accepted_model_unchanged')}, locked-test PR-AUC "
+                f"{(d.get('offline_label_comparison', {}).get('metrics') or {}).get('pr_auc')}")
 
 
 def main() -> None:

@@ -418,17 +418,49 @@ def run_consistency() -> bool:
 def run_security() -> bool:
     checks = []
     r = subprocess.run([str(settings.REPO_ROOT / ".venv/Scripts/python.exe"),
-                        "-m", "pytest", "tests/security", "-q", "--tb=no"],
+                        "-m", "pytest", "tests/security", "--tb=no"],
                        cwd=settings.REPO_ROOT, capture_output=True, text=True, timeout=600)
+    # pyproject's addopts already carries -q; adding another suppresses the
+    # count line, which is the only part of this output worth recording.
+    summary = [ln for ln in r.stdout.splitlines() if " passed" in ln or " failed" in ln]
     checks.append(_result("security_pytest_suite", r.returncode == 0,
-                          (r.stdout.strip().splitlines() or [""])[-1]))
+                          summary[-1].strip() if summary else "no summary line"))
     # SQL injection attempt through case id path
     inj = httpx.get(f"{BASE}/v1/cases/CASE-X'; DROP TABLE cases;--", timeout=30)
     alive = httpx.get(f"{BASE}/health/live", timeout=10).status_code == 200
     checks.append(_result("sql_injection_in_path_safe", inj.status_code in (404, 422) and alive))
-    # XSS in analyst notes is stored as data, returned as JSON (no HTML render server-side)
-    checks.append(_result("xss_notes_stored_as_data", True,
-                          "API returns JSON only; frontend renders via React text nodes (auto-escaped)"))
+    # XSS through analyst free text. Previously this was asserted from prose;
+    # now it is exercised, because "the frontend escapes it" is only half the
+    # claim - the other half is that the API never answers with text/html.
+    xss = "<script>alert(1)</script>"
+    ids = httpx.get(f"{BASE}/v1/cases?limit=1", timeout=30).json()["cases"]
+    if ids:
+        cid = ids[0]["case_id"]
+        dec = httpx.post(f"{BASE}/v1/cases/{cid}/decision", timeout=30,
+                         json={"actor": "qa-harness", "action": "MARK_REVIEWED",
+                               "reason": f"QA XSS probe {xss}"})
+        back = httpx.get(f"{BASE}/v1/cases/{cid}", timeout=30)
+        # Round-trips unchanged, as a JSON string, from a route that never
+        # answers text/html. Escaping it here instead would be the wrong fix:
+        # the stored reason is evidence, and mangling evidence to make a
+        # renderer safe is how audit trails stop matching what was typed.
+        stored = xss in back.text
+        html_typed = "text/html" in back.headers.get("content-type", "")
+        checks.append(_result(
+            "xss_notes_stored_as_data",
+            dec.status_code == 200 and stored and not html_typed,
+            f"decision={dec.status_code} stored_verbatim={stored} "
+            f"content-type={back.headers.get('content-type')}"))
+    else:
+        checks.append(_result("xss_notes_stored_as_data", False,
+                              "no case available to post an analyst note against"))
+
+    # Path traversal through the seal id, which is the one user string that
+    # becomes a filename anywhere in the API.
+    trav = httpx.get(f"{BASE}/v1/validation/seals/..%2f..%2fconfig", timeout=30)
+    checks.append(_result("path_traversal_in_seal_id_blocked",
+                          trav.status_code in (400, 404, 422),
+                          f"status={trav.status_code}"))
     # malformed JSON
     mal = httpx.post(f"{BASE}/v1/score", content=b"{not json",
                      headers={"Content-Type": "application/json"}, timeout=30)
@@ -448,9 +480,14 @@ def run_security() -> bool:
     except sqlite3.DatabaseError:
         tamper_blocked = True
     checks.append(_result("audit_log_tamper_blocked", tamper_blocked))
-    # oversized upload rejected (server-enforced cap)
-    checks.append(_result("upload_size_cap_enforced", True,
-                          "MAX_UPLOAD_BYTES enforced; covered by pytest test_oversized_upload_rejected"))
+    # Oversized upload, actually sent rather than asserted. 65 MB against a
+    # 64 MB cap: large enough to trip it, small enough not to make the harness
+    # slow. A 413 here proves the cap is on the server, not the client.
+    big = b"a" * (65 * 1024 * 1024)
+    over = httpx.post(f"{BASE}/v1/score/file", timeout=120,
+                      files={"file": ("big.csv", big, "text/csv")})
+    checks.append(_result("upload_size_cap_enforced", over.status_code == 413,
+                          f"status={over.status_code} for {len(big) // (1024*1024)} MB"))
     return _finish("security_results", checks)
 
 
