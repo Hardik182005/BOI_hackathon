@@ -10,6 +10,8 @@ Endpoints (all JSON, OpenAPI at /docs):
   POST /v1/cases/{id}/decision     analyst action (identity + reason required)
   POST /v1/cases/{id}/feedback     verdict feedback loop
   GET  /v1/metrics/summary  numbers straight from artifacts (never invented)
+  GET  /v1/capacity/curve   measured recall/precision per analyst review budget
+  POST /v1/capacity/plan    one capacity question -> advisory threshold
   GET  /v1/drift/status
   POST /v1/reports/{case_id}/generate   evidence packet (+optional LLM prose)
 
@@ -56,9 +58,17 @@ app.add_middleware(
     allow_methods=["*"], allow_headers=["*"],
 )
 
+from muleguard.api.routes_capacity import router as capacity_router  # noqa: E402
+from muleguard.api.routes_graph import router as graph_router  # noqa: E402
+from muleguard.api.routes_proofgraph import router as proofgraph_router  # noqa: E402
 from muleguard.api.routes_upload import router as upload_router  # noqa: E402
+from muleguard.api.routes_validation import router as validation_router  # noqa: E402
 
 app.include_router(upload_router)
+app.include_router(proofgraph_router)
+app.include_router(validation_router)
+app.include_router(graph_router)
+app.include_router(capacity_router)
 
 _narrator: OllamaNarrator | None = None
 _rate: dict[str, list[float]] = {}
