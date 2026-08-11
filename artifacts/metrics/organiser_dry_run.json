@@ -1,0 +1,317 @@
+{
+  "generated_utc": "2026-08-12T10:59:38.685796+00:00",
+  "spec": "section 42 - dry-run the organiser validation experience",
+  "mock_file": {
+    "path": "artifacts\\dry_run\\mock_hidden_validation.xlsx",
+    "labels_path": "artifacts\\dry_run\\mock_hidden_labels.csv",
+    "rows": 1818,
+    "columns": 3924,
+    "target_removed": "F3924",
+    "positives_held_back": 17,
+    "prevalence": 0.00935,
+    "sha256": "07c5fa125c5ee5d1",
+    "provenance": "locked test split; no candidate model was fitted on these rows"
+  },
+  "bundle_fingerprint_before": "afd0dc1d8fc02eb9",
+  "bundle_fingerprint_after": "afd0dc1d8fc02eb9",
+  "accepted_model_unchanged": true,
+  "variants": [
+    {
+      "variant": "baseline",
+      "http_status": 200,
+      "overall": "WARN",
+      "seal_id": "seal-20260812T105904-bb6f8f7f",
+      "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
+      "compatibility_score": 99.97,
+      "compatibility_band": "HIGH_COMPATIBILITY",
+      "rows_in": 1818,
+      "cols_in": 3924,
+      "checks": {
+        "accepted": true,
+        "schema_not_rejected": true,
+        "no_target_required": true,
+        "scored": true,
+        "row_count_preserved": true,
+        "model_unchanged": true
+      },
+      "verdict": "PASS",
+      "failed_checks": [],
+      "summary": "No label column was present, so there is nothing to reveal; download the sealed predictions instead",
+      "schema": {
+        "n_columns": 3937,
+        "n_present": 120,
+        "n_missing_required": 0,
+        "n_unexpected_columns": 3807,
+        "schema_completeness": 1.0
+      }
+    },
+    {
+      "variant": "baseline_csv",
+      "http_status": 200,
+      "overall": "WARN",
+      "seal_id": "seal-20260812T105909-eb12de92",
+      "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
+      "compatibility_score": 99.97,
+      "compatibility_band": "HIGH_COMPATIBILITY",
+      "rows_in": 1818,
+      "cols_in": 3924,
+      "checks": {
+        "accepted": true,
+        "schema_not_rejected": true,
+        "no_target_required": true,
+        "scored": true,
+        "row_count_preserved": true,
+        "model_unchanged": true
+      },
+      "verdict": "PASS",
+      "failed_checks": [],
+      "summary": "No label column was present, so there is nothing to reveal; download the sealed predictions instead",
+      "schema": {
+        "n_columns": 3937,
+        "n_present": 120,
+        "n_missing_required": 0,
+        "n_unexpected_columns": 3807,
+        "schema_completeness": 1.0
+      }
+    },
+    {
+      "variant": "shuffled_column_order",
+      "http_status": 200,
+      "overall": "WARN",
+      "seal_id": "seal-20260812T105914-1ade1479",
+      "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
+      "compatibility_score": 99.97,
+      "compatibility_band": "HIGH_COMPATIBILITY",
+      "rows_in": 1818,
+      "cols_in": 3924,
+      "checks": {
+        "accepted": true,
+        "schema_not_rejected": true,
+        "no_target_required": true,
+        "scored": true,
+        "row_count_preserved": true,
+        "model_unchanged": true
+      },
+      "verdict": "PASS",
+      "failed_checks": [],
+      "summary": "No label column was present, so there is nothing to reveal; download the sealed predictions instead",
+      "schema": {
+        "n_columns": 3937,
+        "n_present": 120,
+        "n_missing_required": 0,
+        "n_unexpected_columns": 3807,
+        "schema_completeness": 1.0
+      }
+    },
+    {
+      "variant": "extra_columns",
+      "http_status": 200,
+      "overall": "WARN",
+      "seal_id": "seal-20260812T105919-7701507b",
+      "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
+      "compatibility_score": 99.97,
+      "compatibility_band": "HIGH_COMPATIBILITY",
+      "rows_in": 1818,
+      "cols_in": 3927,
+      "checks": {
+        "accepted": true,
+        "schema_not_rejected": true,
+        "no_target_required": true,
+        "scored": true,
+        "row_count_preserved": true,
+        "model_unchanged": true
+      },
+      "verdict": "PASS",
+      "failed_checks": [],
+      "summary": "No label column was present, so there is nothing to reveal; download the sealed predictions instead",
+      "schema": {
+        "n_columns": 3940,
+        "n_present": 120,
+        "n_missing_required": 0,
+        "n_unexpected_columns": 3810,
+        "schema_completeness": 1.0
+      }
+    },
+    {
+      "variant": "f3912_present",
+      "http_status": 200,
+      "overall": "WARN",
+      "seal_id": "seal-20260812T105923-8635ddc7",
+      "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
+      "compatibility_score": 99.97,
+      "compatibility_band": "HIGH_COMPATIBILITY",
+      "rows_in": 1818,
+      "cols_in": 3924,
+      "checks": {
+        "accepted": true,
+        "schema_not_rejected": true,
+        "no_target_required": true,
+        "scored": true,
+        "row_count_preserved": true,
+        "model_unchanged": true
+      },
+      "verdict": "PASS",
+      "failed_checks": [],
+      "summary": "No label column was present, so there is nothing to reveal; download the sealed predictions instead",
+      "schema": {
+        "n_columns": 3937,
+        "n_present": 120,
+        "n_missing_required": 0,
+        "n_unexpected_columns": 3807,
+        "schema_completeness": 1.0
+      }
+    },
+    {
+      "variant": "resolution_fields_present",
+      "http_status": 200,
+      "overall": "WARN",
+      "seal_id": "seal-20260812T105928-2c298fe8",
+      "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
+      "compatibility_score": 99.97,
+      "compatibility_band": "HIGH_COMPATIBILITY",
+      "rows_in": 1818,
+      "cols_in": 3924,
+      "checks": {
+        "accepted": true,
+        "schema_not_rejected": true,
+        "no_target_required": true,
+        "scored": true,
+        "row_count_preserved": true,
+        "model_unchanged": true
+      },
+      "verdict": "PASS",
+      "failed_checks": [],
+      "summary": "No label column was present, so there is nothing to reveal; download the sealed predictions instead",
+      "schema": {
+        "n_columns": 3937,
+        "n_present": 120,
+        "n_missing_required": 0,
+        "n_unexpected_columns": 3807,
+        "schema_completeness": 1.0
+      }
+    },
+    {
+      "variant": "category_changes",
+      "http_status": 200,
+      "overall": "WARN",
+      "seal_id": "seal-20260812T105932-d410c44a",
+      "prediction_sha256": "4718c126b285ba325f50014a838ec06a30c269b8e31ca5b3861bd0469e6dcecf",
+      "compatibility_score": 99.85,
+      "compatibility_band": "HIGH_COMPATIBILITY",
+      "rows_in": 1818,
+      "cols_in": 3924,
+      "checks": {
+        "accepted": true,
+        "schema_not_rejected": true,
+        "no_target_required": true,
+        "scored": true,
+        "row_count_preserved": true,
+        "model_unchanged": true
+      },
+      "verdict": "PASS",
+      "failed_checks": [],
+      "summary": "No label column was present, so there is nothing to reveal; download the sealed predictions instead",
+      "schema": {
+        "n_columns": 3937,
+        "n_present": 120,
+        "n_missing_required": 0,
+        "n_unexpected_columns": 3807,
+        "schema_completeness": 1.0
+      }
+    },
+    {
+      "variant": "missing_optional_fields",
+      "http_status": 200,
+      "overall": "WARN",
+      "seal_id": "seal-20260812T105937-3e267adc",
+      "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
+      "compatibility_score": 99.97,
+      "compatibility_band": "HIGH_COMPATIBILITY",
+      "rows_in": 1818,
+      "cols_in": 3884,
+      "checks": {
+        "accepted": true,
+        "schema_not_rejected": true,
+        "no_target_required": true,
+        "scored": true,
+        "row_count_preserved": true,
+        "model_unchanged": true
+      },
+      "verdict": "PASS",
+      "failed_checks": [],
+      "summary": "No label column was present, so there is nothing to reveal; download the sealed predictions instead",
+      "schema": {
+        "n_columns": 3897,
+        "n_present": 120,
+        "n_missing_required": 0,
+        "n_unexpected_columns": 3767,
+        "schema_completeness": 1.0
+      }
+    }
+  ],
+  "variants_passed": "8/8",
+  "prediction_invariance": {
+    "reference_variant": "baseline_csv",
+    "reference_prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
+    "results": {
+      "shuffled_column_order": {
+        "identical_to_baseline": true,
+        "reason_it_must_be": "column order is not information"
+      },
+      "extra_columns": {
+        "identical_to_baseline": true,
+        "reason_it_must_be": "columns the model does not consume are ignored"
+      },
+      "f3912_present": {
+        "identical_to_baseline": true,
+        "reason_it_must_be": "F3912 is quarantined, so supplying it must change nothing"
+      },
+      "resolution_fields_present": {
+        "identical_to_baseline": true,
+        "reason_it_must_be": "post-resolution fields are quarantined, so supplying them changes nothing"
+      },
+      "missing_optional_fields": {
+        "identical_to_baseline": true,
+        "reason_it_must_be": "columns the model does not consume are not needed"
+      }
+    },
+    "all_invariant": true,
+    "sensitivity_control": {
+      "variant": "category_changes",
+      "differs_from_baseline": true,
+      "reason_it_must_differ": "an unseen category in a selected feature is a real change to the model's input; identical predictions here would mean the harness is not exercising the scorer"
+    },
+    "sound": true
+  },
+  "offline_label_comparison": {
+    "http_status": 200,
+    "state": "METRICS_REVEALED",
+    "sealed_utc": "2026-08-12T10:59:04.490653+00:00",
+    "revealed_utc": "2026-08-12T10:59:38.459657+00:00",
+    "seal_verified": true,
+    "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
+    "metrics": {
+      "n_rows_scored": 1818,
+      "n_positives": 17,
+      "prevalence": 0.00935093509350935,
+      "status": "OK",
+      "pr_auc": 0.7262714933700882,
+      "roc_auc": 0.9664892053434366,
+      "lift_over_prevalence": 77.66832793804826,
+      "recall_at_budget": {
+        "25": 0.7058823529411765,
+        "50": 0.7058823529411765,
+        "100": 0.8235294117647058
+      },
+      "precision_at_budget": {
+        "25": 0.48,
+        "50": 0.24,
+        "100": 0.14
+      },
+      "mcc_at_top_100": 0.32749697111983994
+    },
+    "integrity_statement": "Predictions were sealed at 2026-08-12T10:59:04.490653+00:00 with SHA-256 cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649. The file was re-hashed at reveal time and matched. These metrics therefore belong to predictions that existed before any label was read."
+  },
+  "leakage_statement": "the revealed metric cannot have leaked into training: the target column was dropped from the uploaded workbook before it left this process, the API withholds any label column it finds before scoring, and the labels were supplied only at reveal time against a prediction file whose hash was already recorded",
+  "verdict": "PASS"
+}
