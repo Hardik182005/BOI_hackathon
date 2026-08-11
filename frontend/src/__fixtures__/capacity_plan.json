@@ -1,0 +1,115 @@
+{
+ "mode": "review_capacity",
+ "input": {
+  "review_capacity": 50
+ },
+ "answered_at_budget": 50,
+ "answered_exactly": true,
+ "capped_to_evaluation_size": false,
+ "expected": {
+  "recall": 0.6875,
+  "recall_ci_low": 0.624609375,
+  "recall_ci_high": 0.765625,
+  "recall_ci_low_resampled_accounts": 0.5843885281385282,
+  "recall_ci_high_resampled_accounts": 0.7869246532156368,
+  "stratified_interval_degenerate": false,
+  "inside_leading_true_positive_run": false,
+  "recall_per_repeat": [
+   0.640625,
+   0.6875,
+   0.609375
+  ],
+  "recall_repeat_min": 0.609375,
+  "recall_repeat_max": 0.6875,
+  "precision": 0.88,
+  "precision_ci_low": 0.7995000000000001,
+  "precision_ci_high": 0.98,
+  "mules_caught": 44,
+  "mules_missed": 20,
+  "mules_available": 64,
+  "false_alarms": 6,
+  "fp_per_1000_legitimate": 0.8333333333333334,
+  "fp_per_1000_screened": 0.8259911894273128
+ },
+ "recommended_threshold": {
+  "status": "ADVISORY_REQUIRES_HUMAN_APPROVAL",
+  "applied": false,
+  "calibrated_risk": 0.34012695961421896,
+  "model_score": 0.5430508553981781,
+  "scale": "calibrated risk, the same field the scoring API returns as calibrated_risk",
+  "alerts_produced_on_evaluation_split": 50,
+  "band_under_frozen_policy": "between URGENT_REVIEW and CRITICAL_REVIEW",
+  "frozen_policy_version": "1.0",
+  "note": "A recommendation for an authorised human to approve. It does not change the frozen policy thresholds, and nothing is actioned automatically."
+ },
+ "uncertainty_note": "Measured on 7,264 development accounts containing only 64 confirmed mules. One mule is worth 1.56 percentage points of recall, so read the interval, not the point.",
+ "provenance": {
+  "generated_utc": "2026-08-12T12:23:39+00:00",
+  "generator": "muleguard.cli.capacity_curve",
+  "champion_model": "xgboost_top_120",
+  "champion_source": "artifacts\\metrics\\lens_stack_oof_v2.json",
+  "predictions_source": "artifacts\\predictions\\oof_v2.parquet",
+  "calibrator": "platt",
+  "calibrator_source": "artifacts\\models\\final_bundle.joblib",
+  "bootstrap": {
+   "n_boot": 1000,
+   "alpha": 0.05,
+   "schemes": {
+    "stratified": "positives and negatives resampled separately; the mule count stays at 64, so this is uncertainty in the ranking alone",
+    "resampled_accounts": "the whole book resampled with replacement, so the number of mules in a replicate moves too; wider, and the one to quote when asked what a different month might look like"
+   }
+  },
+  "seed": 42,
+  "retraining_performed": false,
+  "caveats": [
+   "Recall and precision at a budget are ranking statistics and are unaffected by calibration; only the threshold is on the calibrated scale.",
+   "The frozen policy thresholds were originally read off a cross-fitted calibration of these same scores, while the positions reported here apply the shipped final calibrator. The two differ by a few accounts at each band; the band sizes below are therefore close to, not identical to, the sizes used when policy_version 1.0 was frozen.",
+   "The stratified interval collapses onto the point estimate for budgets inside the leading run of true positives, because a scheme that holds the mule count fixed has nothing to vary there. That is a property of the ranking, not evidence of certainty; read the resampled-accounts interval beside it.",
+   "Development out-of-fold only. No locked-test figure appears in this artifact."
+  ]
+ },
+ "evaluation": {
+  "split": "development out-of-fold (repeat-averaged), leakage-free v2",
+  "n_accounts": 7264,
+  "n_positives": 64,
+  "prevalence": 0.00881057268722467,
+  "n_repeats": 3,
+  "recall_resolution_pct_points": 1.5625,
+  "leading_true_positive_run": 34,
+  "locked_test_used": false
+ },
+ "frozen_policy_position": [
+  {
+   "tier": "CRITICAL_REVIEW",
+   "threshold_key": "critical_risk",
+   "calibrated_risk_threshold": 0.9338487190474695,
+   "accounts_at_or_above": 26,
+   "mules_caught": 26,
+   "recall": 0.40625,
+   "precision": 1.0
+  },
+  {
+   "tier": "URGENT_REVIEW",
+   "threshold_key": "urgent_risk",
+   "calibrated_risk_threshold": 0.09773832436704985,
+   "accounts_at_or_above": 101,
+   "mules_caught": 53,
+   "recall": 0.828125,
+   "precision": 0.5247524752475248
+  },
+  {
+   "tier": "STANDARD_REVIEW",
+   "threshold_key": "standard_risk",
+   "calibrated_risk_threshold": 0.013182620557866929,
+   "accounts_at_or_above": 339,
+   "mules_caught": 58,
+   "recall": 0.90625,
+   "precision": 0.1710914454277286
+  }
+ ],
+ "limitations": [
+  "Measured on development out-of-fold predictions only; the locked test split was not opened to produce this answer.",
+  "Recall at a review budget is bounded by the 64 confirmed mules present in that split, and it is not projected onto a larger book.",
+  "The recommended threshold is a proposal for an authorised human to approve. The frozen policy thresholds are unchanged by this request."
+ ]
+}
