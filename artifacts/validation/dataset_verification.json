@@ -1,0 +1,38 @@
+{
+  "generated_utc": "2026-08-12",
+  "source": "data/interim/dataset.parquet (verified against DataSet.xlsx sha256)",
+  "n_rows": 9082,
+  "n_cols": 3925,
+  "n_feature_cols_excl_target": 3924,
+  "n_feature_cols_excl_target_and_index": 3923,
+  "target": "F3924",
+  "target_unique_values": [
+    0.0,
+    1.0
+  ],
+  "target_is_binary": true,
+  "target_nulls": 0,
+  "positives": 81,
+  "negatives": 9001,
+  "positive_prevalence": 0.008918740365558247,
+  "imbalance_ratio_neg_per_pos": 111.12345679012346,
+  "naive_all_negative_accuracy": 0.9910812596344417,
+  "no_skill_average_precision": 0.008918740365558247,
+  "accuracy_is_misleading": "an all-legitimate classifier scores 99.11% accuracy while catching 0 of 81 mules; accuracy is therefore not used as a selection metric anywhere in this build",
+  "parquet_sha256_matches_recorded": true,
+  "spec_expectation_check": {
+    "expected_rows": 9082,
+    "actual_rows": 9082,
+    "match": true,
+    "expected_positives": 81,
+    "actual_positives": 81,
+    "match_pos": true,
+    "expected_negatives": 9001,
+    "actual_negatives": 9001,
+    "match_neg": true,
+    "expected_prevalence_approx": 0.0089,
+    "actual_prevalence": 0.008918740365558247,
+    "expected_feature_cols_approx": 3923,
+    "actual_excl_target": 3924
+  }
+}

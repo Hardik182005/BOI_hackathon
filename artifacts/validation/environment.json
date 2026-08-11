@@ -1,0 +1,30 @@
+{
+  "generated_utc": "2026-08-12",
+  "environment": {
+    "python": "3.13.2",
+    "platform": "Windows-11-10.0.22631-SP0",
+    "processor": "Intel64 Family 6 Model 140 Stepping 1, GenuineIntel",
+    "logical_cpus": 8,
+    "ram_gb": 16.9,
+    "gpu": "none (CPU-only build; no CUDA runtime installed)",
+    "node": "v24.16.0",
+    "git_sha": "a6eb1699e21db48d22795647646dea1b754c5ee3"
+  },
+  "file_fingerprints": {
+    "DataSet.xlsx (repo root)": {
+      "path": "DataSet.xlsx",
+      "sha256": "7d1be90fe23b57460184f2f7566d572cc3a40fc6d17d436fe33219e80eabc204",
+      "bytes": 147053196
+    },
+    "DataSet.xlsx (data/raw)": {
+      "path": "data/raw/DataSet.xlsx",
+      "sha256": "7d1be90fe23b57460184f2f7566d572cc3a40fc6d17d436fe33219e80eabc204",
+      "bytes": 147053196
+    },
+    "Description.xlsx (data/raw)": {
+      "path": "data/raw/Description.xlsx",
+      "sha256": "7d30652b72d4b79b3feeb3e14ebe67177988b3155912ea33f284f140e8774b20",
+      "bytes": 140914
+    }
+  }
+}
