@@ -49,7 +49,10 @@ export default function CaseDetail() {
   return (
     <>
       <h2 className="page-title">Case {caseId}</h2>
-      <p className="page-sub">Account {c.account_reference} (masked reference) · status {c.status}</p>
+      <p className="page-sub">
+        Account {c.account_reference} (masked reference) · status {c.status} ·{" "}
+        <a href={`#/proof/${caseId}`}>open the dual-evidence ProofGraph</a>
+      </p>
       <HumanReviewNotice />
 
       <div className="grid cols-4">

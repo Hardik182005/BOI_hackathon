@@ -66,6 +66,7 @@ export default function AlertQueue() {
               <tr>
                 <th>Case</th><th>Account (masked)</th><th>Tier</th>
                 <th>Calibrated risk</th><th>Status</th><th>Assignee</th><th>Created (UTC)</th>
+                <th>Evidence</th>
               </tr>
             </thead>
             <tbody>
@@ -78,6 +79,7 @@ export default function AlertQueue() {
                   <td>{c.status}</td>
                   <td>{c.assignee ?? "—"}</td>
                   <td style={{ fontSize: 12, color: "var(--muted)" }}>{String(c.created_utc).slice(0, 19)}</td>
+                  <td><a href={`#/proof/${c.case_id}`}>ProofGraph</a></td>
                 </tr>
               ))}
             </tbody>
