@@ -1,5 +1,25 @@
 # Final Results
 
+> **SUPERSEDED — RETIRED, LEAKAGE-INFLATED RUN. Do not quote any model result
+> from this document as a current result.**
+>
+> Every model number below was produced before the Feature Availability
+> Firewall re-quarantined the post-resolution columns `F3898`, `F3899`,
+> `F3912`, `F3913`, `F3914`, `F3915`, the target `F3924`, the raw index
+> column, and (conditionally) `F3916`/`F3917`/`F3918`. The accepted model of
+> this run, `catboost_tuned_top60`, selected `F3898`, `F3913`, `F3914` and
+> `F3916` — all inadmissible — so its **0.8077 is retired**.
+>
+> Current leakage-free results:
+> **`xgboost_top_120`, OOF PR-AUC 0.7690 ± 0.0266** —
+> see `docs/FINAL_ACCURACY_AND_MODEL_SELECTION_REPORT.md`,
+> `artifacts/metrics/tournament_v2.json`,
+> `artifacts/metrics/promotion_decision_v2.json`.
+>
+> This file is retained unedited below the banner as the reproducible record of
+> how the leaked result was produced, and of the dataset facts (§ Dataset) that
+> did not change.
+
 Generated 2026-07-10T21:43:41.405791+00:00 · commit `e831082acffb` · compute mode `cpu_16gb`
 · seed 42 · raw SHA-256 `7d1be90fe23b57460184…`
 
@@ -22,7 +42,14 @@ touched exactly once.
 | LightGBM clean (quarantine enforced) | 0.6142 ± 0.0474 | ACCEPTED |
 | LightGBM + F3912 | 0.9419 ± 0.0119 | **REJECTED LEAKAGE — evidence only** |
 
-## Model tournament (dev OOF, natural prevalence)
+## Model tournament (dev OOF, natural prevalence) — RETIRED
+
+**Every row in this table was computed on the pre-firewall feature pool and is
+retired.** `catboost_tuned_top60` at 0.8077 selected three post-resolution
+columns plus one of undetermined availability; `tabpfn_top60` at 0.8970 was a
+single-repeat run on the same leaked top-60 set and is retired with it. The
+leakage-free replacement leaderboard is in
+`docs/FINAL_ACCURACY_AND_MODEL_SELECTION_REPORT.md` §3.
 
 | Model | Features | PR-AUC (mean ± std) | ROC-AUC | Repeats | Runtime s |
 |---|---|---|---|---|---|
@@ -38,7 +65,22 @@ touched exactly once.
 | dummy_prevalence |  | 0.0087 ± 0.0000 | 0.4938 | 5 | 59.6 |
 | REJECTED_leakage_lgbm_with_F3912 | — | 0.9419 ± 0.0119 | 0.9933 | 2 | REJECTED LEAKAGE |
 
-Winner: **tabpfn_top60** (0.8970 ± 0.0000).
+Winner of this retired run: **tabpfn_top60** (0.8970 ± 0.0000) as raw leader,
+with `catboost_tuned_top60` (0.8077 ± 0.0450) taken into the bundle under the
+5-repeat eligibility rule. **Both figures are retired.** The current promoted
+model is `xgboost_top_120` at 0.7690 ± 0.0266
+(`artifacts/metrics/promotion_decision_v2.json`).
+
+In the re-run tournament `tabpfn_top_60` **did** complete, once
+`ignore_pretraining_limits=True` was set: status `OK`, OOF PR-AUC
+**0.9110 ± 0.0044** over three repeats. That figure is *not* retired and is not
+in doubt — it was earned on firewall-admitted columns only, and the control that
+settles it is that `xgboost_top_60` sees the identical 60 columns over the
+identical folds and scores 0.7408. It is nonetheless **not promoted**: a single
+`predict_proba` call costs 438 s and the model has no attribution path, so it
+can neither answer an analyst nor produce a §17 ProofGraph. See
+`UPGRADE_GAP_ANALYSIS.md` §3.1.1 and
+`artifacts/metrics/challenger_review_v2.json`.
 Ensemble decision: **REJECTED** — stacker accepted only if it beats the best single model on >= n-1 repeats
 (stacker AP by repeat [0.8443, 0.838, 0.8666, 0.8076, 0.8416] vs best single [0.7681, 0.8384, 0.869, 0.7462, 0.817]).
 
@@ -49,11 +91,17 @@ overlap 0.54. Compact sets: top-15/30/60 evaluated above.
 
 | Challenger | Status | Reason |
 |---|---|---|
-| tabpfn | RAN | completed on top-60 features, 1 repeat (cached OOF result); challenger only - winner eligibility requires 5-repeat evidence, and CPU runtime (3144.3s for one repeat) is operationally prohibitive at ~26 min/fold |
+| tabpfn | RAN — challenger, verified, not promoted | Completed 3 repeats on the firewall-admitted top-60 set at OOF PR-AUC 0.9110 ± 0.0044, satisfying UPDATE 1's three-independent-fold-seeds gate. Blocked on serving, not on evidence: 438 s per single-row `predict_proba` and no attribution path, so no §17 ProofGraph. See `UPGRADE_GAP_ANALYSIS.md` §3.1.1. |
 | tabicl | SKIPPED | package not installed; TabICL(v2) requires GPU-class resources for its in-context regime - Mode A (CPU 16GB) excludes it. Documented as a Mode B/C experiment. |
 | autogluon | SKIPPED | AutoGluon does not support Python 3.13 at build time (requires <=3.12); benchmark documented as a roadmap item on a compatible environment |
 
-## Locked test (single touch)
+## Locked test (single touch) — RETIRED BUNDLE
+
+**These figures belong to the retired `catboost_tuned_top60` bundle
+(`04fafaee25ae82c7…`) and must not be attributed to the current champion.**
+`artifacts/metrics/locked_test_touch_log.json` records all three touches
+against that bundle. The locked test has **not** been re-evaluated under
+`xgboost_top_120`, and no locked-test number is published for it.
 
 | Metric | Value |
 |---|---|
@@ -93,15 +141,24 @@ overlap 0.54. Compact sets: top-15/30/60 evaluated above.
 | OOD_REVIEW | 2 | 0 | 0.00% |
 | MONITOR | 1772 | 4 | 0.23% |
 
-## Lens stack (fitted on dev OOF only)
+## Lens stack (fitted on dev OOF only) — RETIRED
+
+Superseded by `artifacts/metrics/lens_stack_oof_v2.json`, whose `supersedes`
+field names this run as "pre-firewall, leaky feature set". Current values:
+Platt calibrator, Brier 0.003128, ECE 0.001489; frozen policy thresholds
+critical 0.93385 / urgent 0.09774 / standard 0.01318.
 
 - Calibrator: **platt** — comparison {'platt': {'brier': 0.0023493878976461576, 'ece': 0.0005267187771415963}, 'isotonic': {'brier': 0.0024545057969935172, 'ece': 0.0011328873237070357}}
 - Conformal (α=0.10) OOF coverage: {'target_coverage': 0.9, 'positive_coverage': 0.9375, 'negative_coverage': 0.9709722222222222, 'abstention_rate': 0.07034691629955947, 'share_high': 0.036894273127753306, 'share_low': 0.8927588105726872}
 - Hard negatives mined: 144
 - Policy thresholds (frozen): {'critical_risk': 0.9638304837100166, 'urgent_risk': 0.048153197236171764, 'standard_risk': 0.017246147513913988, 'anomaly_escalation_pct': 99.0, 'policy_version': '1.0'}
 
-## Bundle
+## Bundle — RETIRED
 
-`04fafaee25ae82c7a5a2e6ec…` · 60 features ·
-calibrator platt · registered champion in
-`artifacts/model_registry/registry.json`.
+`04fafaee25ae82c7a5a2e6ec…` · 60 features · calibrator platt ·
+`status: "retired"` in `artifacts/model_registry/registry.json`.
+
+Current champion bundle: `d12914de5abee99a…` · `xgboost_top_120` · 120
+firewall-admitted features · calibrator platt ·
+`leakage_status: FIREWALL_ADMITTED_ONLY` · `ensemble_decision:
+SINGLE_MODEL_KEPT` (`artifacts/models/model_manifest.json`).

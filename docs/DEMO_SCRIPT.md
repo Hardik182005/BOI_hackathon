@@ -19,12 +19,17 @@ All numbers spoken must be read from the screen (they come from
 
 ## Scene 2 — Leakage integrity (Model Performance page, leakage panel)  ~60 s
 
-- Show the red **REJECTED LEAKAGE** bar: with F3912 the model scores 0.94
-  PR-AUC; clean it scores 0.61.
+- Show the red **REJECTED LEAKAGE** bar: with F3912 the model scored 0.94
+  PR-AUC in the pre-firewall run; clean it scored 0.61.
 - "Our audit didn't stop at the known suspect. It found that the **snapshot
   month column separates the classes perfectly** — every legitimate account is
   the October snapshot, every mule is Sep/Nov/Dec. The file is even sorted by
   label. All of it is quarantined automatically, with the evidence saved."
+- "And it didn't stop there either. A later pass found that our own accepted
+  model was reading three columns that only exist after an analyst has already
+  closed the case, plus one whose timing nobody could confirm. That model
+  reported 0.8077. We retired it. The model we ship scores **0.7690**, and
+  it is the first number we have that measures the actual task."
 - "The lower number is the honest one — it's the one that survives production."
 
 ## Scene 3 — Trinetra Lens 1: detect (Alert Queue → top case)  ~50 s
@@ -63,17 +68,28 @@ All numbers spoken must be read from the screen (they come from
 
 ## Scene 7 — Bank impact (Executive Overview)  ~45 s
 
-- Recall at top-25/50/100 alert budgets from the locked test.
-- Precision inside the CRITICAL tier.
-- "Every number on screen traces to an artifact file with a bootstrap CI, the
-  locked test was touched exactly once, and every decision an analyst takes
-  lands in an append-only audit log. No recovered-money claims — that would
-  require a live simulation we haven't run."
+- Recall at top-25/50/100 alert budgets, read from the **out-of-fold**
+  numbers in `artifacts/metrics/lens_stack_oof_v2.json` (0.391 / 0.688 /
+  0.828). Say out loud that these are cross-validated, not locked-test,
+  figures.
+- Precision inside the CRITICAL tier, read from the screen.
+- "One thing we will not show you is a locked-test score for this model. The
+  locked test was spent on the model we retired. We are not going to touch it
+  again to make a nicer slide — the honest position is that we have
+  cross-validated evidence and no held-out evidence, and the touch log says
+  so."
+- "Every number on screen traces to an artifact file with a bootstrap CI, and
+  every decision an analyst takes lands in an append-only audit log. No
+  recovered-money claims — that would require a live simulation we haven't
+  run."
 
 ---
 
 Contingencies:
 - API down → `make serve-api`; dashboard shows explicit error states (no fake data).
 - Ollama already off → Scene 6 step 2 becomes step 1.
-- Judge asks for code: show `configs/leakage_quarantine.yaml` and
-  `tests/model/test_leakage_guards.py`.
+- Judge asks for code: show `configs/feature_availability.yaml` (the current
+  policy — 9 hard-quarantined columns, 3 conditional, 1 fairness exclusion),
+  `src/muleguard/features/firewall.py`, and
+  `tests/model/test_leakage_guards.py`. `configs/leakage_quarantine.yaml` is
+  the earlier four-entry list and is retained only as history.

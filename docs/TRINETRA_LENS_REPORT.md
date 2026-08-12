@@ -1,12 +1,15 @@
 # Trinetra Lens Report
 
 Mechanism report; measured lens numbers live in
-`artifacts/metrics/lens_stack_oof.json` and `docs/FINAL_RESULTS.md`.
+`artifacts/metrics/lens_stack_oof_v2.json`. (`lens_stack_oof.json` and the
+model tables in `docs/FINAL_RESULTS.md` are the retired pre-firewall run.)
 
 ## Lens 1 — Detect the behaviour
 
-- Final base models (LightGBM winner + XGBoost + CatBoost on the compact
-  stability-selected feature set) trained on the development split.
+- Final base models (**XGBoost winner, `xgboost_top_120`** + LightGBM +
+  CatBoost agreement models on the compact stability-selected 120-feature set)
+  trained on the development split. No ensemble: the blend was measured and
+  rejected (`SINGLE_MODEL_KEPT`, `artifacts/metrics/ensemble_v2.json`).
 - Outputs per account: raw scores per model, calibrated risk, model agreement
   (1 − max pairwise spread), conformal set, SHAP top drivers vs the
   legitimate-cohort percentiles.
