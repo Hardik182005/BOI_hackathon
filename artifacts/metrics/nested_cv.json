@@ -1,0 +1,181 @@
+{
+  "generated_utc": "2026-08-12T12:04:43.026885+00:00",
+  "design": {
+    "outer": "stratified 5-fold x 1 repeats (identical to the flat tournament folds)",
+    "inner": "stratified 4-fold within outer-train",
+    "selection": "LightGBM gain ranking fitted on each inner-train partition only; frequencies pooled within the outer fold",
+    "tuning": "bounded Optuna TPE, objective = inner-CV average precision",
+    "feature_sizes_offered": [
+      30,
+      60,
+      120
+    ],
+    "outer_validation_use": "predicted once, never fed back"
+  },
+  "leaderboard": [
+    {
+      "model": "xgboost",
+      "protocol": "NESTED",
+      "n_repeats": 1,
+      "pr_auc_mean": 0.6679223603574713,
+      "pr_auc_std": 0.0,
+      "pr_auc_min": 0.6679223603574713,
+      "pr_auc_per_repeat": [
+        0.66792
+      ],
+      "roc_auc_mean": 0.9090451388888889,
+      "feature_sizes_chosen": [
+        30,
+        60,
+        120
+      ],
+      "feature_size_mode": 120,
+      "seconds": 50.4
+    },
+    {
+      "model": "dummy_prevalence",
+      "protocol": "NESTED",
+      "n_repeats": 1,
+      "pr_auc_mean": 0.009310967684860932,
+      "pr_auc_std": 0.0,
+      "pr_auc_min": 0.009310967684860932,
+      "pr_auc_per_repeat": [
+        0.00931
+      ],
+      "roc_auc_mean": 0.5156206597222222,
+      "feature_sizes_chosen": [
+        120
+      ],
+      "feature_size_mode": 120,
+      "seconds": 0.1
+    }
+  ],
+  "chosen_per_fold": {
+    "dummy_prevalence": [
+      {
+        "repeat": 0,
+        "fold": 0,
+        "n_features": 120,
+        "inner_pr_auc": 0.01013,
+        "params": {}
+      },
+      {
+        "repeat": 0,
+        "fold": 1,
+        "n_features": 120,
+        "inner_pr_auc": 0.00891,
+        "params": {}
+      },
+      {
+        "repeat": 0,
+        "fold": 2,
+        "n_features": 120,
+        "inner_pr_auc": 0.00919,
+        "params": {}
+      },
+      {
+        "repeat": 0,
+        "fold": 3,
+        "n_features": 120,
+        "inner_pr_auc": 0.01528,
+        "params": {}
+      },
+      {
+        "repeat": 0,
+        "fold": 4,
+        "n_features": 120,
+        "inner_pr_auc": 0.01322,
+        "params": {}
+      }
+    ],
+    "xgboost": [
+      {
+        "repeat": 0,
+        "fold": 0,
+        "n_features": 120,
+        "inner_pr_auc": 0.70886,
+        "params": {
+          "n_estimators": 200,
+          "max_depth": 3,
+          "learning_rate": 0.0449118203738645,
+          "min_child_weight": 0.540590259302987,
+          "subsample": 0.9001990870434314,
+          "colsample_bytree": 0.8538830102276791,
+          "gamma": 0.0002692733066746167,
+          "reg_alpha": 0.24153577912857777,
+          "reg_lambda": 0.029249598685466817
+        }
+      },
+      {
+        "repeat": 0,
+        "fold": 1,
+        "n_features": 60,
+        "inner_pr_auc": 0.77329,
+        "params": {
+          "n_estimators": 600,
+          "max_depth": 4,
+          "learning_rate": 0.01840644677900502,
+          "min_child_weight": 0.7709028266909819,
+          "subsample": 0.7301924084088975,
+          "colsample_bytree": 0.6501723945388518,
+          "gamma": 0.3982527407327961,
+          "reg_alpha": 1.27553598068207,
+          "reg_lambda": 0.8217323889298784
+        }
+      },
+      {
+        "repeat": 0,
+        "fold": 2,
+        "n_features": 30,
+        "inner_pr_auc": 0.65463,
+        "params": {
+          "n_estimators": 500,
+          "max_depth": 6,
+          "learning_rate": 0.06871390136344754,
+          "min_child_weight": 16.78567328267185,
+          "subsample": 0.9381297136553829,
+          "colsample_bytree": 0.5730396234287577,
+          "gamma": 0.3583387664515244,
+          "reg_alpha": 0.012584637014318896,
+          "reg_lambda": 14.07617829272173
+        }
+      },
+      {
+        "repeat": 0,
+        "fold": 3,
+        "n_features": 120,
+        "inner_pr_auc": 0.78811,
+        "params": {
+          "n_estimators": 400,
+          "max_depth": 3,
+          "learning_rate": 0.12236640818573574,
+          "min_child_weight": 8.421013809416388,
+          "subsample": 0.7753875124700348,
+          "colsample_bytree": 0.8360879987752019,
+          "gamma": 1.7259155902233168,
+          "reg_alpha": 0.0036853170063799665,
+          "reg_lambda": 0.04488835438121331
+        }
+      },
+      {
+        "repeat": 0,
+        "fold": 4,
+        "n_features": 60,
+        "inner_pr_auc": 0.82022,
+        "params": {
+          "n_estimators": 500,
+          "max_depth": 3,
+          "learning_rate": 0.03175447169975763,
+          "min_child_weight": 1.0196280148858075,
+          "subsample": 0.68953749802713,
+          "colsample_bytree": 0.4991368673835113,
+          "gamma": 0.01007549086066741,
+          "reg_alpha": 2.1443860041069684,
+          "reg_lambda": 0.0571141255140473
+        }
+      }
+    ]
+  },
+  "selection_seconds_total": 182.7,
+  "total_seconds": 240.8
+}
