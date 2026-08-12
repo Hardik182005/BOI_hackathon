@@ -271,6 +271,14 @@ def main() -> int:
     split_df.write_parquet(split_path)
     log.info("wrote %s (%d rows)", split_path, split_df.height)
 
+    # The validation spec names artifacts/splits/ for this file while the rest of
+    # the project keeps splits under data/. Write both from the same frame so the
+    # spec-named path can never drift from the one the run actually used.
+    spec_dir = settings.ARTIFACTS_DIR / "splits"
+    spec_dir.mkdir(parents=True, exist_ok=True)
+    split_df.write_parquet(spec_dir / "nested_cv_assignments.parquet")
+    log.info("mirrored to %s", spec_dir / "nested_cv_assignments.parquet")
+
     wanted = set(args.only.split(",")) if args.only else set(FAMILIES)
     results: dict[str, nested.NestedResult] = {}
     for name, (factory, space, trials) in FAMILIES.items():
