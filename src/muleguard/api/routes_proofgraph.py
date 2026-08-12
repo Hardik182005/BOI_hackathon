@@ -28,6 +28,32 @@ router = APIRouter(tags=["proofgraph"])
 
 _TWIN: pg.TwinIndex | None = None
 _TWIN_TRIED = False
+_REGISTRY: dict | None = None
+_REGISTRY_TRIED = False
+
+
+def _registry() -> dict | None:
+    """The persisted feature dictionary, loaded once.
+
+    Without it every evidence node renders as a bare ``F1813`` and the twin
+    difference table shows an em dash where the variable name belongs. The
+    dictionary is built from Description.xlsx and is the only sanctioned source
+    of those names, so it is loaded here rather than reinvented in the route.
+    Failure is not fatal: a graph labelled with column codes is still traceable
+    evidence, and refusing the case would be the worse answer.
+    """
+    global _REGISTRY, _REGISTRY_TRIED
+    if _REGISTRY is not None or _REGISTRY_TRIED:
+        return _REGISTRY
+    _REGISTRY_TRIED = True
+    try:
+        from muleguard.features.dictionary import load_registry
+
+        _REGISTRY = load_registry()
+    except Exception as exc:  # noqa: BLE001 - labels degrade, evidence does not
+        log.warning("feature registry unavailable, nodes will show column codes: %s", exc)
+        _REGISTRY = None
+    return _REGISTRY
 
 
 def _twin_index() -> pg.TwinIndex | None:
@@ -79,6 +105,8 @@ def _build(case_id: str, with_twin: bool) -> dict:
             409, "this score was stored without explanations, so no evidence "
                  "graph can be built for it; rescore with explanations enabled")
 
+    registry = _registry()
+
     twin_payload = None
     if with_twin:
         idx = _twin_index()
@@ -92,13 +120,15 @@ def _build(case_id: str, with_twin: bool) -> dict:
                         "reference": idx.row_labels[j],
                         "distance": float(dist),
                         "differences": pg.twin_differences(
-                            x_row, idx.X[j], idx.feature_names, focus),
+                            x_row, idx.X[j], idx.feature_names, focus,
+                            registry=registry),
                     }
 
     graph = pg.build_proofgraph(
         account_reference=case["account_reference"],
         score=score,
         reasons=reasons,
+        registry=registry,
         twin=twin_payload,
     )
     pg.assert_evidence_traceable(graph)

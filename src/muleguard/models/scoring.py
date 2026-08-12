@@ -26,11 +26,45 @@ log = get_logger("models.scoring")
 _BUNDLE_CACHE: dict[str, Any] | None = None
 
 
+class BundleUnreadable(RuntimeError):
+    """Raised when the model file exists but cannot be deserialised."""
+
+
+def _read_bundle(p) -> dict[str, Any]:
+    """Deserialise one bundle, turning a mangled file into a clear failure.
+
+    A truncated or overwritten joblib surfaces from the pickle machinery as
+    ``KeyError: 110`` or a bare ``ValueError`` about array bytes, which tells an
+    operator nothing about which file is wrong. The model artifact is the one
+    thing whose corruption must be unmistakable.
+    """
+    try:
+        b = joblib.load(p)
+    except FileNotFoundError:
+        raise
+    except Exception as exc:  # noqa: BLE001 - any deserialisation failure
+        raise BundleUnreadable(
+            f"model bundle at {p} could not be read ({type(exc).__name__}: {exc}); "
+            "the file is corrupt or was written by an incompatible version"
+        ) from exc
+    if not isinstance(b, dict) or "feature_list_kept" not in b:
+        raise BundleUnreadable(
+            f"model bundle at {p} loaded but is not a MuleGuard bundle")
+    return b
+
+
 def load_bundle(path=None) -> dict[str, Any]:
+    """The frozen bundle, cached for the life of the process.
+
+    An explicit ``path`` is a diagnostic call - reading some other bundle to
+    compare it - and deliberately does not replace the cached production model.
+    """
     global _BUNDLE_CACHE
-    if _BUNDLE_CACHE is None or path is not None:
-        p = path or settings.MODELS_DIR / "final_bundle.joblib"
-        _BUNDLE_CACHE = joblib.load(p)
+    if path is not None:
+        return _read_bundle(path)
+    if _BUNDLE_CACHE is None:
+        p = settings.MODELS_DIR / "final_bundle.joblib"
+        _BUNDLE_CACHE = _read_bundle(p)
         log.info("bundle loaded: winner=%s sha-fp=%s",
                  _BUNDLE_CACHE["winner_oof_name"],
                  _BUNDLE_CACHE["data_fingerprint_sha256"][:12])

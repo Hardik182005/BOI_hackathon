@@ -43,8 +43,17 @@ export default function Overview() {
           <div className="stat">{lt ? lt.n.toLocaleString() : "–"}</div>
           <div className="stat-sub">true mules present: {lt?.n_positives ?? "–"} ({fmtPct(lt?.prevalence, 2)})</div>
         </div>
-        <div className="card">
-          <h3>PR-AUC · locked test</h3>
+        <div
+          className="card"
+          title={
+            "PR-AUC and recall at analyst budget are the primary performance " +
+            "measures. Plain accuracy is misleading under the ~1% mule " +
+            "prevalence and is deliberately not shown: a model that flags " +
+            "nothing would score ~99% while catching zero mules. ROC-AUC is " +
+            "context only."
+          }
+        >
+          <h3>PR-AUC · locked test <span className="stat-sub">(primary metric)</span></h3>
           <div className="stat">{fmtNum(lt?.pr_auc?.point)}</div>
           <div className="stat-sub">
             95% CI {fmtNum(lt?.pr_auc?.ci_low)}–{fmtNum(lt?.pr_auc?.ci_high)} ·

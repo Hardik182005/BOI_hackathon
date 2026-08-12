@@ -1,0 +1,262 @@
+{
+  "generated_utc": "2026-08-12T15:51:05.609990+00:00",
+  "status": "EXPLORATORY - NOT A SELECTION INSTRUMENT",
+  "measured_on": "all development rows at once, in-sample; these numbers describe the data and must not be used to choose columns. The decision instrument is muleguard.cli.missingness_ablation.",
+  "signature_shape": {
+    "n_flags": 200,
+    "n_families": 22,
+    "n_window_pair_groups": 54,
+    "n_context_blocks": 2,
+    "n_columns_total": 358
+  },
+  "structure": {
+    "n_dev_rows": 7264,
+    "n_dev_positives": 64,
+    "n_admitted_columns": 3925,
+    "admitted_width_note": "equal to the raw width by coincidence: 13 quarantined columns removed, 13 MG_* meta-features added",
+    "quarantined_columns_found_in_admitted_set": [],
+    "cell_missing_fraction": 0.276213,
+    "n_columns_with_any_missing": 3834,
+    "n_columns_fully_missing": 63,
+    "n_columns_in_1_to_99pct_band": 1403,
+    "row_missing_ratio_negatives": 0.27613,
+    "row_missing_ratio_positives": 0.286,
+    "naive_total_null_roc_auc": 0.61865,
+    "interpretation": "Missingness is structural, not incidental - it touches almost every column and a large minority of columns sit in a band where an indicator can carry contrast. The naive volume count separates the classes only slightly, which is the reason to encode the shape rather than the amount."
+  },
+  "top_indicators_in_sample": [
+    {
+      "column": "MX_FAMCNT__FEES_AND_CHARGES",
+      "roc_auc": 0.7406,
+      "gloss": "Number of absent fields in the FEES_AND_CHARGES block."
+    },
+    {
+      "column": "MX_FAMRATIO__FEES_AND_CHARGES",
+      "roc_auc": 0.7406,
+      "gloss": "Share of the FEES_AND_CHARGES block that was absent."
+    },
+    {
+      "column": "MX_NULL__F3348",
+      "roc_auc": 0.70924,
+      "gloss": "The field F3348 was absent for this account."
+    },
+    {
+      "column": "MX_NULL__F3351",
+      "roc_auc": 0.70924,
+      "gloss": "The field F3351 was absent for this account."
+    },
+    {
+      "column": "MX_NULL__F3672",
+      "roc_auc": 0.70924,
+      "gloss": "The field F3672 was absent for this account."
+    },
+    {
+      "column": "MX_NULL__F3675",
+      "roc_auc": 0.70924,
+      "gloss": "The field F3675 was absent for this account."
+    },
+    {
+      "column": "MX_NULL__F3240",
+      "roc_auc": 0.7091,
+      "gloss": "The field F3240 was absent for this account."
+    },
+    {
+      "column": "MX_NULL__F3243",
+      "roc_auc": 0.7091,
+      "gloss": "The field F3243 was absent for this account."
+    },
+    {
+      "column": "MX_NULL__F3564",
+      "roc_auc": 0.7091,
+      "gloss": "The field F3564 was absent for this account."
+    },
+    {
+      "column": "MX_NULL__F3567",
+      "roc_auc": 0.7091,
+      "gloss": "The field F3567 was absent for this account."
+    },
+    {
+      "column": "MX_FAMCNT__CASH",
+      "roc_auc": 0.69178,
+      "gloss": "Number of absent fields in the CASH block."
+    },
+    {
+      "column": "MX_FAMRATIO__CASH",
+      "roc_auc": 0.69178,
+      "gloss": "Share of the CASH block that was absent."
+    },
+    {
+      "column": "MX_FAMCNT__LOAN",
+      "roc_auc": 0.67582,
+      "gloss": "Number of absent fields in the LOAN block."
+    },
+    {
+      "column": "MX_FAMRATIO__LOAN",
+      "roc_auc": 0.67582,
+      "gloss": "Share of the LOAN block that was absent."
+    },
+    {
+      "column": "MX_FAMCNT__AADHAAR_PAYMENT_BRIDGE",
+      "roc_auc": 0.67541,
+      "gloss": "Number of absent fields in the AADHAAR_PAYMENT_BRIDGE block."
+    },
+    {
+      "column": "MX_FAMRATIO__AADHAAR_PAYMENT_BRIDGE",
+      "roc_auc": 0.67541,
+      "gloss": "Share of the AADHAAR_PAYMENT_BRIDGE block that was absent."
+    },
+    {
+      "column": "MX_FAMCNT__NET_BANKING",
+      "roc_auc": 0.65778,
+      "gloss": "Number of absent fields in the NET_BANKING block."
+    },
+    {
+      "column": "MX_FAMRATIO__NET_BANKING",
+      "roc_auc": 0.65778,
+      "gloss": "Share of the NET_BANKING block that was absent."
+    },
+    {
+      "column": "MX_NULL__F3456",
+      "roc_auc": 0.65455,
+      "gloss": "The field F3456 was absent for this account."
+    },
+    {
+      "column": "MX_NULL__F3459",
+      "roc_auc": 0.65455,
+      "gloss": "The field F3459 was absent for this account."
+    },
+    {
+      "column": "MX_NULL__F3780",
+      "roc_auc": 0.65455,
+      "gloss": "The field F3780 was absent for this account."
+    },
+    {
+      "column": "MX_NULL__F3783",
+      "roc_auc": 0.65455,
+      "gloss": "The field F3783 was absent for this account."
+    },
+    {
+      "column": "MX_FAMCNT__GST",
+      "roc_auc": 0.634,
+      "gloss": "Number of absent fields in the GST block."
+    },
+    {
+      "column": "MX_FAMRATIO__GST",
+      "roc_auc": 0.634,
+      "gloss": "Share of the GST block that was absent."
+    },
+    {
+      "column": "MX_FAMCNT__MOBILE_BANKING",
+      "roc_auc": 0.62747,
+      "gloss": "Number of absent fields in the MOBILE_BANKING block."
+    }
+  ],
+  "leakage_audit": {
+    "leading_indicator": "MX_FAMCNT__FEES_AND_CHARGES",
+    "leading_indicator_roc_auc_vs_target": 0.7406,
+    "markers": [
+      {
+        "marker": "F3924",
+        "is_target": true,
+        "prevalence": 0.00881,
+        "auc_from_leading_indicator": 0.7406,
+        "agreement_with_target": 1.0,
+        "positives_shared_with_target": 64
+      },
+      {
+        "marker": "F3912",
+        "is_target": false,
+        "prevalence": 0.00881,
+        "auc_from_leading_indicator": 0.73072,
+        "agreement_with_target": 0.99945,
+        "positives_shared_with_target": 62
+      },
+      {
+        "marker": "F3915",
+        "is_target": false,
+        "prevalence": 0.00234,
+        "auc_from_leading_indicator": 0.54149,
+        "agreement_with_target": 0.98885,
+        "positives_shared_with_target": 0
+      },
+      {
+        "marker": "F3899",
+        "is_target": false,
+        "prevalence": 0.75289,
+        "auc_from_leading_indicator": 0.52278,
+        "agreement_with_target": 0.25069,
+        "positives_shared_with_target": 45
+      },
+      {
+        "marker": "F3898",
+        "is_target": false,
+        "prevalence": 0.697,
+        "auc_from_leading_indicator": 0.52029,
+        "agreement_with_target": 0.30383,
+        "positives_shared_with_target": 35
+      },
+      {
+        "marker": "F3913",
+        "is_target": false,
+        "prevalence": 0.57971,
+        "auc_from_leading_indicator": 0.50565,
+        "agreement_with_target": 0.41561,
+        "positives_shared_with_target": 15
+      },
+      {
+        "marker": "F3914",
+        "is_target": false,
+        "prevalence": 0.31938,
+        "auc_from_leading_indicator": 0.48615,
+        "agreement_with_target": 0.67291,
+        "positives_shared_with_target": 4
+      }
+    ],
+    "proxy_rule": "agreement with target >= 0.99 AND at least half the target's positives shared - agreement alone is satisfied by any two rare columns and would misclassify a merely co-rare marker as a proxy",
+    "n_target_positives": 64,
+    "target_proxies_found": [
+      {
+        "marker": "F3912",
+        "agreement_with_target": 0.99945,
+        "positives_shared_with_target": 62
+      }
+    ],
+    "co_rare_not_proxy": [
+      {
+        "marker": "F3915",
+        "agreement_with_target": 0.98885,
+        "positives_shared_with_target": 0,
+        "prevalence": 0.00234
+      }
+    ],
+    "independent_marker_auc_min": 0.48615,
+    "independent_marker_auc_max": 0.54149,
+    "verdict": "A high AUC against a marker that is itself a near-perfect copy of the target is the target restated, not a second, independent leak - so it is not evidence of workflow leakage. The markers that are genuinely independent of the target are the ones that matter here, and if they sit near 0.5 the indicator is not tracking the bank's investigation process."
+  },
+  "cohort_fingerprint": {
+    "column": "MX_FAMCNT__FEES_AND_CHARGES",
+    "mules": {
+      "n_rows": 64,
+      "n_distinct": 6,
+      "modal_value": 178.0,
+      "modal_share": 0.70312
+    },
+    "legitimate": {
+      "n_rows": 7200,
+      "n_distinct": 67,
+      "modal_value": 178.0,
+      "modal_share": 0.35806
+    },
+    "sample_size_control": {
+      "n_draws": 2000,
+      "seed": 42,
+      "rows_per_draw": 64,
+      "distinct_min": 10,
+      "distinct_mean": 16.311,
+      "modal_share_max": 0.54688,
+      "modal_share_mean": 0.35667,
+      "p_distinct_le_observed": 0.0,
+      "p_modal_share_ge_observed": 0.0
+    }
+  }
+}

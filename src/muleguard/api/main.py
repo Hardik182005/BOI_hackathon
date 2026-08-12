@@ -84,12 +84,38 @@ def get_narrator() -> OllamaNarrator:
     return _narrator
 
 
+def _verify_bundle_hash(manifest: dict) -> str:
+    """Re-hash the bundle on disk and compare it with the manifest.
+
+    Recording the manifest's hash in the database without ever recomputing it
+    proves only that the manifest is self-consistent. The question that matters
+    at boot is whether the file being served is still the file that was
+    evaluated, and the only way to answer it is to read the bytes.
+    """
+    import hashlib
+
+    path = settings.MODELS_DIR / "final_bundle.joblib"
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    actual = h.hexdigest()
+    expected = str(manifest.get("bundle_sha256", ""))
+    if expected and actual != expected:
+        log.error("MODEL INTEGRITY: %s hashes to %s but the manifest records %s",
+                  path.name, actual[:16], expected[:16])
+    else:
+        log.info("model integrity verified: %s sha256=%s", path.name, actual[:16])
+    return actual
+
+
 @app.on_event("startup")
 def startup() -> None:
     db.init_db()
     try:
         b = load_bundle()  # warmup
         manifest = load_json(settings.MODELS_DIR / "model_manifest.json")
+        _verify_bundle_hash(manifest)
         with db.connect() as c:
             row = c.execute(
                 "SELECT 1 FROM model_versions WHERE bundle_sha256=?",
@@ -142,6 +168,17 @@ class FeedbackRequest(BaseModel):
 
 
 # ---------- helpers ----------
+def _prefer_v2(path):
+    """The v2 sibling of an artifact when one exists, else the original.
+
+    ``lens_stack_oof.json`` becomes ``lens_stack_oof_v2.json``. The v2 files are
+    the ones the frozen bundle came out of; the originals belong to an earlier
+    tournament and describe a model that is not deployed.
+    """
+    v2 = path.with_name(f"{path.stem}_v2{path.suffix}")
+    return v2 if v2.exists() else path
+
+
 def _validate_ref(ref: str) -> str:
     if not MASKED_REF.match(ref):
         raise HTTPException(422, "account_reference must be a masked id (alnum/_/-)")
@@ -198,7 +235,14 @@ def model_info() -> dict:
     manifest_path = settings.MODELS_DIR / "model_manifest.json"
     if not manifest_path.exists():
         raise HTTPException(503, "no model manifest")
-    return load_json(manifest_path)
+    manifest = load_json(manifest_path)
+    actual = _verify_bundle_hash(manifest)
+    return {
+        **manifest,
+        "bundle_sha256_recomputed": actual,
+        "integrity": ("VERIFIED" if actual == manifest.get("bundle_sha256")
+                      else "MISMATCH"),
+    }
 
 
 @app.post("/v1/score")
@@ -302,18 +346,27 @@ def case_feedback(case_id: str, req: FeedbackRequest) -> dict:
 
 @app.get("/v1/metrics/summary")
 def metrics_summary() -> dict:
+    """Numbers straight from the artifacts of the model that is deployed.
+
+    Where a v2 artifact exists it wins, because v2 is the run that produced the
+    frozen bundle. Serving the v1 files here quietly showed the dashboard a
+    different model's numbers: a higher OOF PR-AUC than the deployed model
+    earns, and a selection-frequency chart topped by quarantined columns that
+    the shipped feature list does not contain. Both are worse than showing
+    nothing.
+    """
     out: dict[str, Any] = {}
     for name, path in [
         ("oof", settings.METRICS_DIR / "oof_metrics.json"),
         ("locked_test", settings.METRICS_DIR / "locked_test_metrics.json"),
-        ("lens_stack_oof", settings.METRICS_DIR / "lens_stack_oof.json"),
+        ("lens_stack_oof", _prefer_v2(settings.METRICS_DIR / "lens_stack_oof.json")),
         ("ensemble_decision", settings.METRICS_DIR / "ensemble_decision.json"),
         ("leakage_ablation", settings.METRICS_DIR / "with_vs_without_f3912.json"),
         ("registry", settings.REGISTRY_DIR / "registry.json"),
     ]:
         if path.exists():
             out[name] = load_json(path)
-    freq_path = settings.FEATURES_DIR / "selection_frequency.csv"
+    freq_path = _prefer_v2(settings.FEATURES_DIR / "selection_frequency.csv")
     if freq_path.exists():
         freq = pl.read_csv(freq_path).head(60)
         out["selection_frequency"] = freq.to_dicts()

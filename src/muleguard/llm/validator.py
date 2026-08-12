@@ -33,6 +33,19 @@ GUILT_PATTERNS = re.compile(
 FEATURE_TOKEN = re.compile(r"\bF\d{1,4}\b")
 # numbers with currency/amount context invented by the model
 AMOUNT_PATTERN = re.compile(r"(?:rs\.?|inr|₹|\$|usd|eur)\s*[\d,]+", re.IGNORECASE)
+# Calendar dates. The structured facts carry windows ("last 7 days"), never a
+# date: the scored row has no timestamp in it at all. So any date in the
+# narrative was invented, and a narrative that says "on 14 March the account
+# received..." reads as a case fact to an analyst. Matches 2024-03-14,
+# 14/03/2024, 14 March 2024 and March 14, 2024.
+DATE_PATTERN = re.compile(
+    r"\b(?:\d{4}-\d{2}-\d{2}"
+    r"|\d{1,2}[/-]\d{1,2}[/-]\d{2,4}"
+    r"|\d{1,2}\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?(?:\s+\d{2,4})?"
+    r"|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{1,2}(?:st|nd|rd|th)?"
+    r"(?:,?\s+\d{2,4})?)\b",
+    re.IGNORECASE,
+)
 
 
 def validate_llm_output(raw_text: str, ctx: NarratorInput) -> tuple[NarratorOutput | None, list[str]]:
@@ -66,6 +79,13 @@ def validate_llm_output(raw_text: str, ctx: NarratorInput) -> tuple[NarratorOutp
 
     if AMOUNT_PATTERN.search(all_text):
         reasons.append("invents a currency amount not present in structured input")
+
+    date_hit = DATE_PATTERN.search(all_text)
+    if date_hit:
+        reasons.append(
+            f"invents a calendar date not present in structured input: "
+            f"{date_hit.group(0)}"
+        )
 
     if GUILT_PATTERNS.search(all_text):
         reasons.append("asserts criminal guilt")
