@@ -156,9 +156,15 @@ def build_outer_folds(
             tr = np.flatnonzero(ids != k)
             va = np.flatnonzero(ids == k)
 
+            Xtr_raw, Xva_raw, fold_names = Xdev[tr], Xdev[va], list(names)
+            if augment is not None:
+                # Fitted on this fold's training rows only. Runs pre-preprocessing
+                # so a hook that reads missingness still sees the nulls.
+                Xtr_raw, Xva_raw, fold_names = augment(Xtr_raw, Xva_raw, names)
+
             prep = FoldPreprocessor(mode="tree")
-            Xtr = prep.fit_transform(Xdev[tr], names)
-            Xva = prep.transform(Xdev[va])
+            Xtr = prep.fit_transform(Xtr_raw, fold_names)
+            Xva = prep.transform(Xva_raw)
             ytr, yva = ydev[tr], ydev[va]
 
             inner = StratifiedKFold(n_splits=n_inner, shuffle=True,
