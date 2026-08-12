@@ -56,7 +56,12 @@ merchant-verifier:
 audit-labels:
 	$(PY) -m muleguard.cli.audit_labels
 
-addendum: train-select-v2 build-lenses-v2 shield robustness merchant-verifier audit-labels
+# Re-reads the stored dev OOF predictions of the promoted champion. Nothing is
+# refitted, so this is safe to run any time the champion or the policy changes.
+capacity-curve:
+	$(PY) -m muleguard.cli.capacity_curve
+
+addendum: train-select-v2 build-lenses-v2 shield robustness merchant-verifier audit-labels capacity-curve
 
 # Section 42. Needs a backend on :8001 - it goes over HTTP on purpose, because
 # the organiser will too.

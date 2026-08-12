@@ -123,6 +123,9 @@ def build_outer_folds(
     n_repeats: int = 3,
     n_inner: int = 4,
     selector_top_k: int = 200,
+    augment: Callable[
+        [np.ndarray, np.ndarray, Sequence[str]],
+        tuple[np.ndarray, np.ndarray, list[str]]] | None = None,
 ) -> list[OuterFold]:
     """Materialise every outer fold, with selection done inside outer-train.
 
@@ -130,6 +133,15 @@ def build_outer_folds(
     label. ``ranked_features`` is produced by fitting the selector separately on
     each inner-train partition of the outer-train rows and pooling the results,
     which is the nested analogue of the flat procedure.
+
+    Args:
+        augment: optional hook receiving ``(Xtr_raw, Xva_raw, names)`` for one
+            outer fold and returning the same three, widened. It runs **before**
+            preprocessing, so a hook that reads ``isnan`` still sees the nulls,
+            and it is called once per outer fold with only that fold's training
+            rows available for fitting. ``None`` leaves the pipeline byte-identical
+            to the unaugmented run, which is what makes an ablation against it a
+            controlled comparison.
     """
     dev = harness.dev_split(n_repeats)
     Xdev = frame.X[dev.row_index]
