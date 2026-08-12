@@ -1,0 +1,4330 @@
+{
+  "generated_utc": "2026-08-12T12:43:45.366291+00:00",
+  "artifact": "Missed-Mule Error Atlas",
+  "purpose": "Diagnostic only. For every labelled mule the served champion did not place inside the analyst budget, measure why and assign one category from a fixed, ordered rule list.",
+  "what_this_artifact_must_never_be_used_for": [
+    "Creating a rule, feature, threshold or override for an individual account. Any pattern found here is a hypothesis and must beat the existing model through nested cross-validation before it changes anything.",
+    "Any statement about an account beyond 'carries a mule label in the development data' and 'the model ranked it here'.",
+    "Any claim of a relationship between two accounts. Neighbour fields are feature-space similarity only; this dataset has no edge table."
+  ],
+  "read_only_contract": {
+    "modifies_scores_thresholds_features_or_models": false,
+    "inputs_hashed_before_and_after": true,
+    "input_sha256": {
+      "oof_v2.parquet": "69c73c8fa03ad8327a27a335a824b925a34a872b2812649d3e5547842fbd0499",
+      "final_bundle.joblib": "d12914de5abee99aa18b80e3d41ae2da800dbf9355b53f3a9c0e06806921efc5",
+      "merchant_verifier.joblib": "a231a7fc5cc647cf725c16ea5141182287f6e294e9851ae409cc853013cfd758",
+      "selected_features_v2.json": "ecc8527d6148f565576b7ce2529a9a42d81e92fa9fc165f62f97586dfa9464ea",
+      "promotion_decision_v2.json": "7a30ef93569ea8f3774080168fd53e9860feaf5a4d01e75a57fb058445ddb342",
+      "thresholds.yaml": "39d65e20bd894148049588108aa6aea2d554ee3014ca45a74c4f20132f9c797c"
+    },
+    "writes": [
+      "artifacts/metrics/error_atlas.json",
+      "docs/ERROR_ATLAS.md"
+    ]
+  },
+  "provenance": {
+    "no_language_model_used": true,
+    "evidence_policy": "Every field is a measured quantity, a value copied from a configuration file, or a fixed string written by hand in this repository. No generated evidence.",
+    "split": "development out-of-fold only; the locked test split was not read and no locked-test number appears here",
+    "git": {
+      "branch": "main",
+      "commit_sha": "fbd8fe066713ee0050d19f5e4c156d33b881fddc",
+      "is_dirty": "yes"
+    },
+    "seed": 42,
+    "omp_num_threads": "4",
+    "seconds": 44.1
+  },
+  "scope": {
+    "champion": "xgboost_top_120",
+    "champion_family": "xgboost",
+    "analyst_budget_k": 100,
+    "budget_source": "configs/thresholds.yaml tiers.urgent_review.daily_alert_capacity",
+    "development_rows": 7264,
+    "labelled_mules": 64,
+    "prevalence": 0.008811,
+    "n_missed": 11,
+    "n_caught": 53,
+    "recall_at_budget": 0.828125,
+    "statistical_caution": "11 misses. Every count below is a count over 11 accounts. Nothing here is a rate that would survive a confidence interval, and no pattern seen in a handful of accounts should be treated as established. The categories describe these accounts; they do not estimate a population."
+  },
+  "aggregation_sensitivity": {
+    "note": "The three ways of collapsing repeated CV to one ranking disagree. All three are reported rather than choosing the most favourable.",
+    "convention_used": "score_average",
+    "why": "build_lenses_v2 averages raw scores across repeats to derive the thresholds the system serves, so this is the deployed operating point.",
+    "conventions": {
+      "score_average": {
+        "recall_at_budget": 0.828125,
+        "n_misses": 11
+      },
+      "rank_average": {
+        "recall_at_budget": 0.8125,
+        "n_misses": 12
+      },
+      "per_repeat_mean": {
+        "recall_at_budget": 0.78125,
+        "n_misses_per_repeat": [
+          16,
+          13,
+          13
+        ]
+      }
+    }
+  },
+  "categories": {
+    "definitions": [
+      {
+        "priority": 1,
+        "rule": "missing_data",
+        "category": "MISSING_DATA",
+        "test": "missingness_z >= 4.0 OR missing_fraction >= 0.5",
+        "reads": [
+          "missingness_z",
+          "missing_fraction"
+        ],
+        "rationale": "The champion could not read evidence that was not there. Both thresholds are the deployed OOD lens's own published values, so the Atlas does not invent a second definition of 'too much missing data'."
+      },
+      {
+        "priority": 2,
+        "rule": "ood_pattern",
+        "category": "OOD_PATTERN",
+        "test": "knn_distance > knn_threshold (the lens's own dev-quantile gate) OR range_violation_share > 0.2",
+        "reads": [
+          "knn_distance",
+          "knn_threshold",
+          "range_violation_share"
+        ],
+        "rationale": "The evidence was present but unlike the development cohort, so the champion was extrapolating. Delegated verbatim to the OOD lens the system already serves."
+      },
+      {
+        "priority": 3,
+        "rule": "threshold_miss",
+        "category": "THRESHOLD_MISS",
+        "test": "champion_rank <= 2.0 x budget_k",
+        "reads": [
+          "champion_rank",
+          "budget_k"
+        ],
+        "rationale": "The champion did rank the account near the top of the book; what excluded it was the size of the review queue, not the model's opinion. Placed above the estimator rules because 'the operating point cut it' is the more parsimonious explanation when both apply."
+      },
+      {
+        "priority": 4,
+        "rule": "model_disagreement",
+        "category": "MODEL_DISAGREEMENT",
+        "test": "n_peer_families_within_budget >= 1",
+        "reads": [
+          "n_peer_families_within_budget"
+        ],
+        "rationale": "At least one other model family, scored out-of-fold on the same folds and the same labels, would have placed this account inside the same budget. The signal was therefore recoverable from this data; this champion did not recover it."
+      },
+      {
+        "priority": 5,
+        "rule": "lookalike_mule",
+        "category": "LOOKALIKE_MULE",
+        "test": "n_mule_labels_in_neighbourhood == 0 AND distance_to_nearest_legitimate_account < distance_to_nearest_known_mule",
+        "reads": [
+          "n_mule_labels_in_neighbourhood",
+          "distance_to_nearest_legitimate_account",
+          "distance_to_nearest_known_mule"
+        ],
+        "rationale": "In the champion's own input space this account sits inside the legitimate book: no mule-labelled account is among its nearest neighbours, and a legitimate account is nearer than any mule-labelled one. Both tests are definitional - 'zero' and 'closer than' - so there is no threshold to tune."
+      },
+      {
+        "priority": 6,
+        "rule": "low_signal_mule",
+        "category": "LOW_SIGNAL_MULE",
+        "test": "residual - reached only when no rule above fired",
+        "reads": [
+          "n_families_below_dev_median",
+          "n_families_measured"
+        ],
+        "rationale": "No measured quantity separated this account from the legitimate book: the evidence was present and in distribution, the champion did not rank it near the budget, no peer family surfaced it, and its neighbourhood is not exclusively legitimate. Recorded as an unattributed miss."
+      }
+    ],
+    "constants": {
+      "missingness_z": 4.0,
+      "range_violation_share": 0.2,
+      "missing_fraction": 0.5,
+      "threshold_miss_capacity_multiple": 2.0,
+      "neighbourhood_k": 10
+    },
+    "constant_sources": {
+      "missingness_z": "configs/thresholds.yaml ood.missingness_z_threshold",
+      "range_violation_share": "configs/thresholds.yaml ood.range_violation_share_threshold",
+      "missing_fraction": "definitional - half of the champion's inputs",
+      "threshold_miss_capacity_multiple": "chosen: twice the published analyst capacity. The only free parameter in the rule list.",
+      "neighbourhood_k": "OODDetector.k from the served bundle"
+    },
+    "assignment": "First rule that fires wins. Every rule is evaluated for every miss and all verdicts are recorded, so the reader can see which explanations were available and which the priority order selected.",
+    "determinism": "Pure function of the measurement vector. No randomness, no per-account branch, no state.",
+    "counts": {
+      "LOW_SIGNAL_MULE": 0,
+      "LOOKALIKE_MULE": 4,
+      "MODEL_DISAGREEMENT": 5,
+      "MISSING_DATA": 0,
+      "OOD_PATTERN": 0,
+      "THRESHOLD_MISS": 2
+    }
+  },
+  "rule_base_rates_on_caught_mules": {
+    "n_control_rows": 53,
+    "rates": {
+      "missing_data": {
+        "n_fired": 0,
+        "rate": 0.0
+      },
+      "ood_pattern": {
+        "n_fired": 0,
+        "rate": 0.0
+      },
+      "threshold_miss": {
+        "n_fired": 53,
+        "rate": 1.0
+      },
+      "model_disagreement": {
+        "n_fired": 52,
+        "rate": 0.9811
+      },
+      "lookalike_mule": {
+        "n_fired": 16,
+        "rate": 0.3019
+      }
+    },
+    "control_group": "the 53 labelled mules the champion DID surface within the budget",
+    "why": "A rule that fires as often on caught mules as on missed ones explains nothing. These rates are the discriminating power of each rule, measured rather than assumed."
+  },
+  "cross_family_agreement": {
+    "note": "Same folds, same labels, same budget. A family that catches a champion miss shows the signal was recoverable from this data.",
+    "per_family": {
+      "catboost": {
+        "model": "catboost_top_120",
+        "own_misses_at_budget": 15,
+        "catches_n_of_champion_misses": 1,
+        "champion_misses_it_catches_dataset_row_index": [
+          9069
+        ],
+        "has_n_misses_champion_catches": 5
+      },
+      "lightgbm": {
+        "model": "lightgbm_top_120",
+        "own_misses_at_budget": 15,
+        "catches_n_of_champion_misses": 2,
+        "champion_misses_it_catches_dataset_row_index": [
+          9069,
+          9081
+        ],
+        "has_n_misses_champion_catches": 6
+      },
+      "tabpfn": {
+        "model": "tabpfn_top_60",
+        "own_misses_at_budget": 5,
+        "catches_n_of_champion_misses": 7,
+        "champion_misses_it_catches_dataset_row_index": [
+          9010,
+          9039,
+          9053,
+          9069,
+          9072,
+          9078,
+          9081
+        ],
+        "has_n_misses_champion_catches": 1
+      }
+    },
+    "champion_misses_missed_by_every_measured_family_dataset_row_index": [
+      9047,
+      9057,
+      9067,
+      9077
+    ],
+    "n_missed_by_every_measured_family": 4
+  },
+  "lens_observations": {
+    "why_this_section_exists": "The OOD category delegates to the served lens rather than inventing a second definition of out-of-distribution, so what that lens can and cannot do on this data determines what the category can mean.",
+    "knn_gate": {
+      "gate_value": 38947879.664,
+      "gate_definition": "quantile 0.999 of the development k-NN distances, k=10 (configs/thresholds.yaml ood.knn_quantile)",
+      "max_development_knn_distance": 346942400.0,
+      "median_development_knn_distance": 114.981,
+      "n_development_rows_above_gate": 8,
+      "gate_fires_on_development_data": true
+    },
+    "range_violation_limb": {
+      "max_development_range_violation_share": 0.0,
+      "n_development_rows_above_threshold": 0,
+      "observation": "Zero, and necessarily so: the lens's accepted ranges were widened from these same development rows, so no development row can violate them. This limb is a production-drift detector and carries no information in this in-sample analysis. Reported so that a zero count is not mistaken for evidence."
+    },
+    "development_rows_flagged": {
+      "n_flagged": 11,
+      "n_flagged_carrying_a_mule_label": 0,
+      "observation": "The lens flags 11 development rows and none of them carries a mule label. So the OOD_PATTERN count of zero among the misses is not an artefact of an incapable gate - the gate does fire, just never on these accounts."
+    },
+    "the_atlas_did_not_change_any_of_this": "Adjusting a served threshold is outside what this instrument is permitted to do. These are observations for whoever owns the lens."
+  },
+  "quarantine_guard": {
+    "n_quarantined_columns": 13,
+    "quarantined_columns_named_in_this_artifact": 0,
+    "enforced_by": "muleguard.models.error_atlas.assert_no_quarantined_feature, which raises rather than emits"
+  },
+  "attribution_method": {
+    "method": "EXACT_TREESHAP",
+    "implementation": "muleguard.explain.reason_codes.tree_shap (shap.TreeExplainer, interventional off, exact)",
+    "not_a_fallback": "Model-native feature importances were NOT used. Per-row exact TreeSHAP was affordable at this scale, so no substitution was made.",
+    "computed_on": "the out-of-fold model for each repeat, rebuilt from the same folds, preprocessor and deterministic fold seed the tournament used",
+    "all_folds_reproduce_stored_oof_exactly": true,
+    "attribution_fidelity": "EXACT - every refit reproduced its stored out-of-fold scores to 0.0 absolute, so these attributions come from the same model that produced the score being explained",
+    "dropped_column_convention": "The per-fold preprocessor removes constant and exactly duplicated columns, so a column absent from a fold's model gets contribution 0.0 for that repeat. A duplicated column's contribution is carried by its surviving twin.",
+    "fold_checks": [
+      {
+        "repeat": 0,
+        "fold": 0,
+        "n_validation_rows": 1453,
+        "n_target_rows_in_fold": 2,
+        "max_abs_score_difference_vs_stored_oof": 0.0,
+        "reproduces_stored_oof": true,
+        "n_features_kept_by_fold_preprocessor": 120,
+        "seconds": 5.29
+      },
+      {
+        "repeat": 0,
+        "fold": 1,
+        "n_validation_rows": 1453,
+        "n_target_rows_in_fold": 1,
+        "max_abs_score_difference_vs_stored_oof": 0.0,
+        "reproduces_stored_oof": true,
+        "n_features_kept_by_fold_preprocessor": 120,
+        "seconds": 2.68
+      },
+      {
+        "repeat": 0,
+        "fold": 2,
+        "n_validation_rows": 1453,
+        "n_target_rows_in_fold": 1,
+        "max_abs_score_difference_vs_stored_oof": 0.0,
+        "reproduces_stored_oof": true,
+        "n_features_kept_by_fold_preprocessor": 120,
+        "seconds": 2.41
+      },
+      {
+        "repeat": 0,
+        "fold": 3,
+        "n_validation_rows": 1453,
+        "n_target_rows_in_fold": 5,
+        "max_abs_score_difference_vs_stored_oof": 0.0,
+        "reproduces_stored_oof": true,
+        "n_features_kept_by_fold_preprocessor": 120,
+        "seconds": 2.24
+      },
+      {
+        "repeat": 0,
+        "fold": 4,
+        "n_validation_rows": 1452,
+        "n_target_rows_in_fold": 2,
+        "max_abs_score_difference_vs_stored_oof": 0.0,
+        "reproduces_stored_oof": true,
+        "n_features_kept_by_fold_preprocessor": 120,
+        "seconds": 3.62
+      },
+      {
+        "repeat": 1,
+        "fold": 0,
+        "n_validation_rows": 1453,
+        "n_target_rows_in_fold": 4,
+        "max_abs_score_difference_vs_stored_oof": 0.0,
+        "reproduces_stored_oof": true,
+        "n_features_kept_by_fold_preprocessor": 120,
+        "seconds": 2.74
+      },
+      {
+        "repeat": 1,
+        "fold": 1,
+        "n_validation_rows": 1453,
+        "n_target_rows_in_fold": 4,
+        "max_abs_score_difference_vs_stored_oof": 0.0,
+        "reproduces_stored_oof": true,
+        "n_features_kept_by_fold_preprocessor": 120,
+        "seconds": 4.34
+      },
+      {
+        "repeat": 1,
+        "fold": 2,
+        "n_validation_rows": 1453,
+        "n_target_rows_in_fold": 1,
+        "max_abs_score_difference_vs_stored_oof": 0.0,
+        "reproduces_stored_oof": true,
+        "n_features_kept_by_fold_preprocessor": 120,
+        "seconds": 2.66
+      },
+      {
+        "repeat": 1,
+        "fold": 3,
+        "n_validation_rows": 1453,
+        "n_target_rows_in_fold": 2,
+        "max_abs_score_difference_vs_stored_oof": 0.0,
+        "reproduces_stored_oof": true,
+        "n_features_kept_by_fold_preprocessor": 120,
+        "seconds": 2.03
+      },
+      {
+        "repeat": 2,
+        "fold": 0,
+        "n_validation_rows": 1453,
+        "n_target_rows_in_fold": 2,
+        "max_abs_score_difference_vs_stored_oof": 0.0,
+        "reproduces_stored_oof": true,
+        "n_features_kept_by_fold_preprocessor": 120,
+        "seconds": 1.67
+      },
+      {
+        "repeat": 2,
+        "fold": 1,
+        "n_validation_rows": 1453,
+        "n_target_rows_in_fold": 1,
+        "max_abs_score_difference_vs_stored_oof": 0.0,
+        "reproduces_stored_oof": true,
+        "n_features_kept_by_fold_preprocessor": 120,
+        "seconds": 2.64
+      },
+      {
+        "repeat": 2,
+        "fold": 2,
+        "n_validation_rows": 1453,
+        "n_target_rows_in_fold": 3,
+        "max_abs_score_difference_vs_stored_oof": 0.0,
+        "reproduces_stored_oof": true,
+        "n_features_kept_by_fold_preprocessor": 120,
+        "seconds": 1.44
+      },
+      {
+        "repeat": 2,
+        "fold": 3,
+        "n_validation_rows": 1453,
+        "n_target_rows_in_fold": 3,
+        "max_abs_score_difference_vs_stored_oof": 0.0,
+        "reproduces_stored_oof": true,
+        "n_features_kept_by_fold_preprocessor": 120,
+        "seconds": 1.69
+      },
+      {
+        "repeat": 2,
+        "fold": 4,
+        "n_validation_rows": 1452,
+        "n_target_rows_in_fold": 2,
+        "max_abs_score_difference_vs_stored_oof": 0.0,
+        "reproduces_stored_oof": true,
+        "n_features_kept_by_fold_preprocessor": 120,
+        "seconds": 2.2
+      }
+    ]
+  },
+  "misses": [
+    {
+      "dev_row_position": 7207,
+      "dataset_row_index": 9010,
+      "label": "MULE_LABELLED_IN_DEVELOPMENT_DATA",
+      "why_this_is_a_miss": {
+        "champion": "xgboost_top_120",
+        "champion_rank": 423,
+        "analyst_budget_k": 100,
+        "aggregation": "score_average over repeats (the served convention)",
+        "n_repeats_outside_budget": 3,
+        "n_repeats": 3,
+        "per_repeat_rank": [
+          1149,
+          178,
+          753
+        ]
+      },
+      "category": "MODEL_DISAGREEMENT",
+      "classification": {
+        "category": "MODEL_DISAGREEMENT",
+        "decided_by_rule": "model_disagreement",
+        "decided_by_test": "n_peer_families_within_budget >= 1",
+        "decided_by_measured_values": {
+          "n_peer_families_within_budget": 1
+        },
+        "other_rules_that_also_fired": [
+          "lookalike_mule"
+        ],
+        "rules_evaluated": [
+          {
+            "priority": 1,
+            "rule": "missing_data",
+            "category": "MISSING_DATA",
+            "fired": false,
+            "test": "missingness_z >= 4.0 OR missing_fraction >= 0.5",
+            "measured": {
+              "missingness_z": -0.331618,
+              "missing_fraction": 0.158333
+            }
+          },
+          {
+            "priority": 2,
+            "rule": "ood_pattern",
+            "category": "OOD_PATTERN",
+            "fired": false,
+            "test": "knn_distance > knn_threshold (the lens's own dev-quantile gate) OR range_violation_share > 0.2",
+            "measured": {
+              "knn_distance": 983.228394,
+              "knn_threshold": 38947879.664001,
+              "range_violation_share": 0.0
+            }
+          },
+          {
+            "priority": 3,
+            "rule": "threshold_miss",
+            "category": "THRESHOLD_MISS",
+            "fired": false,
+            "test": "champion_rank <= 2.0 x budget_k",
+            "measured": {
+              "champion_rank": 423,
+              "budget_k": 100
+            }
+          },
+          {
+            "priority": 4,
+            "rule": "model_disagreement",
+            "category": "MODEL_DISAGREEMENT",
+            "fired": true,
+            "test": "n_peer_families_within_budget >= 1",
+            "measured": {
+              "n_peer_families_within_budget": 1
+            }
+          },
+          {
+            "priority": 5,
+            "rule": "lookalike_mule",
+            "category": "LOOKALIKE_MULE",
+            "fired": true,
+            "test": "n_mule_labels_in_neighbourhood == 0 AND distance_to_nearest_legitimate_account < distance_to_nearest_known_mule",
+            "measured": {
+              "n_mule_labels_in_neighbourhood": 0,
+              "distance_to_nearest_legitimate_account": 937.459151,
+              "distance_to_nearest_known_mule": 1701.447215
+            }
+          },
+          {
+            "priority": 6,
+            "rule": "low_signal_mule",
+            "category": "LOW_SIGNAL_MULE",
+            "fired": true,
+            "test": "residual - reached only when no rule above fired",
+            "measured": {
+              "n_families_below_dev_median": 0,
+              "n_families_measured": 4
+            }
+          }
+        ],
+        "rule_order": [
+          "missing_data",
+          "ood_pattern",
+          "threshold_miss",
+          "model_disagreement",
+          "lookalike_mule",
+          "low_signal_mule"
+        ]
+      },
+      "measurements": {
+        "champion_rank": 423,
+        "budget_k": 100,
+        "missing_fraction": 0.15833333333333333,
+        "missingness_z": -0.3316175768060352,
+        "range_violation_share": 0.0,
+        "knn_distance": 983.2283935546875,
+        "knn_threshold": 38947879.6640008,
+        "n_peer_families_within_budget": 1,
+        "n_mule_labels_in_neighbourhood": 0,
+        "distance_to_nearest_known_mule": 1701.4472146757496,
+        "distance_to_nearest_legitimate_account": 937.4591514129683,
+        "n_families_below_dev_median": 0,
+        "n_families_measured": 4
+      },
+      "family_scores": {
+        "catboost": {
+          "model": "catboost_top_120",
+          "score_repeat_average": 0.342863,
+          "per_repeat_score": [
+            0.076505,
+            0.368612,
+            0.583472
+          ],
+          "rank": 280,
+          "within_budget": false,
+          "score_percentile_in_development": 96.159
+        },
+        "lightgbm": {
+          "model": "lightgbm_top_120",
+          "score_repeat_average": 0.006904,
+          "per_repeat_score": [
+            0.014293,
+            0.00014,
+            0.006279
+          ],
+          "rank": 1009,
+          "within_budget": false,
+          "score_percentile_in_development": 86.123
+        },
+        "tabpfn": {
+          "model": "tabpfn_top_60",
+          "score_repeat_average": 0.101974,
+          "per_repeat_score": [
+            0.071943,
+            0.132941,
+            0.101037
+          ],
+          "rank": 87,
+          "within_budget": true,
+          "score_percentile_in_development": 98.816
+        },
+        "xgboost": {
+          "model": "xgboost_top_120",
+          "score_repeat_average": 0.032809,
+          "per_repeat_score": [
+            0.00259,
+            0.069062,
+            0.026776
+          ],
+          "rank": 423,
+          "within_budget": false,
+          "score_percentile_in_development": 94.191
+        }
+      },
+      "closest_known_mule": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 9033,
+        "dev_row_position": 7224,
+        "distance": 1701.447215,
+        "that_account_champion_rank": 8,
+        "that_account_was_surfaced_within_budget": true
+      },
+      "closest_legitimate_account": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 946,
+        "dev_row_position": 749,
+        "distance": 937.459151,
+        "closer_than_nearest_mule_labelled_account": true
+      },
+      "nearest_neighbour_distance": {
+        "space": "champion input space (120 columns), median-imputed then robust-scaled by the deployed OOD lens's medians and IQRs",
+        "k": 10,
+        "mean_distance_to_k_nearest": 978.407756,
+        "n_mule_labels_among_k_nearest": 0,
+        "ood_lens_knn_distance": 983.228394,
+        "ood_lens_knn_gate": 38947879.664001,
+        "ood_lens_knn_distance_percentile_in_development": 70.691
+      },
+      "missingness_pattern": {
+        "n_features": 120,
+        "n_missing": 19,
+        "missing_fraction": 0.158333,
+        "missingness_z_vs_development": -0.3316,
+        "development_mean_missing_fraction": 0.177664,
+        "missing_by_feature_family": {
+          "GST": 7,
+          "CASH": 3,
+          "MOBILE_BANKING": 3,
+          "NET_BANKING": 3,
+          "ELEC_XFER": 2,
+          "ATM": 1
+        },
+        "missing_features": [
+          "F148",
+          "F150",
+          "F163",
+          "F164",
+          "F2397",
+          "F2527",
+          "F2595",
+          "F2598",
+          "F261",
+          "F2624",
+          "F264",
+          "F2671",
+          "F2672",
+          "F2691",
+          "F2831",
+          "F3073",
+          "F3091",
+          "F3093",
+          "F456"
+        ]
+      },
+      "merchant_context_evidence": {
+        "source": "Merchant Legitimacy Verifier (E_profile_merchant view, 1331 business features)",
+        "verdict": {
+          "legitimacy": 0.00606,
+          "band": "LITTLE_BUSINESS_EVIDENCE",
+          "mule_probability_from_business_evidence": 0.998144,
+          "components": {},
+          "disclaimer": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue."
+        },
+        "policy": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue.",
+        "caveat": "fitted on all development rows including this one; the reading is in-sample and is context, not corroboration"
+      },
+      "anomaly_score": {
+        "anomaly_percentile": 52.8084,
+        "detector": "IsolationForest challenger from the served bundle",
+        "fitted_on": "development rows NOT carrying a mule label, so this account was not part of the detector's fit",
+        "reference_distribution": "all development rows",
+        "interpretation": "100 = most anomalous relative to the development cohort. This is an unsupervised lens; it is not a risk score."
+      },
+      "hard_negative_verifier": {
+        "confirms_risk": true,
+        "probability": 0.999981,
+        "caveat": "fitted on all development rows including this one; this reading is in-sample and is reported as context, not as independent corroboration"
+      },
+      "top_shap_features": [
+        {
+          "feature": "F193",
+          "value": 0.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.527795,
+          "contribution_std_across_repeats": 0.106035,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3908",
+          "value": 1.0,
+          "value_is_missing": false,
+          "mean_contribution": 0.494482,
+          "contribution_std_across_repeats": 0.043359,
+          "direction": "INCREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3748",
+          "value": -0.07,
+          "value_is_missing": false,
+          "mean_contribution": -0.454944,
+          "contribution_std_across_repeats": 0.139381,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F468",
+          "value": 1.36,
+          "value_is_missing": false,
+          "mean_contribution": -0.413919,
+          "contribution_std_across_repeats": 0.039924,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1057",
+          "value": 89583.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.374413,
+          "contribution_std_across_repeats": 0.170172,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3784",
+          "value": -0.03,
+          "value_is_missing": false,
+          "mean_contribution": -0.373291,
+          "contribution_std_across_repeats": 0.155861,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F114",
+          "value": 0.13,
+          "value_is_missing": false,
+          "mean_contribution": -0.339266,
+          "contribution_std_across_repeats": 0.096531,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3105",
+          "value": 28.0,
+          "value_is_missing": false,
+          "mean_contribution": 0.332586,
+          "contribution_std_across_repeats": 0.117205,
+          "direction": "INCREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3799",
+          "value": 1783420.875,
+          "value_is_missing": false,
+          "mean_contribution": -0.311836,
+          "contribution_std_across_repeats": 0.0658,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F2685",
+          "value": -0.59,
+          "value_is_missing": false,
+          "mean_contribution": -0.281763,
+          "contribution_std_across_repeats": 0.087182,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        }
+      ]
+    },
+    {
+      "dev_row_position": 7228,
+      "dataset_row_index": 9039,
+      "label": "MULE_LABELLED_IN_DEVELOPMENT_DATA",
+      "why_this_is_a_miss": {
+        "champion": "xgboost_top_120",
+        "champion_rank": 260,
+        "analyst_budget_k": 100,
+        "aggregation": "score_average over repeats (the served convention)",
+        "n_repeats_outside_budget": 3,
+        "n_repeats": 3,
+        "per_repeat_rank": [
+          1463,
+          323,
+          192
+        ]
+      },
+      "category": "MODEL_DISAGREEMENT",
+      "classification": {
+        "category": "MODEL_DISAGREEMENT",
+        "decided_by_rule": "model_disagreement",
+        "decided_by_test": "n_peer_families_within_budget >= 1",
+        "decided_by_measured_values": {
+          "n_peer_families_within_budget": 1
+        },
+        "other_rules_that_also_fired": [
+          "lookalike_mule"
+        ],
+        "rules_evaluated": [
+          {
+            "priority": 1,
+            "rule": "missing_data",
+            "category": "MISSING_DATA",
+            "fired": false,
+            "test": "missingness_z >= 4.0 OR missing_fraction >= 0.5",
+            "measured": {
+              "missingness_z": -0.760497,
+              "missing_fraction": 0.133333
+            }
+          },
+          {
+            "priority": 2,
+            "rule": "ood_pattern",
+            "category": "OOD_PATTERN",
+            "fired": false,
+            "test": "knn_distance > knn_threshold (the lens's own dev-quantile gate) OR range_violation_share > 0.2",
+            "measured": {
+              "knn_distance": 7573.270996,
+              "knn_threshold": 38947879.664001,
+              "range_violation_share": 0.0
+            }
+          },
+          {
+            "priority": 3,
+            "rule": "threshold_miss",
+            "category": "THRESHOLD_MISS",
+            "fired": false,
+            "test": "champion_rank <= 2.0 x budget_k",
+            "measured": {
+              "champion_rank": 260,
+              "budget_k": 100
+            }
+          },
+          {
+            "priority": 4,
+            "rule": "model_disagreement",
+            "category": "MODEL_DISAGREEMENT",
+            "fired": true,
+            "test": "n_peer_families_within_budget >= 1",
+            "measured": {
+              "n_peer_families_within_budget": 1
+            }
+          },
+          {
+            "priority": 5,
+            "rule": "lookalike_mule",
+            "category": "LOOKALIKE_MULE",
+            "fired": true,
+            "test": "n_mule_labels_in_neighbourhood == 0 AND distance_to_nearest_legitimate_account < distance_to_nearest_known_mule",
+            "measured": {
+              "n_mule_labels_in_neighbourhood": 0,
+              "distance_to_nearest_legitimate_account": 7309.283496,
+              "distance_to_nearest_known_mule": 7606.60337
+            }
+          },
+          {
+            "priority": 6,
+            "rule": "low_signal_mule",
+            "category": "LOW_SIGNAL_MULE",
+            "fired": true,
+            "test": "residual - reached only when no rule above fired",
+            "measured": {
+              "n_families_below_dev_median": 0,
+              "n_families_measured": 4
+            }
+          }
+        ],
+        "rule_order": [
+          "missing_data",
+          "ood_pattern",
+          "threshold_miss",
+          "model_disagreement",
+          "lookalike_mule",
+          "low_signal_mule"
+        ]
+      },
+      "measurements": {
+        "champion_rank": 260,
+        "budget_k": 100,
+        "missing_fraction": 0.13333333333333333,
+        "missingness_z": -0.7604965224296024,
+        "range_violation_share": 0.0,
+        "knn_distance": 7573.27099609375,
+        "knn_threshold": 38947879.6640008,
+        "n_peer_families_within_budget": 1,
+        "n_mule_labels_in_neighbourhood": 0,
+        "distance_to_nearest_known_mule": 7606.603369867063,
+        "distance_to_nearest_legitimate_account": 7309.283495877722,
+        "n_families_below_dev_median": 0,
+        "n_families_measured": 4
+      },
+      "family_scores": {
+        "catboost": {
+          "model": "catboost_top_120",
+          "score_repeat_average": 0.154424,
+          "per_repeat_score": [
+            0.005901,
+            0.020124,
+            0.437246
+          ],
+          "rank": 2022,
+          "within_budget": false,
+          "score_percentile_in_development": 72.178
+        },
+        "lightgbm": {
+          "model": "lightgbm_top_120",
+          "score_repeat_average": 0.00418,
+          "per_repeat_score": [
+            0.000658,
+            0.00512,
+            0.006761
+          ],
+          "rank": 1588,
+          "within_budget": false,
+          "score_percentile_in_development": 78.153
+        },
+        "tabpfn": {
+          "model": "tabpfn_top_60",
+          "score_repeat_average": 0.076101,
+          "per_repeat_score": [
+            0.139447,
+            0.044322,
+            0.044536
+          ],
+          "rank": 97,
+          "within_budget": true,
+          "score_percentile_in_development": 98.678
+        },
+        "xgboost": {
+          "model": "xgboost_top_120",
+          "score_repeat_average": 0.06401,
+          "per_repeat_score": [
+            0.001627,
+            0.026451,
+            0.163952
+          ],
+          "rank": 260,
+          "within_budget": false,
+          "score_percentile_in_development": 96.434
+        }
+      },
+      "closest_known_mule": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 9043,
+        "dev_row_position": 7231,
+        "distance": 7606.60337,
+        "that_account_champion_rank": 65,
+        "that_account_was_surfaced_within_budget": true
+      },
+      "closest_legitimate_account": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 4562,
+        "dev_row_position": 3626,
+        "distance": 7309.283496,
+        "closer_than_nearest_mule_labelled_account": true
+      },
+      "nearest_neighbour_distance": {
+        "space": "champion input space (120 columns), median-imputed then robust-scaled by the deployed OOD lens's medians and IQRs",
+        "k": 10,
+        "mean_distance_to_k_nearest": 7527.591291,
+        "n_mule_labels_among_k_nearest": 0,
+        "ood_lens_knn_distance": 7573.270996,
+        "ood_lens_knn_gate": 38947879.664001,
+        "ood_lens_knn_distance_percentile_in_development": 83.852
+      },
+      "missingness_pattern": {
+        "n_features": 120,
+        "n_missing": 16,
+        "missing_fraction": 0.133333,
+        "missingness_z_vs_development": -0.7605,
+        "development_mean_missing_fraction": 0.177664,
+        "missing_by_feature_family": {
+          "GST": 7,
+          "CASH": 3,
+          "LOAN": 3,
+          "NET_BANKING": 3
+        },
+        "missing_features": [
+          "F148",
+          "F150",
+          "F163",
+          "F164",
+          "F193",
+          "F2527",
+          "F2624",
+          "F2671",
+          "F2672",
+          "F2691",
+          "F2831",
+          "F3091",
+          "F3093",
+          "F3136",
+          "F456",
+          "F499"
+        ]
+      },
+      "merchant_context_evidence": {
+        "source": "Merchant Legitimacy Verifier (E_profile_merchant view, 1331 business features)",
+        "verdict": {
+          "legitimacy": 0.00358,
+          "band": "LITTLE_BUSINESS_EVIDENCE",
+          "mule_probability_from_business_evidence": 0.998882,
+          "components": {},
+          "disclaimer": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue."
+        },
+        "policy": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue.",
+        "caveat": "fitted on all development rows including this one; the reading is in-sample and is context, not corroboration"
+      },
+      "anomaly_score": {
+        "anomaly_percentile": 83.0809,
+        "detector": "IsolationForest challenger from the served bundle",
+        "fitted_on": "development rows NOT carrying a mule label, so this account was not part of the detector's fit",
+        "reference_distribution": "all development rows",
+        "interpretation": "100 = most anomalous relative to the development cohort. This is an unsupervised lens; it is not a risk score."
+      },
+      "hard_negative_verifier": {
+        "confirms_risk": true,
+        "probability": 0.999984,
+        "caveat": "fitted on all development rows including this one; this reading is in-sample and is reported as context, not as independent corroboration"
+      },
+      "top_shap_features": [
+        {
+          "feature": "F3492",
+          "value": -0.41,
+          "value_is_missing": false,
+          "mean_contribution": -0.781552,
+          "contribution_std_across_repeats": 0.212388,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3908",
+          "value": 0.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.755482,
+          "contribution_std_across_repeats": 0.176701,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F2489",
+          "value": 2311.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.529816,
+          "contribution_std_across_repeats": 0.181595,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1323",
+          "value": 1.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.525384,
+          "contribution_std_across_repeats": 0.339878,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3642",
+          "value": -0.95,
+          "value_is_missing": false,
+          "mean_contribution": -0.480649,
+          "contribution_std_across_repeats": 0.409974,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": false
+        },
+        {
+          "feature": "F2184",
+          "value": 0.080645,
+          "value_is_missing": false,
+          "mean_contribution": -0.406873,
+          "contribution_std_across_repeats": 0.248452,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F2390",
+          "value": 2311.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.401777,
+          "contribution_std_across_repeats": 0.347612,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3807",
+          "value": 504126.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.359474,
+          "contribution_std_across_repeats": 0.264143,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1815",
+          "value": 506937.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.357549,
+          "contribution_std_across_repeats": 0.087867,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3105",
+          "value": 61.0,
+          "value_is_missing": false,
+          "mean_contribution": 0.349363,
+          "contribution_std_across_repeats": 0.153455,
+          "direction": "INCREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        }
+      ]
+    },
+    {
+      "dev_row_position": 7234,
+      "dataset_row_index": 9047,
+      "label": "MULE_LABELLED_IN_DEVELOPMENT_DATA",
+      "why_this_is_a_miss": {
+        "champion": "xgboost_top_120",
+        "champion_rank": 1949,
+        "analyst_budget_k": 100,
+        "aggregation": "score_average over repeats (the served convention)",
+        "n_repeats_outside_budget": 3,
+        "n_repeats": 3,
+        "per_repeat_rank": [
+          3846,
+          780,
+          2788
+        ]
+      },
+      "category": "LOOKALIKE_MULE",
+      "classification": {
+        "category": "LOOKALIKE_MULE",
+        "decided_by_rule": "lookalike_mule",
+        "decided_by_test": "n_mule_labels_in_neighbourhood == 0 AND distance_to_nearest_legitimate_account < distance_to_nearest_known_mule",
+        "decided_by_measured_values": {
+          "n_mule_labels_in_neighbourhood": 0,
+          "distance_to_nearest_legitimate_account": 11.301816,
+          "distance_to_nearest_known_mule": 13.232576
+        },
+        "other_rules_that_also_fired": [],
+        "rules_evaluated": [
+          {
+            "priority": 1,
+            "rule": "missing_data",
+            "category": "MISSING_DATA",
+            "fired": false,
+            "test": "missingness_z >= 4.0 OR missing_fraction >= 0.5",
+            "measured": {
+              "missingness_z": 0.6691,
+              "missing_fraction": 0.216667
+            }
+          },
+          {
+            "priority": 2,
+            "rule": "ood_pattern",
+            "category": "OOD_PATTERN",
+            "fired": false,
+            "test": "knn_distance > knn_threshold (the lens's own dev-quantile gate) OR range_violation_share > 0.2",
+            "measured": {
+              "knn_distance": 13.142138,
+              "knn_threshold": 38947879.664001,
+              "range_violation_share": 0.0
+            }
+          },
+          {
+            "priority": 3,
+            "rule": "threshold_miss",
+            "category": "THRESHOLD_MISS",
+            "fired": false,
+            "test": "champion_rank <= 2.0 x budget_k",
+            "measured": {
+              "champion_rank": 1949,
+              "budget_k": 100
+            }
+          },
+          {
+            "priority": 4,
+            "rule": "model_disagreement",
+            "category": "MODEL_DISAGREEMENT",
+            "fired": false,
+            "test": "n_peer_families_within_budget >= 1",
+            "measured": {
+              "n_peer_families_within_budget": 0
+            }
+          },
+          {
+            "priority": 5,
+            "rule": "lookalike_mule",
+            "category": "LOOKALIKE_MULE",
+            "fired": true,
+            "test": "n_mule_labels_in_neighbourhood == 0 AND distance_to_nearest_legitimate_account < distance_to_nearest_known_mule",
+            "measured": {
+              "n_mule_labels_in_neighbourhood": 0,
+              "distance_to_nearest_legitimate_account": 11.301816,
+              "distance_to_nearest_known_mule": 13.232576
+            }
+          },
+          {
+            "priority": 6,
+            "rule": "low_signal_mule",
+            "category": "LOW_SIGNAL_MULE",
+            "fired": true,
+            "test": "residual - reached only when no rule above fired",
+            "measured": {
+              "n_families_below_dev_median": 1,
+              "n_families_measured": 4
+            }
+          }
+        ],
+        "rule_order": [
+          "missing_data",
+          "ood_pattern",
+          "threshold_miss",
+          "model_disagreement",
+          "lookalike_mule",
+          "low_signal_mule"
+        ]
+      },
+      "measurements": {
+        "champion_rank": 1949,
+        "budget_k": 100,
+        "missing_fraction": 0.21666666666666667,
+        "missingness_z": 0.6690999629822888,
+        "range_violation_share": 0.0,
+        "knn_distance": 13.142138481140137,
+        "knn_threshold": 38947879.6640008,
+        "n_peer_families_within_budget": 0,
+        "n_mule_labels_in_neighbourhood": 0,
+        "distance_to_nearest_known_mule": 13.232576131431044,
+        "distance_to_nearest_legitimate_account": 11.301815874659468,
+        "n_families_below_dev_median": 1,
+        "n_families_measured": 4
+      },
+      "family_scores": {
+        "catboost": {
+          "model": "catboost_top_120",
+          "score_repeat_average": 0.168876,
+          "per_repeat_score": [
+            0.004013,
+            0.342989,
+            0.159626
+          ],
+          "rank": 1702,
+          "within_budget": false,
+          "score_percentile_in_development": 76.583
+        },
+        "lightgbm": {
+          "model": "lightgbm_top_120",
+          "score_repeat_average": 0.001197,
+          "per_repeat_score": [
+            0.00031,
+            0.000517,
+            0.002762
+          ],
+          "rank": 4126,
+          "within_budget": false,
+          "score_percentile_in_development": 43.213
+        },
+        "tabpfn": {
+          "model": "tabpfn_top_60",
+          "score_repeat_average": 0.003807,
+          "per_repeat_score": [
+            0.003463,
+            0.004733,
+            0.003226
+          ],
+          "rank": 424,
+          "within_budget": false,
+          "score_percentile_in_development": 94.177
+        },
+        "xgboost": {
+          "model": "xgboost_top_120",
+          "score_repeat_average": 0.003516,
+          "per_repeat_score": [
+            0.00018,
+            0.006367,
+            0.004002
+          ],
+          "rank": 1949,
+          "within_budget": false,
+          "score_percentile_in_development": 73.183
+        }
+      },
+      "closest_known_mule": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 9026,
+        "dev_row_position": 7221,
+        "distance": 13.232576,
+        "that_account_champion_rank": 39,
+        "that_account_was_surfaced_within_budget": true
+      },
+      "closest_legitimate_account": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 2418,
+        "dev_row_position": 1907,
+        "distance": 11.301816,
+        "closer_than_nearest_mule_labelled_account": true
+      },
+      "nearest_neighbour_distance": {
+        "space": "champion input space (120 columns), median-imputed then robust-scaled by the deployed OOD lens's medians and IQRs",
+        "k": 10,
+        "mean_distance_to_k_nearest": 12.671966,
+        "n_mule_labels_among_k_nearest": 0,
+        "ood_lens_knn_distance": 13.142138,
+        "ood_lens_knn_gate": 38947879.664001,
+        "ood_lens_knn_distance_percentile_in_development": 22.137
+      },
+      "missingness_pattern": {
+        "n_features": 120,
+        "n_missing": 26,
+        "missing_fraction": 0.216667,
+        "missingness_z_vs_development": 0.6691,
+        "development_mean_missing_fraction": 0.177664,
+        "missing_by_feature_family": {
+          "UPI": 9,
+          "GST": 7,
+          "CASH": 3,
+          "LOAN": 3,
+          "NET_BANKING": 3,
+          "ATM": 1
+        },
+        "missing_features": [
+          "F148",
+          "F150",
+          "F163",
+          "F164",
+          "F193",
+          "F2390",
+          "F2489",
+          "F2527",
+          "F2624",
+          "F2671",
+          "F2672",
+          "F2686",
+          "F2691",
+          "F2831",
+          "F2999",
+          "F3073",
+          "F3091",
+          "F3093",
+          "F3105",
+          "F3136",
+          "F366",
+          "F456",
+          "F468",
+          "F471",
+          "F499",
+          "F570"
+        ]
+      },
+      "merchant_context_evidence": {
+        "source": "Merchant Legitimacy Verifier (E_profile_merchant view, 1331 business features)",
+        "verdict": {
+          "legitimacy": 0.0084,
+          "band": "LITTLE_BUSINESS_EVIDENCE",
+          "mule_probability_from_business_evidence": 0.99594,
+          "components": {},
+          "disclaimer": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue."
+        },
+        "policy": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue.",
+        "caveat": "fitted on all development rows including this one; the reading is in-sample and is context, not corroboration"
+      },
+      "anomaly_score": {
+        "anomaly_percentile": 80.2037,
+        "detector": "IsolationForest challenger from the served bundle",
+        "fitted_on": "development rows NOT carrying a mule label, so this account was not part of the detector's fit",
+        "reference_distribution": "all development rows",
+        "interpretation": "100 = most anomalous relative to the development cohort. This is an unsupervised lens; it is not a risk score."
+      },
+      "hard_negative_verifier": {
+        "confirms_risk": true,
+        "probability": 0.999979,
+        "caveat": "fitted on all development rows including this one; this reading is in-sample and is reported as context, not as independent corroboration"
+      },
+      "top_shap_features": [
+        {
+          "feature": "F3105",
+          "value": null,
+          "value_is_missing": true,
+          "mean_contribution": -0.541679,
+          "contribution_std_across_repeats": 0.071859,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3805",
+          "value": 2363007.5,
+          "value_is_missing": false,
+          "mean_contribution": -0.537474,
+          "contribution_std_across_repeats": 0.081992,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3492",
+          "value": -0.74,
+          "value_is_missing": false,
+          "mean_contribution": -0.526645,
+          "contribution_std_across_repeats": 0.129344,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3908",
+          "value": 0.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.523246,
+          "contribution_std_across_repeats": 0.26501,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F2999",
+          "value": null,
+          "value_is_missing": true,
+          "mean_contribution": -0.473883,
+          "contribution_std_across_repeats": 0.115465,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3811",
+          "value": 2344184.5,
+          "value_is_missing": false,
+          "mean_contribution": -0.405589,
+          "contribution_std_across_repeats": 0.227599,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3486",
+          "value": -0.75,
+          "value_is_missing": false,
+          "mean_contribution": -0.395648,
+          "contribution_std_across_repeats": 0.097897,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1323",
+          "value": 0.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.361892,
+          "contribution_std_across_repeats": 0.009521,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F366",
+          "value": null,
+          "value_is_missing": true,
+          "mean_contribution": -0.335142,
+          "contribution_std_across_repeats": 0.191451,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F2184",
+          "value": 0.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.330564,
+          "contribution_std_across_repeats": 0.146113,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        }
+      ]
+    },
+    {
+      "dev_row_position": 7239,
+      "dataset_row_index": 9053,
+      "label": "MULE_LABELLED_IN_DEVELOPMENT_DATA",
+      "why_this_is_a_miss": {
+        "champion": "xgboost_top_120",
+        "champion_rank": 115,
+        "analyst_budget_k": 100,
+        "aggregation": "score_average over repeats (the served convention)",
+        "n_repeats_outside_budget": 2,
+        "n_repeats": 3,
+        "per_repeat_rank": [
+          127,
+          154,
+          99
+        ]
+      },
+      "category": "THRESHOLD_MISS",
+      "classification": {
+        "category": "THRESHOLD_MISS",
+        "decided_by_rule": "threshold_miss",
+        "decided_by_test": "champion_rank <= 2.0 x budget_k",
+        "decided_by_measured_values": {
+          "champion_rank": 115,
+          "budget_k": 100
+        },
+        "other_rules_that_also_fired": [
+          "model_disagreement"
+        ],
+        "rules_evaluated": [
+          {
+            "priority": 1,
+            "rule": "missing_data",
+            "category": "MISSING_DATA",
+            "fired": false,
+            "test": "missingness_z >= 4.0 OR missing_fraction >= 0.5",
+            "measured": {
+              "missingness_z": -1.332335,
+              "missing_fraction": 0.1
+            }
+          },
+          {
+            "priority": 2,
+            "rule": "ood_pattern",
+            "category": "OOD_PATTERN",
+            "fired": false,
+            "test": "knn_distance > knn_threshold (the lens's own dev-quantile gate) OR range_violation_share > 0.2",
+            "measured": {
+              "knn_distance": 7.633888,
+              "knn_threshold": 38947879.664001,
+              "range_violation_share": 0.0
+            }
+          },
+          {
+            "priority": 3,
+            "rule": "threshold_miss",
+            "category": "THRESHOLD_MISS",
+            "fired": true,
+            "test": "champion_rank <= 2.0 x budget_k",
+            "measured": {
+              "champion_rank": 115,
+              "budget_k": 100
+            }
+          },
+          {
+            "priority": 4,
+            "rule": "model_disagreement",
+            "category": "MODEL_DISAGREEMENT",
+            "fired": true,
+            "test": "n_peer_families_within_budget >= 1",
+            "measured": {
+              "n_peer_families_within_budget": 1
+            }
+          },
+          {
+            "priority": 5,
+            "rule": "lookalike_mule",
+            "category": "LOOKALIKE_MULE",
+            "fired": false,
+            "test": "n_mule_labels_in_neighbourhood == 0 AND distance_to_nearest_legitimate_account < distance_to_nearest_known_mule",
+            "measured": {
+              "n_mule_labels_in_neighbourhood": 2,
+              "distance_to_nearest_legitimate_account": 6.980018,
+              "distance_to_nearest_known_mule": 7.17771
+            }
+          },
+          {
+            "priority": 6,
+            "rule": "low_signal_mule",
+            "category": "LOW_SIGNAL_MULE",
+            "fired": true,
+            "test": "residual - reached only when no rule above fired",
+            "measured": {
+              "n_families_below_dev_median": 0,
+              "n_families_measured": 4
+            }
+          }
+        ],
+        "rule_order": [
+          "missing_data",
+          "ood_pattern",
+          "threshold_miss",
+          "model_disagreement",
+          "lookalike_mule",
+          "low_signal_mule"
+        ]
+      },
+      "measurements": {
+        "champion_rank": 115,
+        "budget_k": 100,
+        "missing_fraction": 0.1,
+        "missingness_z": -1.3323351165943587,
+        "range_violation_share": 0.0,
+        "knn_distance": 7.633887767791748,
+        "knn_threshold": 38947879.6640008,
+        "n_peer_families_within_budget": 1,
+        "n_mule_labels_in_neighbourhood": 2,
+        "distance_to_nearest_known_mule": 7.177710057758796,
+        "distance_to_nearest_legitimate_account": 6.98001831956067,
+        "n_families_below_dev_median": 0,
+        "n_families_measured": 4
+      },
+      "family_scores": {
+        "catboost": {
+          "model": "catboost_top_120",
+          "score_repeat_average": 0.399407,
+          "per_repeat_score": [
+            0.172307,
+            0.577142,
+            0.448773
+          ],
+          "rank": 176,
+          "within_budget": false,
+          "score_percentile_in_development": 97.591
+        },
+        "lightgbm": {
+          "model": "lightgbm_top_120",
+          "score_repeat_average": 0.042564,
+          "per_repeat_score": [
+            0.039999,
+            0.012556,
+            0.075138
+          ],
+          "rank": 194,
+          "within_budget": false,
+          "score_percentile_in_development": 97.343
+        },
+        "tabpfn": {
+          "model": "tabpfn_top_60",
+          "score_repeat_average": 0.434038,
+          "per_repeat_score": [
+            0.332689,
+            0.65307,
+            0.316356
+          ],
+          "rank": 53,
+          "within_budget": true,
+          "score_percentile_in_development": 99.284
+        },
+        "xgboost": {
+          "model": "xgboost_top_120",
+          "score_repeat_average": 0.195112,
+          "per_repeat_score": [
+            0.130996,
+            0.088013,
+            0.366329
+          ],
+          "rank": 115,
+          "within_budget": false,
+          "score_percentile_in_development": 98.431
+        }
+      },
+      "closest_known_mule": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 9018,
+        "dev_row_position": 7215,
+        "distance": 7.17771,
+        "that_account_champion_rank": 33,
+        "that_account_was_surfaced_within_budget": true
+      },
+      "closest_legitimate_account": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 5637,
+        "dev_row_position": 4507,
+        "distance": 6.980018,
+        "closer_than_nearest_mule_labelled_account": true
+      },
+      "nearest_neighbour_distance": {
+        "space": "champion input space (120 columns), median-imputed then robust-scaled by the deployed OOD lens's medians and IQRs",
+        "k": 10,
+        "mean_distance_to_k_nearest": 7.46044,
+        "n_mule_labels_among_k_nearest": 2,
+        "ood_lens_knn_distance": 7.633888,
+        "ood_lens_knn_gate": 38947879.664001,
+        "ood_lens_knn_distance_percentile_in_development": 7.833
+      },
+      "missingness_pattern": {
+        "n_features": 120,
+        "n_missing": 12,
+        "missing_fraction": 0.1,
+        "missingness_z_vs_development": -1.3323,
+        "development_mean_missing_fraction": 0.177664,
+        "missing_by_feature_family": {
+          "CASH": 3,
+          "LOAN": 3,
+          "MOBILE_BANKING": 3,
+          "ELEC_XFER": 2,
+          "ATM": 1
+        },
+        "missing_features": [
+          "F193",
+          "F2397",
+          "F2527",
+          "F2595",
+          "F2598",
+          "F261",
+          "F2624",
+          "F264",
+          "F2831",
+          "F3073",
+          "F3136",
+          "F499"
+        ]
+      },
+      "merchant_context_evidence": {
+        "source": "Merchant Legitimacy Verifier (E_profile_merchant view, 1331 business features)",
+        "verdict": {
+          "legitimacy": 0.0011,
+          "band": "LITTLE_BUSINESS_EVIDENCE",
+          "mule_probability_from_business_evidence": 0.99938,
+          "components": {},
+          "disclaimer": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue."
+        },
+        "policy": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue.",
+        "caveat": "fitted on all development rows including this one; the reading is in-sample and is context, not corroboration"
+      },
+      "anomaly_score": {
+        "anomaly_percentile": 63.092,
+        "detector": "IsolationForest challenger from the served bundle",
+        "fitted_on": "development rows NOT carrying a mule label, so this account was not part of the detector's fit",
+        "reference_distribution": "all development rows",
+        "interpretation": "100 = most anomalous relative to the development cohort. This is an unsupervised lens; it is not a risk score."
+      },
+      "hard_negative_verifier": {
+        "confirms_risk": true,
+        "probability": 0.999984,
+        "caveat": "fitted on all development rows including this one; this reading is in-sample and is reported as context, not as independent corroboration"
+      },
+      "top_shap_features": [
+        {
+          "feature": "F2638",
+          "value": -0.5,
+          "value_is_missing": false,
+          "mean_contribution": -0.779069,
+          "contribution_std_across_repeats": 0.245047,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1922",
+          "value": 12605.625,
+          "value_is_missing": false,
+          "mean_contribution": -0.680705,
+          "contribution_std_across_repeats": 0.24535,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F422",
+          "value": 1.98,
+          "value_is_missing": false,
+          "mean_contribution": -0.633555,
+          "contribution_std_across_repeats": 0.147513,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3908",
+          "value": 1.0,
+          "value_is_missing": false,
+          "mean_contribution": 0.412964,
+          "contribution_std_across_repeats": 0.132488,
+          "direction": "INCREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F950",
+          "value": 200000.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.373279,
+          "contribution_std_across_repeats": 0.152995,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "MG_PASSTHROUGH_7D",
+          "value": 0.717059,
+          "value_is_missing": false,
+          "mean_contribution": -0.271918,
+          "contribution_std_across_repeats": 0.142411,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F158",
+          "value": 0.5,
+          "value_is_missing": false,
+          "mean_contribution": -0.257342,
+          "contribution_std_across_repeats": 0.111241,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1323",
+          "value": 90000.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.257132,
+          "contribution_std_across_repeats": 0.056787,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1166",
+          "value": 200000.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.251839,
+          "contribution_std_across_repeats": 0.182469,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F2686",
+          "value": -0.42,
+          "value_is_missing": false,
+          "mean_contribution": -0.248878,
+          "contribution_std_across_repeats": 0.275665,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        }
+      ]
+    },
+    {
+      "dev_row_position": 7243,
+      "dataset_row_index": 9057,
+      "label": "MULE_LABELLED_IN_DEVELOPMENT_DATA",
+      "why_this_is_a_miss": {
+        "champion": "xgboost_top_120",
+        "champion_rank": 2131,
+        "analyst_budget_k": 100,
+        "aggregation": "score_average over repeats (the served convention)",
+        "n_repeats_outside_budget": 3,
+        "n_repeats": 3,
+        "per_repeat_rank": [
+          2239,
+          4683,
+          1737
+        ]
+      },
+      "category": "LOOKALIKE_MULE",
+      "classification": {
+        "category": "LOOKALIKE_MULE",
+        "decided_by_rule": "lookalike_mule",
+        "decided_by_test": "n_mule_labels_in_neighbourhood == 0 AND distance_to_nearest_legitimate_account < distance_to_nearest_known_mule",
+        "decided_by_measured_values": {
+          "n_mule_labels_in_neighbourhood": 0,
+          "distance_to_nearest_legitimate_account": 321.409724,
+          "distance_to_nearest_known_mule": 104959.624989
+        },
+        "other_rules_that_also_fired": [],
+        "rules_evaluated": [
+          {
+            "priority": 1,
+            "rule": "missing_data",
+            "category": "MISSING_DATA",
+            "fired": false,
+            "test": "missingness_z >= 4.0 OR missing_fraction >= 0.5",
+            "measured": {
+              "missingness_z": -0.617537,
+              "missing_fraction": 0.141667
+            }
+          },
+          {
+            "priority": 2,
+            "rule": "ood_pattern",
+            "category": "OOD_PATTERN",
+            "fired": false,
+            "test": "knn_distance > knn_threshold (the lens's own dev-quantile gate) OR range_violation_share > 0.2",
+            "measured": {
+              "knn_distance": 22897.660156,
+              "knn_threshold": 38947879.664001,
+              "range_violation_share": 0.0
+            }
+          },
+          {
+            "priority": 3,
+            "rule": "threshold_miss",
+            "category": "THRESHOLD_MISS",
+            "fired": false,
+            "test": "champion_rank <= 2.0 x budget_k",
+            "measured": {
+              "champion_rank": 2131,
+              "budget_k": 100
+            }
+          },
+          {
+            "priority": 4,
+            "rule": "model_disagreement",
+            "category": "MODEL_DISAGREEMENT",
+            "fired": false,
+            "test": "n_peer_families_within_budget >= 1",
+            "measured": {
+              "n_peer_families_within_budget": 0
+            }
+          },
+          {
+            "priority": 5,
+            "rule": "lookalike_mule",
+            "category": "LOOKALIKE_MULE",
+            "fired": true,
+            "test": "n_mule_labels_in_neighbourhood == 0 AND distance_to_nearest_legitimate_account < distance_to_nearest_known_mule",
+            "measured": {
+              "n_mule_labels_in_neighbourhood": 0,
+              "distance_to_nearest_legitimate_account": 321.409724,
+              "distance_to_nearest_known_mule": 104959.624989
+            }
+          },
+          {
+            "priority": 6,
+            "rule": "low_signal_mule",
+            "category": "LOW_SIGNAL_MULE",
+            "fired": true,
+            "test": "residual - reached only when no rule above fired",
+            "measured": {
+              "n_families_below_dev_median": 1,
+              "n_families_measured": 4
+            }
+          }
+        ],
+        "rule_order": [
+          "missing_data",
+          "ood_pattern",
+          "threshold_miss",
+          "model_disagreement",
+          "lookalike_mule",
+          "low_signal_mule"
+        ]
+      },
+      "measurements": {
+        "champion_rank": 2131,
+        "budget_k": 100,
+        "missing_fraction": 0.14166666666666666,
+        "missingness_z": -0.6175368738884134,
+        "range_violation_share": 0.0,
+        "knn_distance": 22897.66015625,
+        "knn_threshold": 38947879.6640008,
+        "n_peer_families_within_budget": 0,
+        "n_mule_labels_in_neighbourhood": 0,
+        "distance_to_nearest_known_mule": 104959.62498908535,
+        "distance_to_nearest_legitimate_account": 321.4097241960801,
+        "n_families_below_dev_median": 1,
+        "n_families_measured": 4
+      },
+      "family_scores": {
+        "catboost": {
+          "model": "catboost_top_120",
+          "score_repeat_average": 0.002269,
+          "per_repeat_score": [
+            0.00061,
+            0.004034,
+            0.002163
+          ],
+          "rank": 7071,
+          "within_budget": false,
+          "score_percentile_in_development": 2.671
+        },
+        "lightgbm": {
+          "model": "lightgbm_top_120",
+          "score_repeat_average": 0.002752,
+          "per_repeat_score": [
+            0.000276,
+            0.000306,
+            0.007674
+          ],
+          "rank": 2214,
+          "within_budget": false,
+          "score_percentile_in_development": 69.535
+        },
+        "tabpfn": {
+          "model": "tabpfn_top_60",
+          "score_repeat_average": 0.015968,
+          "per_repeat_score": [
+            0.001109,
+            0.013983,
+            0.032811
+          ],
+          "rank": 184,
+          "within_budget": false,
+          "score_percentile_in_development": 97.481
+        },
+        "xgboost": {
+          "model": "xgboost_top_120",
+          "score_repeat_average": 0.003059,
+          "per_repeat_score": [
+            0.000661,
+            0.000119,
+            0.008396
+          ],
+          "rank": 2131,
+          "within_budget": false,
+          "score_percentile_in_development": 70.677
+        }
+      },
+      "closest_known_mule": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 9081,
+        "dev_row_position": 7263,
+        "distance": 104959.624989,
+        "that_account_champion_rank": 198,
+        "that_account_was_surfaced_within_budget": false
+      },
+      "closest_legitimate_account": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 148,
+        "dev_row_position": 112,
+        "distance": 321.409724,
+        "closer_than_nearest_mule_labelled_account": true
+      },
+      "nearest_neighbour_distance": {
+        "space": "champion input space (120 columns), median-imputed then robust-scaled by the deployed OOD lens's medians and IQRs",
+        "k": 10,
+        "mean_distance_to_k_nearest": 15000.244668,
+        "n_mule_labels_among_k_nearest": 0,
+        "ood_lens_knn_distance": 22897.660156,
+        "ood_lens_knn_gate": 38947879.664001,
+        "ood_lens_knn_distance_percentile_in_development": 90.859
+      },
+      "missingness_pattern": {
+        "n_features": 120,
+        "n_missing": 17,
+        "missing_fraction": 0.141667,
+        "missingness_z_vs_development": -0.6175,
+        "development_mean_missing_fraction": 0.177664,
+        "missing_by_feature_family": {
+          "GST": 7,
+          "CASH": 3,
+          "LOAN": 3,
+          "ELEC_XFER": 2,
+          "MOBILE_BANKING": 2
+        },
+        "missing_features": [
+          "F148",
+          "F150",
+          "F193",
+          "F2527",
+          "F2595",
+          "F2598",
+          "F261",
+          "F2624",
+          "F264",
+          "F2671",
+          "F2672",
+          "F2831",
+          "F3091",
+          "F3093",
+          "F3136",
+          "F456",
+          "F499"
+        ]
+      },
+      "merchant_context_evidence": {
+        "source": "Merchant Legitimacy Verifier (E_profile_merchant view, 1331 business features)",
+        "verdict": {
+          "legitimacy": 0.0033,
+          "band": "LITTLE_BUSINESS_EVIDENCE",
+          "mule_probability_from_business_evidence": 0.998931,
+          "components": {},
+          "disclaimer": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue."
+        },
+        "policy": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue.",
+        "caveat": "fitted on all development rows including this one; the reading is in-sample and is context, not corroboration"
+      },
+      "anomaly_score": {
+        "anomaly_percentile": 48.0865,
+        "detector": "IsolationForest challenger from the served bundle",
+        "fitted_on": "development rows NOT carrying a mule label, so this account was not part of the detector's fit",
+        "reference_distribution": "all development rows",
+        "interpretation": "100 = most anomalous relative to the development cohort. This is an unsupervised lens; it is not a risk score."
+      },
+      "hard_negative_verifier": {
+        "confirms_risk": true,
+        "probability": 0.999977,
+        "caveat": "fitted on all development rows including this one; this reading is in-sample and is reported as context, not as independent corroboration"
+      },
+      "top_shap_features": [
+        {
+          "feature": "F3105",
+          "value": 379.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.641272,
+          "contribution_std_across_repeats": 0.32607,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3805",
+          "value": 1613373.875,
+          "value_is_missing": false,
+          "mean_contribution": -0.556837,
+          "contribution_std_across_repeats": 0.031812,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3796",
+          "value": 380.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.549488,
+          "contribution_std_across_repeats": 0.444534,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3873",
+          "value": 369999.8125,
+          "value_is_missing": false,
+          "mean_contribution": -0.541654,
+          "contribution_std_across_repeats": 0.233608,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F466",
+          "value": 0.94,
+          "value_is_missing": false,
+          "mean_contribution": -0.459261,
+          "contribution_std_across_repeats": 0.391447,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F2489",
+          "value": 0.95,
+          "value_is_missing": false,
+          "mean_contribution": -0.458868,
+          "contribution_std_across_repeats": 0.204238,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1810",
+          "value": 380.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.437019,
+          "contribution_std_across_repeats": 0.335173,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1819",
+          "value": 2847046.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.429954,
+          "contribution_std_across_repeats": 0.296043,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F158",
+          "value": 0.25,
+          "value_is_missing": false,
+          "mean_contribution": -0.417519,
+          "contribution_std_across_repeats": 0.222501,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F2738",
+          "value": -0.58,
+          "value_is_missing": false,
+          "mean_contribution": -0.346034,
+          "contribution_std_across_repeats": 0.050445,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        }
+      ]
+    },
+    {
+      "dev_row_position": 7250,
+      "dataset_row_index": 9067,
+      "label": "MULE_LABELLED_IN_DEVELOPMENT_DATA",
+      "why_this_is_a_miss": {
+        "champion": "xgboost_top_120",
+        "champion_rank": 4804,
+        "analyst_budget_k": 100,
+        "aggregation": "score_average over repeats (the served convention)",
+        "n_repeats_outside_budget": 3,
+        "n_repeats": 3,
+        "per_repeat_rank": [
+          4663,
+          7129,
+          4128
+        ]
+      },
+      "category": "LOOKALIKE_MULE",
+      "classification": {
+        "category": "LOOKALIKE_MULE",
+        "decided_by_rule": "lookalike_mule",
+        "decided_by_test": "n_mule_labels_in_neighbourhood == 0 AND distance_to_nearest_legitimate_account < distance_to_nearest_known_mule",
+        "decided_by_measured_values": {
+          "n_mule_labels_in_neighbourhood": 0,
+          "distance_to_nearest_legitimate_account": 8.563333,
+          "distance_to_nearest_known_mule": 17.887284
+        },
+        "other_rules_that_also_fired": [],
+        "rules_evaluated": [
+          {
+            "priority": 1,
+            "rule": "missing_data",
+            "category": "MISSING_DATA",
+            "fired": false,
+            "test": "missingness_z >= 4.0 OR missing_fraction >= 0.5",
+            "measured": {
+              "missingness_z": 0.240221,
+              "missing_fraction": 0.191667
+            }
+          },
+          {
+            "priority": 2,
+            "rule": "ood_pattern",
+            "category": "OOD_PATTERN",
+            "fired": false,
+            "test": "knn_distance > knn_threshold (the lens's own dev-quantile gate) OR range_violation_share > 0.2",
+            "measured": {
+              "knn_distance": 12.86529,
+              "knn_threshold": 38947879.664001,
+              "range_violation_share": 0.0
+            }
+          },
+          {
+            "priority": 3,
+            "rule": "threshold_miss",
+            "category": "THRESHOLD_MISS",
+            "fired": false,
+            "test": "champion_rank <= 2.0 x budget_k",
+            "measured": {
+              "champion_rank": 4804,
+              "budget_k": 100
+            }
+          },
+          {
+            "priority": 4,
+            "rule": "model_disagreement",
+            "category": "MODEL_DISAGREEMENT",
+            "fired": false,
+            "test": "n_peer_families_within_budget >= 1",
+            "measured": {
+              "n_peer_families_within_budget": 0
+            }
+          },
+          {
+            "priority": 5,
+            "rule": "lookalike_mule",
+            "category": "LOOKALIKE_MULE",
+            "fired": true,
+            "test": "n_mule_labels_in_neighbourhood == 0 AND distance_to_nearest_legitimate_account < distance_to_nearest_known_mule",
+            "measured": {
+              "n_mule_labels_in_neighbourhood": 0,
+              "distance_to_nearest_legitimate_account": 8.563333,
+              "distance_to_nearest_known_mule": 17.887284
+            }
+          },
+          {
+            "priority": 6,
+            "rule": "low_signal_mule",
+            "category": "LOW_SIGNAL_MULE",
+            "fired": true,
+            "test": "residual - reached only when no rule above fired",
+            "measured": {
+              "n_families_below_dev_median": 3,
+              "n_families_measured": 4
+            }
+          }
+        ],
+        "rule_order": [
+          "missing_data",
+          "ood_pattern",
+          "threshold_miss",
+          "model_disagreement",
+          "lookalike_mule",
+          "low_signal_mule"
+        ]
+      },
+      "measurements": {
+        "champion_rank": 4804,
+        "budget_k": 100,
+        "missing_fraction": 0.19166666666666668,
+        "missingness_z": 0.24022101735872156,
+        "range_violation_share": 0.0,
+        "knn_distance": 12.865289688110352,
+        "knn_threshold": 38947879.6640008,
+        "n_peer_families_within_budget": 0,
+        "n_mule_labels_in_neighbourhood": 0,
+        "distance_to_nearest_known_mule": 17.887284467513446,
+        "distance_to_nearest_legitimate_account": 8.563332863864236,
+        "n_families_below_dev_median": 3,
+        "n_families_measured": 4
+      },
+      "family_scores": {
+        "catboost": {
+          "model": "catboost_top_120",
+          "score_repeat_average": 0.049345,
+          "per_repeat_score": [
+            0.000265,
+            0.138512,
+            0.00926
+          ],
+          "rank": 5647,
+          "within_budget": false,
+          "score_percentile_in_development": 22.274
+        },
+        "lightgbm": {
+          "model": "lightgbm_top_120",
+          "score_repeat_average": 0.000765,
+          "per_repeat_score": [
+            0.000153,
+            0.000159,
+            0.001983
+          ],
+          "rank": 5222,
+          "within_budget": false,
+          "score_percentile_in_development": 28.125
+        },
+        "tabpfn": {
+          "model": "tabpfn_top_60",
+          "score_repeat_average": 0.000563,
+          "per_repeat_score": [
+            0.000774,
+            0.000473,
+            0.000444
+          ],
+          "rank": 1516,
+          "within_budget": false,
+          "score_percentile_in_development": 79.144
+        },
+        "xgboost": {
+          "model": "xgboost_top_120",
+          "score_repeat_average": 0.000647,
+          "per_repeat_score": [
+            9.4e-05,
+            1e-06,
+            0.001845
+          ],
+          "rank": 4804,
+          "within_budget": false,
+          "score_percentile_in_development": 33.879
+        }
+      },
+      "closest_known_mule": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 9051,
+        "dev_row_position": 7238,
+        "distance": 17.887284,
+        "that_account_champion_rank": 4,
+        "that_account_was_surfaced_within_budget": true
+      },
+      "closest_legitimate_account": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 8402,
+        "dev_row_position": 6723,
+        "distance": 8.563333,
+        "closer_than_nearest_mule_labelled_account": true
+      },
+      "nearest_neighbour_distance": {
+        "space": "champion input space (120 columns), median-imputed then robust-scaled by the deployed OOD lens's medians and IQRs",
+        "k": 10,
+        "mean_distance_to_k_nearest": 11.612407,
+        "n_mule_labels_among_k_nearest": 0,
+        "ood_lens_knn_distance": 12.86529,
+        "ood_lens_knn_gate": 38947879.664001,
+        "ood_lens_knn_distance_percentile_in_development": 21.669
+      },
+      "missingness_pattern": {
+        "n_features": 120,
+        "n_missing": 23,
+        "missing_fraction": 0.191667,
+        "missingness_z_vs_development": 0.2402,
+        "development_mean_missing_fraction": 0.177664,
+        "missing_by_feature_family": {
+          "UPI": 11,
+          "UPI_XFER": 5,
+          "LOAN": 3,
+          "MOBILE_BANKING": 3,
+          "ATM": 1
+        },
+        "missing_features": [
+          "F158",
+          "F193",
+          "F2390",
+          "F2397",
+          "F2489",
+          "F2581",
+          "F2595",
+          "F2598",
+          "F2681",
+          "F2685",
+          "F2686",
+          "F2999",
+          "F3073",
+          "F3103",
+          "F3105",
+          "F3136",
+          "F364",
+          "F366",
+          "F466",
+          "F468",
+          "F471",
+          "F499",
+          "F570"
+        ]
+      },
+      "merchant_context_evidence": {
+        "source": "Merchant Legitimacy Verifier (E_profile_merchant view, 1331 business features)",
+        "verdict": {
+          "legitimacy": 0.00537,
+          "band": "LITTLE_BUSINESS_EVIDENCE",
+          "mule_probability_from_business_evidence": 0.998424,
+          "components": {},
+          "disclaimer": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue."
+        },
+        "policy": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue.",
+        "caveat": "fitted on all development rows including this one; the reading is in-sample and is context, not corroboration"
+      },
+      "anomaly_score": {
+        "anomaly_percentile": 61.082,
+        "detector": "IsolationForest challenger from the served bundle",
+        "fitted_on": "development rows NOT carrying a mule label, so this account was not part of the detector's fit",
+        "reference_distribution": "all development rows",
+        "interpretation": "100 = most anomalous relative to the development cohort. This is an unsupervised lens; it is not a risk score."
+      },
+      "hard_negative_verifier": {
+        "confirms_risk": true,
+        "probability": 0.999962,
+        "caveat": "fitted on all development rows including this one; this reading is in-sample and is reported as context, not as independent corroboration"
+      },
+      "top_shap_features": [
+        {
+          "feature": "F3105",
+          "value": null,
+          "value_is_missing": true,
+          "mean_contribution": -0.52929,
+          "contribution_std_across_repeats": 0.35966,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F364",
+          "value": null,
+          "value_is_missing": true,
+          "mean_contribution": -0.474878,
+          "contribution_std_across_repeats": 0.160232,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3908",
+          "value": 0.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.470542,
+          "contribution_std_across_repeats": 0.050946,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3873",
+          "value": 1712229.625,
+          "value_is_missing": false,
+          "mean_contribution": -0.440715,
+          "contribution_std_across_repeats": 0.168843,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F471",
+          "value": null,
+          "value_is_missing": true,
+          "mean_contribution": -0.437701,
+          "contribution_std_across_repeats": 0.20118,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3805",
+          "value": 4804254.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.412494,
+          "contribution_std_across_repeats": 0.109387,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3103",
+          "value": null,
+          "value_is_missing": true,
+          "mean_contribution": -0.410899,
+          "contribution_std_across_repeats": 0.10875,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3091",
+          "value": 93.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.390428,
+          "contribution_std_across_repeats": 0.188756,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1922",
+          "value": 19591.650391,
+          "value_is_missing": false,
+          "mean_contribution": -0.37695,
+          "contribution_std_across_repeats": 0.227511,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1323",
+          "value": 0.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.369381,
+          "contribution_std_across_repeats": 0.199586,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        }
+      ]
+    },
+    {
+      "dev_row_position": 7252,
+      "dataset_row_index": 9069,
+      "label": "MULE_LABELLED_IN_DEVELOPMENT_DATA",
+      "why_this_is_a_miss": {
+        "champion": "xgboost_top_120",
+        "champion_rank": 201,
+        "analyst_budget_k": 100,
+        "aggregation": "score_average over repeats (the served convention)",
+        "n_repeats_outside_budget": 3,
+        "n_repeats": 3,
+        "per_repeat_rank": [
+          389,
+          342,
+          135
+        ]
+      },
+      "category": "MODEL_DISAGREEMENT",
+      "classification": {
+        "category": "MODEL_DISAGREEMENT",
+        "decided_by_rule": "model_disagreement",
+        "decided_by_test": "n_peer_families_within_budget >= 1",
+        "decided_by_measured_values": {
+          "n_peer_families_within_budget": 3
+        },
+        "other_rules_that_also_fired": [],
+        "rules_evaluated": [
+          {
+            "priority": 1,
+            "rule": "missing_data",
+            "category": "MISSING_DATA",
+            "fired": false,
+            "test": "missingness_z >= 4.0 OR missing_fraction >= 0.5",
+            "measured": {
+              "missingness_z": -0.045698,
+              "missing_fraction": 0.175
+            }
+          },
+          {
+            "priority": 2,
+            "rule": "ood_pattern",
+            "category": "OOD_PATTERN",
+            "fired": false,
+            "test": "knn_distance > knn_threshold (the lens's own dev-quantile gate) OR range_violation_share > 0.2",
+            "measured": {
+              "knn_distance": 891.509155,
+              "knn_threshold": 38947879.664001,
+              "range_violation_share": 0.0
+            }
+          },
+          {
+            "priority": 3,
+            "rule": "threshold_miss",
+            "category": "THRESHOLD_MISS",
+            "fired": false,
+            "test": "champion_rank <= 2.0 x budget_k",
+            "measured": {
+              "champion_rank": 201,
+              "budget_k": 100
+            }
+          },
+          {
+            "priority": 4,
+            "rule": "model_disagreement",
+            "category": "MODEL_DISAGREEMENT",
+            "fired": true,
+            "test": "n_peer_families_within_budget >= 1",
+            "measured": {
+              "n_peer_families_within_budget": 3
+            }
+          },
+          {
+            "priority": 5,
+            "rule": "lookalike_mule",
+            "category": "LOOKALIKE_MULE",
+            "fired": false,
+            "test": "n_mule_labels_in_neighbourhood == 0 AND distance_to_nearest_legitimate_account < distance_to_nearest_known_mule",
+            "measured": {
+              "n_mule_labels_in_neighbourhood": 1,
+              "distance_to_nearest_legitimate_account": 391.476051,
+              "distance_to_nearest_known_mule": 394.005034
+            }
+          },
+          {
+            "priority": 6,
+            "rule": "low_signal_mule",
+            "category": "LOW_SIGNAL_MULE",
+            "fired": true,
+            "test": "residual - reached only when no rule above fired",
+            "measured": {
+              "n_families_below_dev_median": 0,
+              "n_families_measured": 4
+            }
+          }
+        ],
+        "rule_order": [
+          "missing_data",
+          "ood_pattern",
+          "threshold_miss",
+          "model_disagreement",
+          "lookalike_mule",
+          "low_signal_mule"
+        ]
+      },
+      "measurements": {
+        "champion_rank": 201,
+        "budget_k": 100,
+        "missing_fraction": 0.175,
+        "missingness_z": -0.045698279723657066,
+        "range_violation_share": 0.0,
+        "knn_distance": 891.5091552734375,
+        "knn_threshold": 38947879.6640008,
+        "n_peer_families_within_budget": 3,
+        "n_mule_labels_in_neighbourhood": 1,
+        "distance_to_nearest_known_mule": 394.0050340269757,
+        "distance_to_nearest_legitimate_account": 391.4760510174985,
+        "n_families_below_dev_median": 0,
+        "n_families_measured": 4
+      },
+      "family_scores": {
+        "catboost": {
+          "model": "catboost_top_120",
+          "score_repeat_average": 0.662366,
+          "per_repeat_score": [
+            0.423853,
+            0.731451,
+            0.831793
+          ],
+          "rank": 58,
+          "within_budget": true,
+          "score_percentile_in_development": 99.215
+        },
+        "lightgbm": {
+          "model": "lightgbm_top_120",
+          "score_repeat_average": 0.090895,
+          "per_repeat_score": [
+            0.043357,
+            0.018647,
+            0.210681
+          ],
+          "rank": 99,
+          "within_budget": true,
+          "score_percentile_in_development": 98.651
+        },
+        "tabpfn": {
+          "model": "tabpfn_top_60",
+          "score_repeat_average": 0.502773,
+          "per_repeat_score": [
+            0.3388,
+            0.617882,
+            0.551638
+          ],
+          "rank": 51,
+          "within_budget": true,
+          "score_percentile_in_development": 99.312
+        },
+        "xgboost": {
+          "model": "xgboost_top_120",
+          "score_repeat_average": 0.098041,
+          "per_repeat_score": [
+            0.017108,
+            0.023936,
+            0.253078
+          ],
+          "rank": 201,
+          "within_budget": false,
+          "score_percentile_in_development": 97.247
+        }
+      },
+      "closest_known_mule": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 9068,
+        "dev_row_position": 7251,
+        "distance": 394.005034,
+        "that_account_champion_rank": 27,
+        "that_account_was_surfaced_within_budget": true
+      },
+      "closest_legitimate_account": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 3955,
+        "dev_row_position": 3125,
+        "distance": 391.476051,
+        "closer_than_nearest_mule_labelled_account": true
+      },
+      "nearest_neighbour_distance": {
+        "space": "champion input space (120 columns), median-imputed then robust-scaled by the deployed OOD lens's medians and IQRs",
+        "k": 10,
+        "mean_distance_to_k_nearest": 577.173187,
+        "n_mule_labels_among_k_nearest": 1,
+        "ood_lens_knn_distance": 891.509155,
+        "ood_lens_knn_gate": 38947879.664001,
+        "ood_lens_knn_distance_percentile_in_development": 69.686
+      },
+      "missingness_pattern": {
+        "n_features": 120,
+        "n_missing": 21,
+        "missing_fraction": 0.175,
+        "missingness_z_vs_development": -0.0457,
+        "development_mean_missing_fraction": 0.177664,
+        "missing_by_feature_family": {
+          "GST": 7,
+          "CASH": 3,
+          "LOAN": 3,
+          "MOBILE_BANKING": 3,
+          "NET_BANKING": 3,
+          "ELEC_XFER": 2
+        },
+        "missing_features": [
+          "F148",
+          "F150",
+          "F163",
+          "F164",
+          "F193",
+          "F2397",
+          "F2527",
+          "F2595",
+          "F2598",
+          "F261",
+          "F2624",
+          "F264",
+          "F2671",
+          "F2672",
+          "F2691",
+          "F2831",
+          "F3091",
+          "F3093",
+          "F3136",
+          "F456",
+          "F499"
+        ]
+      },
+      "merchant_context_evidence": {
+        "source": "Merchant Legitimacy Verifier (E_profile_merchant view, 1331 business features)",
+        "verdict": {
+          "legitimacy": 0.00867,
+          "band": "LITTLE_BUSINESS_EVIDENCE",
+          "mule_probability_from_business_evidence": 0.99374,
+          "components": {},
+          "disclaimer": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue."
+        },
+        "policy": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue.",
+        "caveat": "fitted on all development rows including this one; the reading is in-sample and is context, not corroboration"
+      },
+      "anomaly_score": {
+        "anomaly_percentile": 13.3673,
+        "detector": "IsolationForest challenger from the served bundle",
+        "fitted_on": "development rows NOT carrying a mule label, so this account was not part of the detector's fit",
+        "reference_distribution": "all development rows",
+        "interpretation": "100 = most anomalous relative to the development cohort. This is an unsupervised lens; it is not a risk score."
+      },
+      "hard_negative_verifier": {
+        "confirms_risk": true,
+        "probability": 0.999979,
+        "caveat": "fitted on all development rows including this one; this reading is in-sample and is reported as context, not as independent corroboration"
+      },
+      "top_shap_features": [
+        {
+          "feature": "F3105",
+          "value": 275.0,
+          "value_is_missing": false,
+          "mean_contribution": -1.023837,
+          "contribution_std_across_repeats": 0.462874,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F2390",
+          "value": 1.01,
+          "value_is_missing": false,
+          "mean_contribution": -0.635046,
+          "contribution_std_across_repeats": 0.305905,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1810",
+          "value": 276.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.596431,
+          "contribution_std_across_repeats": 0.291094,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3796",
+          "value": 276.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.52964,
+          "contribution_std_across_repeats": 0.463329,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3103",
+          "value": 275.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.515629,
+          "contribution_std_across_repeats": 0.184463,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3908",
+          "value": 1.0,
+          "value_is_missing": false,
+          "mean_contribution": 0.506866,
+          "contribution_std_across_repeats": 0.035949,
+          "direction": "INCREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F2489",
+          "value": 2.38,
+          "value_is_missing": false,
+          "mean_contribution": -0.472259,
+          "contribution_std_across_repeats": 0.152779,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F120",
+          "value": 0.5,
+          "value_is_missing": false,
+          "mean_contribution": -0.418812,
+          "contribution_std_across_repeats": 0.11908,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3493",
+          "value": -1.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.403314,
+          "contribution_std_across_repeats": 0.103127,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F114",
+          "value": 0.5,
+          "value_is_missing": false,
+          "mean_contribution": -0.367198,
+          "contribution_std_across_repeats": 0.036428,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        }
+      ]
+    },
+    {
+      "dev_row_position": 7255,
+      "dataset_row_index": 9072,
+      "label": "MULE_LABELLED_IN_DEVELOPMENT_DATA",
+      "why_this_is_a_miss": {
+        "champion": "xgboost_top_120",
+        "champion_rank": 298,
+        "analyst_budget_k": 100,
+        "aggregation": "score_average over repeats (the served convention)",
+        "n_repeats_outside_budget": 3,
+        "n_repeats": 3,
+        "per_repeat_rank": [
+          1773,
+          250,
+          248
+        ]
+      },
+      "category": "MODEL_DISAGREEMENT",
+      "classification": {
+        "category": "MODEL_DISAGREEMENT",
+        "decided_by_rule": "model_disagreement",
+        "decided_by_test": "n_peer_families_within_budget >= 1",
+        "decided_by_measured_values": {
+          "n_peer_families_within_budget": 1
+        },
+        "other_rules_that_also_fired": [
+          "lookalike_mule"
+        ],
+        "rules_evaluated": [
+          {
+            "priority": 1,
+            "rule": "missing_data",
+            "category": "MISSING_DATA",
+            "fired": false,
+            "test": "missingness_z >= 4.0 OR missing_fraction >= 0.5",
+            "measured": {
+              "missingness_z": -1.046416,
+              "missing_fraction": 0.116667
+            }
+          },
+          {
+            "priority": 2,
+            "rule": "ood_pattern",
+            "category": "OOD_PATTERN",
+            "fired": false,
+            "test": "knn_distance > knn_threshold (the lens's own dev-quantile gate) OR range_violation_share > 0.2",
+            "measured": {
+              "knn_distance": 1891.46106,
+              "knn_threshold": 38947879.664001,
+              "range_violation_share": 0.0
+            }
+          },
+          {
+            "priority": 3,
+            "rule": "threshold_miss",
+            "category": "THRESHOLD_MISS",
+            "fired": false,
+            "test": "champion_rank <= 2.0 x budget_k",
+            "measured": {
+              "champion_rank": 298,
+              "budget_k": 100
+            }
+          },
+          {
+            "priority": 4,
+            "rule": "model_disagreement",
+            "category": "MODEL_DISAGREEMENT",
+            "fired": true,
+            "test": "n_peer_families_within_budget >= 1",
+            "measured": {
+              "n_peer_families_within_budget": 1
+            }
+          },
+          {
+            "priority": 5,
+            "rule": "lookalike_mule",
+            "category": "LOOKALIKE_MULE",
+            "fired": true,
+            "test": "n_mule_labels_in_neighbourhood == 0 AND distance_to_nearest_legitimate_account < distance_to_nearest_known_mule",
+            "measured": {
+              "n_mule_labels_in_neighbourhood": 0,
+              "distance_to_nearest_legitimate_account": 445.849441,
+              "distance_to_nearest_known_mule": 15562.198201
+            }
+          },
+          {
+            "priority": 6,
+            "rule": "low_signal_mule",
+            "category": "LOW_SIGNAL_MULE",
+            "fired": true,
+            "test": "residual - reached only when no rule above fired",
+            "measured": {
+              "n_families_below_dev_median": 0,
+              "n_families_measured": 4
+            }
+          }
+        ],
+        "rule_order": [
+          "missing_data",
+          "ood_pattern",
+          "threshold_miss",
+          "model_disagreement",
+          "lookalike_mule",
+          "low_signal_mule"
+        ]
+      },
+      "measurements": {
+        "champion_rank": 298,
+        "budget_k": 100,
+        "missing_fraction": 0.11666666666666667,
+        "missingness_z": -1.0464158195119806,
+        "range_violation_share": 0.0,
+        "knn_distance": 1891.4610595703125,
+        "knn_threshold": 38947879.6640008,
+        "n_peer_families_within_budget": 1,
+        "n_mule_labels_in_neighbourhood": 0,
+        "distance_to_nearest_known_mule": 15562.19820087935,
+        "distance_to_nearest_legitimate_account": 445.8494409588454,
+        "n_families_below_dev_median": 0,
+        "n_families_measured": 4
+      },
+      "family_scores": {
+        "catboost": {
+          "model": "catboost_top_120",
+          "score_repeat_average": 0.161173,
+          "per_repeat_score": [
+            0.01009,
+            0.19257,
+            0.28086
+          ],
+          "rank": 1853,
+          "within_budget": false,
+          "score_percentile_in_development": 74.504
+        },
+        "lightgbm": {
+          "model": "lightgbm_top_120",
+          "score_repeat_average": 0.009954,
+          "per_repeat_score": [
+            0.003603,
+            0.00061,
+            0.025649
+          ],
+          "rank": 707,
+          "within_budget": false,
+          "score_percentile_in_development": 90.281
+        },
+        "tabpfn": {
+          "model": "tabpfn_top_60",
+          "score_repeat_average": 0.168733,
+          "per_repeat_score": [
+            0.082659,
+            0.279436,
+            0.144104
+          ],
+          "rank": 65,
+          "within_budget": true,
+          "score_percentile_in_development": 99.119
+        },
+        "xgboost": {
+          "model": "xgboost_top_120",
+          "score_repeat_average": 0.054201,
+          "per_repeat_score": [
+            0.001147,
+            0.039861,
+            0.121596
+          ],
+          "rank": 298,
+          "within_budget": false,
+          "score_percentile_in_development": 95.911
+        }
+      },
+      "closest_known_mule": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 9081,
+        "dev_row_position": 7263,
+        "distance": 15562.198201,
+        "that_account_champion_rank": 198,
+        "that_account_was_surfaced_within_budget": false
+      },
+      "closest_legitimate_account": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 86,
+        "dev_row_position": 68,
+        "distance": 445.849441,
+        "closer_than_nearest_mule_labelled_account": true
+      },
+      "nearest_neighbour_distance": {
+        "space": "champion input space (120 columns), median-imputed then robust-scaled by the deployed OOD lens's medians and IQRs",
+        "k": 10,
+        "mean_distance_to_k_nearest": 1235.263401,
+        "n_mule_labels_among_k_nearest": 0,
+        "ood_lens_knn_distance": 1891.46106,
+        "ood_lens_knn_gate": 38947879.664001,
+        "ood_lens_knn_distance_percentile_in_development": 74.959
+      },
+      "missingness_pattern": {
+        "n_features": 120,
+        "n_missing": 14,
+        "missing_fraction": 0.116667,
+        "missingness_z_vs_development": -1.0464,
+        "development_mean_missing_fraction": 0.177664,
+        "missing_by_feature_family": {
+          "CASH": 3,
+          "LOAN": 3,
+          "MOBILE_BANKING": 3,
+          "NET_BANKING": 3,
+          "ELEC_XFER": 2
+        },
+        "missing_features": [
+          "F163",
+          "F164",
+          "F193",
+          "F2397",
+          "F2527",
+          "F2595",
+          "F2598",
+          "F261",
+          "F2624",
+          "F264",
+          "F2691",
+          "F2831",
+          "F3136",
+          "F499"
+        ]
+      },
+      "merchant_context_evidence": {
+        "source": "Merchant Legitimacy Verifier (E_profile_merchant view, 1331 business features)",
+        "verdict": {
+          "legitimacy": 0.00262,
+          "band": "LITTLE_BUSINESS_EVIDENCE",
+          "mule_probability_from_business_evidence": 0.999051,
+          "components": {},
+          "disclaimer": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue."
+        },
+        "policy": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue.",
+        "caveat": "fitted on all development rows including this one; the reading is in-sample and is context, not corroboration"
+      },
+      "anomaly_score": {
+        "anomaly_percentile": 69.163,
+        "detector": "IsolationForest challenger from the served bundle",
+        "fitted_on": "development rows NOT carrying a mule label, so this account was not part of the detector's fit",
+        "reference_distribution": "all development rows",
+        "interpretation": "100 = most anomalous relative to the development cohort. This is an unsupervised lens; it is not a risk score."
+      },
+      "hard_negative_verifier": {
+        "confirms_risk": true,
+        "probability": 0.999988,
+        "caveat": "fitted on all development rows including this one; this reading is in-sample and is reported as context, not as independent corroboration"
+      },
+      "top_shap_features": [
+        {
+          "feature": "F3105",
+          "value": 201.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.606703,
+          "contribution_std_across_repeats": 0.479401,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3091",
+          "value": 201.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.524887,
+          "contribution_std_across_repeats": 0.162061,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3908",
+          "value": 1.0,
+          "value_is_missing": false,
+          "mean_contribution": 0.512474,
+          "contribution_std_across_repeats": 0.02703,
+          "direction": "INCREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3796",
+          "value": 202.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.455945,
+          "contribution_std_across_repeats": 0.502129,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1810",
+          "value": 202.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.419274,
+          "contribution_std_across_repeats": 0.295573,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1815",
+          "value": 817046.1875,
+          "value_is_missing": false,
+          "mean_contribution": -0.408094,
+          "contribution_std_across_repeats": 0.048339,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1819",
+          "value": 1816872.5,
+          "value_is_missing": false,
+          "mean_contribution": -0.391792,
+          "contribution_std_across_repeats": 0.18032,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3886",
+          "value": 3.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.366839,
+          "contribution_std_across_repeats": 0.212477,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F158",
+          "value": 0.4,
+          "value_is_missing": false,
+          "mean_contribution": -0.36033,
+          "contribution_std_across_repeats": 0.098889,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3093",
+          "value": 201.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.341515,
+          "contribution_std_across_repeats": 0.127448,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        }
+      ]
+    },
+    {
+      "dev_row_position": 7260,
+      "dataset_row_index": 9077,
+      "label": "MULE_LABELLED_IN_DEVELOPMENT_DATA",
+      "why_this_is_a_miss": {
+        "champion": "xgboost_top_120",
+        "champion_rank": 6125,
+        "analyst_budget_k": 100,
+        "aggregation": "score_average over repeats (the served convention)",
+        "n_repeats_outside_budget": 3,
+        "n_repeats": 3,
+        "per_repeat_rank": [
+          4388,
+          3915,
+          6108
+        ]
+      },
+      "category": "LOOKALIKE_MULE",
+      "classification": {
+        "category": "LOOKALIKE_MULE",
+        "decided_by_rule": "lookalike_mule",
+        "decided_by_test": "n_mule_labels_in_neighbourhood == 0 AND distance_to_nearest_legitimate_account < distance_to_nearest_known_mule",
+        "decided_by_measured_values": {
+          "n_mule_labels_in_neighbourhood": 0,
+          "distance_to_nearest_legitimate_account": 37.292338,
+          "distance_to_nearest_known_mule": 601.415104
+        },
+        "other_rules_that_also_fired": [],
+        "rules_evaluated": [
+          {
+            "priority": 1,
+            "rule": "missing_data",
+            "category": "MISSING_DATA",
+            "fired": false,
+            "test": "missingness_z >= 4.0 OR missing_fraction >= 0.5",
+            "measured": {
+              "missingness_z": -0.474577,
+              "missing_fraction": 0.15
+            }
+          },
+          {
+            "priority": 2,
+            "rule": "ood_pattern",
+            "category": "OOD_PATTERN",
+            "fired": false,
+            "test": "knn_distance > knn_threshold (the lens's own dev-quantile gate) OR range_violation_share > 0.2",
+            "measured": {
+              "knn_distance": 203.209579,
+              "knn_threshold": 38947879.664001,
+              "range_violation_share": 0.0
+            }
+          },
+          {
+            "priority": 3,
+            "rule": "threshold_miss",
+            "category": "THRESHOLD_MISS",
+            "fired": false,
+            "test": "champion_rank <= 2.0 x budget_k",
+            "measured": {
+              "champion_rank": 6125,
+              "budget_k": 100
+            }
+          },
+          {
+            "priority": 4,
+            "rule": "model_disagreement",
+            "category": "MODEL_DISAGREEMENT",
+            "fired": false,
+            "test": "n_peer_families_within_budget >= 1",
+            "measured": {
+              "n_peer_families_within_budget": 0
+            }
+          },
+          {
+            "priority": 5,
+            "rule": "lookalike_mule",
+            "category": "LOOKALIKE_MULE",
+            "fired": true,
+            "test": "n_mule_labels_in_neighbourhood == 0 AND distance_to_nearest_legitimate_account < distance_to_nearest_known_mule",
+            "measured": {
+              "n_mule_labels_in_neighbourhood": 0,
+              "distance_to_nearest_legitimate_account": 37.292338,
+              "distance_to_nearest_known_mule": 601.415104
+            }
+          },
+          {
+            "priority": 6,
+            "rule": "low_signal_mule",
+            "category": "LOW_SIGNAL_MULE",
+            "fired": true,
+            "test": "residual - reached only when no rule above fired",
+            "measured": {
+              "n_families_below_dev_median": 3,
+              "n_families_measured": 4
+            }
+          }
+        ],
+        "rule_order": [
+          "missing_data",
+          "ood_pattern",
+          "threshold_miss",
+          "model_disagreement",
+          "lookalike_mule",
+          "low_signal_mule"
+        ]
+      },
+      "measurements": {
+        "champion_rank": 6125,
+        "budget_k": 100,
+        "missing_fraction": 0.15,
+        "missingness_z": -0.4745772253472243,
+        "range_violation_share": 0.0,
+        "knn_distance": 203.20957946777344,
+        "knn_threshold": 38947879.6640008,
+        "n_peer_families_within_budget": 0,
+        "n_mule_labels_in_neighbourhood": 0,
+        "distance_to_nearest_known_mule": 601.4151041575105,
+        "distance_to_nearest_legitimate_account": 37.2923375694921,
+        "n_families_below_dev_median": 3,
+        "n_families_measured": 4
+      },
+      "family_scores": {
+        "catboost": {
+          "model": "catboost_top_120",
+          "score_repeat_average": 0.002138,
+          "per_repeat_score": [
+            0.000614,
+            0.000198,
+            0.005601
+          ],
+          "rank": 7076,
+          "within_budget": false,
+          "score_percentile_in_development": 2.602
+        },
+        "lightgbm": {
+          "model": "lightgbm_top_120",
+          "score_repeat_average": 0.000182,
+          "per_repeat_score": [
+            6.5e-05,
+            9.9e-05,
+            0.000383
+          ],
+          "rank": 6768,
+          "within_budget": false,
+          "score_percentile_in_development": 6.842
+        },
+        "tabpfn": {
+          "model": "tabpfn_top_60",
+          "score_repeat_average": 0.000659,
+          "per_repeat_score": [
+            0.000729,
+            0.000568,
+            0.00068
+          ],
+          "rank": 1345,
+          "within_budget": false,
+          "score_percentile_in_development": 81.498
+        },
+        "xgboost": {
+          "model": "xgboost_top_120",
+          "score_repeat_average": 0.000196,
+          "per_repeat_score": [
+            0.000119,
+            0.000231,
+            0.000239
+          ],
+          "rank": 6125,
+          "within_budget": false,
+          "score_percentile_in_development": 15.694
+        }
+      },
+      "closest_known_mule": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 9003,
+        "dev_row_position": 7201,
+        "distance": 601.415104,
+        "that_account_champion_rank": 23,
+        "that_account_was_surfaced_within_budget": true
+      },
+      "closest_legitimate_account": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 867,
+        "dev_row_position": 686,
+        "distance": 37.292338,
+        "closer_than_nearest_mule_labelled_account": true
+      },
+      "nearest_neighbour_distance": {
+        "space": "champion input space (120 columns), median-imputed then robust-scaled by the deployed OOD lens's medians and IQRs",
+        "k": 10,
+        "mean_distance_to_k_nearest": 96.048824,
+        "n_mule_labels_among_k_nearest": 0,
+        "ood_lens_knn_distance": 203.209579,
+        "ood_lens_knn_gate": 38947879.664001,
+        "ood_lens_knn_distance_percentile_in_development": 53.538
+      },
+      "missingness_pattern": {
+        "n_features": 120,
+        "n_missing": 18,
+        "missing_fraction": 0.15,
+        "missingness_z_vs_development": -0.4746,
+        "development_mean_missing_fraction": 0.177664,
+        "missing_by_feature_family": {
+          "GST": 7,
+          "LOAN": 3,
+          "MOBILE_BANKING": 3,
+          "ELEC_XFER": 2,
+          "UPI": 2,
+          "FEES_AND_CHARGES": 1
+        },
+        "missing_features": [
+          "F148",
+          "F150",
+          "F158",
+          "F193",
+          "F2397",
+          "F2595",
+          "F2598",
+          "F261",
+          "F264",
+          "F2671",
+          "F2672",
+          "F2685",
+          "F3091",
+          "F3093",
+          "F3136",
+          "F3518",
+          "F456",
+          "F499"
+        ]
+      },
+      "merchant_context_evidence": {
+        "source": "Merchant Legitimacy Verifier (E_profile_merchant view, 1331 business features)",
+        "verdict": {
+          "legitimacy": 0.00785,
+          "band": "LITTLE_BUSINESS_EVIDENCE",
+          "mule_probability_from_business_evidence": 0.996905,
+          "components": {},
+          "disclaimer": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue."
+        },
+        "policy": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue.",
+        "caveat": "fitted on all development rows including this one; the reading is in-sample and is context, not corroboration"
+      },
+      "anomaly_score": {
+        "anomaly_percentile": 44.5209,
+        "detector": "IsolationForest challenger from the served bundle",
+        "fitted_on": "development rows NOT carrying a mule label, so this account was not part of the detector's fit",
+        "reference_distribution": "all development rows",
+        "interpretation": "100 = most anomalous relative to the development cohort. This is an unsupervised lens; it is not a risk score."
+      },
+      "hard_negative_verifier": {
+        "confirms_risk": true,
+        "probability": 0.999983,
+        "caveat": "fitted on all development rows including this one; this reading is in-sample and is reported as context, not as independent corroboration"
+      },
+      "top_shap_features": [
+        {
+          "feature": "F3908",
+          "value": 0.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.931343,
+          "contribution_std_across_repeats": 0.245843,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "MG_PASSTHROUGH_7D",
+          "value": 0.453245,
+          "value_is_missing": false,
+          "mean_contribution": -0.609954,
+          "contribution_std_across_repeats": 0.385624,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1045",
+          "value": 40000.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.571513,
+          "contribution_std_across_repeats": 0.235407,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3805",
+          "value": 5417485.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.562982,
+          "contribution_std_across_repeats": 0.161481,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3873",
+          "value": 2891325.25,
+          "value_is_missing": false,
+          "mean_contribution": -0.523988,
+          "contribution_std_across_repeats": 0.08292,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1922",
+          "value": 109619.890625,
+          "value_is_missing": false,
+          "mean_contribution": -0.520486,
+          "contribution_std_across_repeats": 0.280945,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F2029",
+          "value": 166171.421875,
+          "value_is_missing": false,
+          "mean_contribution": -0.515008,
+          "contribution_std_across_repeats": 0.06854,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1819",
+          "value": 5520985.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.443399,
+          "contribution_std_across_repeats": 0.288398,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3640",
+          "value": -0.41,
+          "value_is_missing": false,
+          "mean_contribution": -0.376455,
+          "contribution_std_across_repeats": 0.05843,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3807",
+          "value": 1258650.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.371215,
+          "contribution_std_across_repeats": 0.227942,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        }
+      ]
+    },
+    {
+      "dev_row_position": 7261,
+      "dataset_row_index": 9078,
+      "label": "MULE_LABELLED_IN_DEVELOPMENT_DATA",
+      "why_this_is_a_miss": {
+        "champion": "xgboost_top_120",
+        "champion_rank": 788,
+        "analyst_budget_k": 100,
+        "aggregation": "score_average over repeats (the served convention)",
+        "n_repeats_outside_budget": 3,
+        "n_repeats": 3,
+        "per_repeat_rank": [
+          397,
+          2127,
+          852
+        ]
+      },
+      "category": "MODEL_DISAGREEMENT",
+      "classification": {
+        "category": "MODEL_DISAGREEMENT",
+        "decided_by_rule": "model_disagreement",
+        "decided_by_test": "n_peer_families_within_budget >= 1",
+        "decided_by_measured_values": {
+          "n_peer_families_within_budget": 1
+        },
+        "other_rules_that_also_fired": [
+          "lookalike_mule"
+        ],
+        "rules_evaluated": [
+          {
+            "priority": 1,
+            "rule": "missing_data",
+            "category": "MISSING_DATA",
+            "fired": false,
+            "test": "missingness_z >= 4.0 OR missing_fraction >= 0.5",
+            "measured": {
+              "missingness_z": -0.760497,
+              "missing_fraction": 0.133333
+            }
+          },
+          {
+            "priority": 2,
+            "rule": "ood_pattern",
+            "category": "OOD_PATTERN",
+            "fired": false,
+            "test": "knn_distance > knn_threshold (the lens's own dev-quantile gate) OR range_violation_share > 0.2",
+            "measured": {
+              "knn_distance": 11.846542,
+              "knn_threshold": 38947879.664001,
+              "range_violation_share": 0.0
+            }
+          },
+          {
+            "priority": 3,
+            "rule": "threshold_miss",
+            "category": "THRESHOLD_MISS",
+            "fired": false,
+            "test": "champion_rank <= 2.0 x budget_k",
+            "measured": {
+              "champion_rank": 788,
+              "budget_k": 100
+            }
+          },
+          {
+            "priority": 4,
+            "rule": "model_disagreement",
+            "category": "MODEL_DISAGREEMENT",
+            "fired": true,
+            "test": "n_peer_families_within_budget >= 1",
+            "measured": {
+              "n_peer_families_within_budget": 1
+            }
+          },
+          {
+            "priority": 5,
+            "rule": "lookalike_mule",
+            "category": "LOOKALIKE_MULE",
+            "fired": true,
+            "test": "n_mule_labels_in_neighbourhood == 0 AND distance_to_nearest_legitimate_account < distance_to_nearest_known_mule",
+            "measured": {
+              "n_mule_labels_in_neighbourhood": 0,
+              "distance_to_nearest_legitimate_account": 8.886293,
+              "distance_to_nearest_known_mule": 14.777098
+            }
+          },
+          {
+            "priority": 6,
+            "rule": "low_signal_mule",
+            "category": "LOW_SIGNAL_MULE",
+            "fired": true,
+            "test": "residual - reached only when no rule above fired",
+            "measured": {
+              "n_families_below_dev_median": 0,
+              "n_families_measured": 4
+            }
+          }
+        ],
+        "rule_order": [
+          "missing_data",
+          "ood_pattern",
+          "threshold_miss",
+          "model_disagreement",
+          "lookalike_mule",
+          "low_signal_mule"
+        ]
+      },
+      "measurements": {
+        "champion_rank": 788,
+        "budget_k": 100,
+        "missing_fraction": 0.13333333333333333,
+        "missingness_z": -0.7604965224296024,
+        "range_violation_share": 0.0,
+        "knn_distance": 11.846542358398438,
+        "knn_threshold": 38947879.6640008,
+        "n_peer_families_within_budget": 1,
+        "n_mule_labels_in_neighbourhood": 0,
+        "distance_to_nearest_known_mule": 14.777097660914647,
+        "distance_to_nearest_legitimate_account": 8.88629255429491,
+        "n_families_below_dev_median": 0,
+        "n_families_measured": 4
+      },
+      "family_scores": {
+        "catboost": {
+          "model": "catboost_top_120",
+          "score_repeat_average": 0.269103,
+          "per_repeat_score": [
+            0.365673,
+            0.009376,
+            0.432261
+          ],
+          "rank": 608,
+          "within_budget": false,
+          "score_percentile_in_development": 91.644
+        },
+        "lightgbm": {
+          "model": "lightgbm_top_120",
+          "score_repeat_average": 0.005606,
+          "per_repeat_score": [
+            0.0122,
+            0.00151,
+            0.003108
+          ],
+          "rank": 1235,
+          "within_budget": false,
+          "score_percentile_in_development": 83.012
+        },
+        "tabpfn": {
+          "model": "tabpfn_top_60",
+          "score_repeat_average": 0.10448,
+          "per_repeat_score": [
+            0.201788,
+            0.039451,
+            0.072202
+          ],
+          "rank": 86,
+          "within_budget": true,
+          "score_percentile_in_development": 98.83
+        },
+        "xgboost": {
+          "model": "xgboost_top_120",
+          "score_repeat_average": 0.013299,
+          "per_repeat_score": [
+            0.016851,
+            0.001074,
+            0.021973
+          ],
+          "rank": 788,
+          "within_budget": false,
+          "score_percentile_in_development": 89.166
+        }
+      },
+      "closest_known_mule": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 9060,
+        "dev_row_position": 7245,
+        "distance": 14.777098,
+        "that_account_champion_rank": 79,
+        "that_account_was_surfaced_within_budget": true
+      },
+      "closest_legitimate_account": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 1026,
+        "dev_row_position": 816,
+        "distance": 8.886293,
+        "closer_than_nearest_mule_labelled_account": true
+      },
+      "nearest_neighbour_distance": {
+        "space": "champion input space (120 columns), median-imputed then robust-scaled by the deployed OOD lens's medians and IQRs",
+        "k": 10,
+        "mean_distance_to_k_nearest": 10.686838,
+        "n_mule_labels_among_k_nearest": 0,
+        "ood_lens_knn_distance": 11.846542,
+        "ood_lens_knn_gate": 38947879.664001,
+        "ood_lens_knn_distance_percentile_in_development": 19.796
+      },
+      "missingness_pattern": {
+        "n_features": 120,
+        "n_missing": 16,
+        "missing_fraction": 0.133333,
+        "missingness_z_vs_development": -0.7605,
+        "development_mean_missing_fraction": 0.177664,
+        "missing_by_feature_family": {
+          "GST": 7,
+          "LOAN": 3,
+          "MOBILE_BANKING": 3,
+          "ELEC_XFER": 2,
+          "ATM": 1
+        },
+        "missing_features": [
+          "F148",
+          "F150",
+          "F193",
+          "F2397",
+          "F2595",
+          "F2598",
+          "F261",
+          "F264",
+          "F2671",
+          "F2672",
+          "F3073",
+          "F3091",
+          "F3093",
+          "F3136",
+          "F456",
+          "F499"
+        ]
+      },
+      "merchant_context_evidence": {
+        "source": "Merchant Legitimacy Verifier (E_profile_merchant view, 1331 business features)",
+        "verdict": {
+          "legitimacy": 0.00413,
+          "band": "LITTLE_BUSINESS_EVIDENCE",
+          "mule_probability_from_business_evidence": 0.998741,
+          "components": {},
+          "disclaimer": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue."
+        },
+        "policy": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue.",
+        "caveat": "fitted on all development rows including this one; the reading is in-sample and is context, not corroboration"
+      },
+      "anomaly_score": {
+        "anomaly_percentile": 20.0578,
+        "detector": "IsolationForest challenger from the served bundle",
+        "fitted_on": "development rows NOT carrying a mule label, so this account was not part of the detector's fit",
+        "reference_distribution": "all development rows",
+        "interpretation": "100 = most anomalous relative to the development cohort. This is an unsupervised lens; it is not a risk score."
+      },
+      "hard_negative_verifier": {
+        "confirms_risk": true,
+        "probability": 0.999985,
+        "caveat": "fitted on all development rows including this one; this reading is in-sample and is reported as context, not as independent corroboration"
+      },
+      "top_shap_features": [
+        {
+          "feature": "F1045",
+          "value": 100000.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.670576,
+          "contribution_std_across_repeats": 0.383363,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1819",
+          "value": 1640617.625,
+          "value_is_missing": false,
+          "mean_contribution": -0.651508,
+          "contribution_std_across_repeats": 0.363888,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F2489",
+          "value": 1.53,
+          "value_is_missing": false,
+          "mean_contribution": -0.613211,
+          "contribution_std_across_repeats": 0.142321,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3873",
+          "value": 358849.34375,
+          "value_is_missing": false,
+          "mean_contribution": -0.426867,
+          "contribution_std_across_repeats": 0.08924,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3908",
+          "value": 1.0,
+          "value_is_missing": false,
+          "mean_contribution": 0.384135,
+          "contribution_std_across_repeats": 0.115326,
+          "direction": "INCREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3807",
+          "value": 504984.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.33575,
+          "contribution_std_across_repeats": 0.308824,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F2736",
+          "value": -0.11,
+          "value_is_missing": false,
+          "mean_contribution": -0.329693,
+          "contribution_std_across_repeats": 0.059375,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1863",
+          "value": 695814.3125,
+          "value_is_missing": false,
+          "mean_contribution": -0.313309,
+          "contribution_std_across_repeats": 0.042405,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3105",
+          "value": 174.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.30225,
+          "contribution_std_across_repeats": 0.114251,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F158",
+          "value": 0.58,
+          "value_is_missing": false,
+          "mean_contribution": -0.288989,
+          "contribution_std_across_repeats": 0.12787,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        }
+      ]
+    },
+    {
+      "dev_row_position": 7263,
+      "dataset_row_index": 9081,
+      "label": "MULE_LABELLED_IN_DEVELOPMENT_DATA",
+      "why_this_is_a_miss": {
+        "champion": "xgboost_top_120",
+        "champion_rank": 198,
+        "analyst_budget_k": 100,
+        "aggregation": "score_average over repeats (the served convention)",
+        "n_repeats_outside_budget": 3,
+        "n_repeats": 3,
+        "per_repeat_rank": [
+          234,
+          430,
+          144
+        ]
+      },
+      "category": "THRESHOLD_MISS",
+      "classification": {
+        "category": "THRESHOLD_MISS",
+        "decided_by_rule": "threshold_miss",
+        "decided_by_test": "champion_rank <= 2.0 x budget_k",
+        "decided_by_measured_values": {
+          "champion_rank": 198,
+          "budget_k": 100
+        },
+        "other_rules_that_also_fired": [
+          "model_disagreement",
+          "lookalike_mule"
+        ],
+        "rules_evaluated": [
+          {
+            "priority": 1,
+            "rule": "missing_data",
+            "category": "MISSING_DATA",
+            "fired": false,
+            "test": "missingness_z >= 4.0 OR missing_fraction >= 0.5",
+            "measured": {
+              "missingness_z": -0.045698,
+              "missing_fraction": 0.175
+            }
+          },
+          {
+            "priority": 2,
+            "rule": "ood_pattern",
+            "category": "OOD_PATTERN",
+            "fired": false,
+            "test": "knn_distance > knn_threshold (the lens's own dev-quantile gate) OR range_violation_share > 0.2",
+            "measured": {
+              "knn_distance": 2412.686768,
+              "knn_threshold": 38947879.664001,
+              "range_violation_share": 0.0
+            }
+          },
+          {
+            "priority": 3,
+            "rule": "threshold_miss",
+            "category": "THRESHOLD_MISS",
+            "fired": true,
+            "test": "champion_rank <= 2.0 x budget_k",
+            "measured": {
+              "champion_rank": 198,
+              "budget_k": 100
+            }
+          },
+          {
+            "priority": 4,
+            "rule": "model_disagreement",
+            "category": "MODEL_DISAGREEMENT",
+            "fired": true,
+            "test": "n_peer_families_within_budget >= 1",
+            "measured": {
+              "n_peer_families_within_budget": 2
+            }
+          },
+          {
+            "priority": 5,
+            "rule": "lookalike_mule",
+            "category": "LOOKALIKE_MULE",
+            "fired": true,
+            "test": "n_mule_labels_in_neighbourhood == 0 AND distance_to_nearest_legitimate_account < distance_to_nearest_known_mule",
+            "measured": {
+              "n_mule_labels_in_neighbourhood": 0,
+              "distance_to_nearest_legitimate_account": 696.888777,
+              "distance_to_nearest_known_mule": 15562.198201
+            }
+          },
+          {
+            "priority": 6,
+            "rule": "low_signal_mule",
+            "category": "LOW_SIGNAL_MULE",
+            "fired": true,
+            "test": "residual - reached only when no rule above fired",
+            "measured": {
+              "n_families_below_dev_median": 0,
+              "n_families_measured": 4
+            }
+          }
+        ],
+        "rule_order": [
+          "missing_data",
+          "ood_pattern",
+          "threshold_miss",
+          "model_disagreement",
+          "lookalike_mule",
+          "low_signal_mule"
+        ]
+      },
+      "measurements": {
+        "champion_rank": 198,
+        "budget_k": 100,
+        "missing_fraction": 0.175,
+        "missingness_z": -0.045698279723657066,
+        "range_violation_share": 0.0,
+        "knn_distance": 2412.686767578125,
+        "knn_threshold": 38947879.6640008,
+        "n_peer_families_within_budget": 2,
+        "n_mule_labels_in_neighbourhood": 0,
+        "distance_to_nearest_known_mule": 15562.19820087935,
+        "distance_to_nearest_legitimate_account": 696.8887772098889,
+        "n_families_below_dev_median": 0,
+        "n_families_measured": 4
+      },
+      "family_scores": {
+        "catboost": {
+          "model": "catboost_top_120",
+          "score_repeat_average": 0.273974,
+          "per_repeat_score": [
+            0.212995,
+            0.540692,
+            0.068236
+          ],
+          "rank": 582,
+          "within_budget": false,
+          "score_percentile_in_development": 92.002
+        },
+        "lightgbm": {
+          "model": "lightgbm_top_120",
+          "score_repeat_average": 0.102013,
+          "per_repeat_score": [
+            0.02121,
+            0.055213,
+            0.229615
+          ],
+          "rank": 93,
+          "within_budget": true,
+          "score_percentile_in_development": 98.733
+        },
+        "tabpfn": {
+          "model": "tabpfn_top_60",
+          "score_repeat_average": 0.418838,
+          "per_repeat_score": [
+            0.327448,
+            0.426995,
+            0.50207
+          ],
+          "rank": 54,
+          "within_budget": true,
+          "score_percentile_in_development": 99.27
+        },
+        "xgboost": {
+          "model": "xgboost_top_120",
+          "score_repeat_average": 0.098353,
+          "per_repeat_score": [
+            0.04389,
+            0.016563,
+            0.234605
+          ],
+          "rank": 198,
+          "within_budget": false,
+          "score_percentile_in_development": 97.288
+        }
+      },
+      "closest_known_mule": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 9072,
+        "dev_row_position": 7255,
+        "distance": 15562.198201,
+        "that_account_champion_rank": 298,
+        "that_account_was_surfaced_within_budget": false
+      },
+      "closest_legitimate_account": {
+        "relation": "FEATURE_SPACE_NEAREST_NEIGHBOUR",
+        "not_a_transaction_link": true,
+        "meaning": "Feature-space proximity in the champion's own 120-column input space, robust-scaled with the deployed OOD lens's medians and IQRs. It is a similarity of measured attributes only. It is NOT a transfer, a shared counterparty, a relationship or any other link between the two accounts: this dataset contains no edge table and none was derived.",
+        "dataset_row_index": 3134,
+        "dev_row_position": 2467,
+        "distance": 696.888777,
+        "closer_than_nearest_mule_labelled_account": true
+      },
+      "nearest_neighbour_distance": {
+        "space": "champion input space (120 columns), median-imputed then robust-scaled by the deployed OOD lens's medians and IQRs",
+        "k": 10,
+        "mean_distance_to_k_nearest": 1413.92164,
+        "n_mule_labels_among_k_nearest": 0,
+        "ood_lens_knn_distance": 2412.686768,
+        "ood_lens_knn_gate": 38947879.664001,
+        "ood_lens_knn_distance_percentile_in_development": 76.611
+      },
+      "missingness_pattern": {
+        "n_features": 120,
+        "n_missing": 21,
+        "missing_fraction": 0.175,
+        "missingness_z_vs_development": -0.0457,
+        "development_mean_missing_fraction": 0.177664,
+        "missing_by_feature_family": {
+          "GST": 7,
+          "LOAN": 3,
+          "MOBILE_BANKING": 3,
+          "NET_BANKING": 3,
+          "CASH": 2,
+          "ELEC_XFER": 2,
+          "UPI": 1
+        },
+        "missing_features": [
+          "F148",
+          "F150",
+          "F163",
+          "F164",
+          "F193",
+          "F2397",
+          "F2527",
+          "F2595",
+          "F2598",
+          "F261",
+          "F264",
+          "F2671",
+          "F2672",
+          "F2685",
+          "F2691",
+          "F2831",
+          "F3091",
+          "F3093",
+          "F3136",
+          "F456",
+          "F499"
+        ]
+      },
+      "merchant_context_evidence": {
+        "source": "Merchant Legitimacy Verifier (E_profile_merchant view, 1331 business features)",
+        "verdict": {
+          "legitimacy": 0.00812,
+          "band": "LITTLE_BUSINESS_EVIDENCE",
+          "mule_probability_from_business_evidence": 0.996342,
+          "components": {},
+          "disclaimer": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue."
+        },
+        "policy": "Business evidence is exculpatory context, never a whitelist. A genuine merchant can also be a mule, and mule networks are known to use business accounts precisely because they attract less scrutiny. This verifier can only reduce the confidence attached to an automatic escalation; it cannot clear an account, cannot lower its risk score, and cannot remove it from a review queue.",
+        "caveat": "fitted on all development rows including this one; the reading is in-sample and is context, not corroboration"
+      },
+      "anomaly_score": {
+        "anomaly_percentile": 86.2472,
+        "detector": "IsolationForest challenger from the served bundle",
+        "fitted_on": "development rows NOT carrying a mule label, so this account was not part of the detector's fit",
+        "reference_distribution": "all development rows",
+        "interpretation": "100 = most anomalous relative to the development cohort. This is an unsupervised lens; it is not a risk score."
+      },
+      "hard_negative_verifier": {
+        "confirms_risk": true,
+        "probability": 0.999988,
+        "caveat": "fitted on all development rows including this one; this reading is in-sample and is reported as context, not as independent corroboration"
+      },
+      "top_shap_features": [
+        {
+          "feature": "F3873",
+          "value": 1200000.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.862207,
+          "contribution_std_across_repeats": 0.007767,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F466",
+          "value": 0.63,
+          "value_is_missing": false,
+          "mean_contribution": -0.75532,
+          "contribution_std_across_repeats": 0.410562,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1045",
+          "value": 130000.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.751015,
+          "contribution_std_across_repeats": 0.211764,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3640",
+          "value": -0.1,
+          "value_is_missing": false,
+          "mean_contribution": -0.739301,
+          "contribution_std_across_repeats": 0.333548,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F2681",
+          "value": 0.6,
+          "value_is_missing": false,
+          "mean_contribution": -0.606961,
+          "contribution_std_across_repeats": 0.162943,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1165",
+          "value": 1400000.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.49644,
+          "contribution_std_across_repeats": 0.029433,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F3908",
+          "value": 1.0,
+          "value_is_missing": false,
+          "mean_contribution": 0.463021,
+          "contribution_std_across_repeats": 0.151407,
+          "direction": "INCREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1813",
+          "value": 1597476.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.365579,
+          "contribution_std_across_repeats": 0.090535,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F158",
+          "value": 0.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.344463,
+          "contribution_std_across_repeats": 0.075316,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        },
+        {
+          "feature": "F1166",
+          "value": 1400000.0,
+          "value_is_missing": false,
+          "mean_contribution": -0.326977,
+          "contribution_std_across_repeats": 0.147761,
+          "direction": "DECREASES_MODEL_SCORE",
+          "stable_sign_across_repeats": true
+        }
+      ]
+    }
+  ],
+  "hypotheses_for_nested_cv_testing": {
+    "standing_rule": "None of these has been acted on. Nothing in this file has changed a score, a threshold, a feature set or a model, and none of these hypotheses may do so until it has beaten the existing champion through nested cross-validation. Hand-writing a rule for any individual account listed in this artifact would be a failure of the exercise, not a fix.",
+    "count": 5,
+    "hypotheses": [
+      {
+        "id": "H1_recall_oriented_ensemble",
+        "trigger": "tabpfn_top_60 catches 7 of the champion's 11 misses at K=100, and has 1 miss the champion catches.",
+        "hypothesis": "A blend of xgboost_top_120 with tabpfn_top_60, selected on recall at the analyst budget rather than on PR-AUC, surfaces more labelled mules within the same queue than xgboost_top_120 alone.",
+        "how_to_test": "Nested CV with recall@K as the selection objective, blend weights chosen in the inner loop only, scored in the outer loop. Must beat the champion on the outer folds, not on these misses.",
+        "why_it_might_fail": "challenger_review_v2 already found the rank blend does not beat the best single member on PR-AUC. Recall at a budget is a different objective, but the prior is not encouraging, and 7 overlapping accounts is far too few to select a blend weight on.",
+        "status": "UNTESTED - NOT IMPLEMENTED, NOT WIRED, NO EFFECT ON ANY SCORE"
+      },
+      {
+        "id": "H2_neighbourhood_label_density_feature",
+        "trigger": "4 misses sit in a neighbourhood with no mule-labelled account in it and a legitimate account nearer than any mule-labelled one; the same test fires on 16 of 53 caught mules, so it separates but far from cleanly.",
+        "hypothesis": "A feature counting mule labels among an account's k nearest neighbours in the champion's input space adds signal the tree models are not extracting.",
+        "how_to_test": "Nested CV. The neighbour graph and the label counts must be built inside each training fold only - building them on all development rows leaks the validation labels straight into the feature and will produce a spectacular and entirely false gain.",
+        "why_it_might_fail": "With this prevalence a fold-local neighbourhood contains almost no positives, so the feature may be near-constant zero and add nothing.",
+        "status": "UNTESTED - NOT IMPLEMENTED, NOT WIRED, NO EFFECT ON ANY SCORE"
+      },
+      {
+        "id": "H3_missingness_is_not_the_explanation",
+        "trigger": "Zero misses met either missingness test.",
+        "hypothesis": "A negative result, recorded so it is not rediscovered: missing data does not explain these misses. Missingness-structure work is worth doing on its own merits but should not be justified by this Atlas.",
+        "how_to_test": "Nothing to test here; this entry exists to close off a wrong lead.",
+        "why_it_might_fail": "Not applicable.",
+        "status": "OBSERVATION - NOT ACTED ON"
+      },
+      {
+        "id": "H4_operating_point_sensitivity",
+        "trigger": "2 miss(es) were ranked within twice the budget - the champion ranked them highly and the queue length excluded them.",
+        "hypothesis": "For these accounts the binding constraint is review capacity, not model quality. Their recovery is a capacity question and no model change would be credited for it.",
+        "how_to_test": "Not a modelling change. If capacity is ever revised, the gain must be attributed to capacity and not reported as a model improvement.",
+        "why_it_might_fail": "Capacity is an operational constraint set outside this system.",
+        "status": "OBSERVATION - NOT ACTED ON"
+      },
+      {
+        "id": "H5_irreducible_on_current_features",
+        "trigger": "4 miss(es) were outside the budget for every measured family.",
+        "hypothesis": "These accounts are not separable by any estimator on the current feature set. If they are to be recovered it will take new evidence, not a new estimator.",
+        "how_to_test": "Nested CV on any genuinely new evidence source. Re-tuning existing models against these accounts would be fitting to 4 rows and is exactly the failure mode this Atlas is written to avoid.",
+        "why_it_might_fail": "There may be no further evidence available in this dataset.",
+        "status": "UNTESTED - NOT IMPLEMENTED, NOT WIRED, NO EFFECT ON ANY SCORE"
+      }
+    ]
+  }
+}
