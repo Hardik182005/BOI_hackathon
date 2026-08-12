@@ -1,15 +1,15 @@
 {
-  "generated_utc": "2026-07-10T23:08:26.756079+00:00",
+  "generated_utc": "2026-08-12T11:52:24.439264+00:00",
   "git": {
     "branch": "main",
-    "commit_sha": "c8e0d253acf8719f5d9453e8be7efe51649219ac",
+    "commit_sha": "a6eb1699e21db48d22795647646dea1b754c5ee3",
     "is_dirty": "yes"
   },
   "verdict": "PASS",
   "checks": {
     "no_target_or_f3912_leakage": {
       "passed": true,
-      "detail": "60 bundle features disjoint from 4 quarantined",
+      "detail": "120 bundle features disjoint from 13 quarantined",
       "description": "target/F3912/F2230/index quarantined from bundle features"
     },
     "no_split_overlap": {
@@ -64,7 +64,7 @@
     },
     "tests_pass": {
       "passed": true,
-      "detail": "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+      "detail": "196 passed in 140.06s (0:02:20)",
       "description": "full pytest suite green"
     },
     "probabilities_bounded": {
@@ -76,29 +76,85 @@
       "passed": true,
       "detail": "19 artifacts present",
       "description": "all required artifact files exist"
+    },
+    "addendum_artifacts_complete": {
+      "passed": true,
+      "detail": "10 addendum artifacts present",
+      "description": "every upgrade artifact was actually produced"
+    },
+    "robustness_grade_not_hand_picked": {
+      "passed": true,
+      "detail": "grade=LOW limited_by=['prediction_rank_stability']",
+      "description": "the badge is recomputable from the published thresholds"
+    },
+    "label_audit_changed_nothing": {
+      "passed": true,
+      "detail": "1 rows flagged, all HUMAN_REVIEW_ONLY",
+      "description": "no label flipped, no row removed (U5)"
+    },
+    "merchant_verifier_cannot_lower_risk": {
+      "passed": true,
+      "detail": "risk held at 0.91/INVESTIGATE; confidence -> MEDIUM; 1 adjustments all carry their trigger values",
+      "description": "business evidence moves confidence, never the score (U9)"
+    },
+    "graph_never_fabricates_edges": {
+      "passed": true,
+      "detail": "default UNAVAILABLE; contract forbids derived edges",
+      "description": "no graph without an uploaded edge file (U8)"
+    },
+    "shield_reports_no_leaked_feature": {
+      "passed": true,
+      "detail": "54 STABLE / 66 WATCH / 0 SHIFT_PRONE / 0 LEAKAGE",
+      "description": "the champion's features all clear the availability firewall (U3)"
+    },
+    "no_forbidden_verdict_vocabulary": {
+      "passed": true,
+      "detail": "5 forbidden verdict words absent from shipped source",
+      "description": "never GUILTY/CERTIFIED_CLEAN/AUTO_FREEZE"
+    },
+    "attack_surface_covered": {
+      "passed": true,
+      "detail": "49 security tests collected covering sqli, xss, path_traversal, csv_injection",
+      "description": "XSS, SQLi, path-traversal and CSV-injection tests exist and pass"
+    },
+    "organiser_dry_run_passed": {
+      "passed": true,
+      "detail": "8/8 variants, invariance sound=True, model unchanged=True, locked-test PR-AUC 0.7262714933700882",
+      "description": "the section 42 rehearsal scored every malformed export without moving the model"
     }
   },
   "model_manifest": {
     "bundle_path": "E:\\BOI\\BOI_hackathon\\artifacts\\models\\final_bundle.joblib",
-    "bundle_sha256": "04fafaee25ae82c7a5a2e6ec5757d77eea99e33138e47167f76706aae17c8e7b",
-    "created_utc": "2026-07-10T20:47:21.082140+00:00",
+    "bundle_sha256": "d12914de5abee99aa18b80e3d41ae2da800dbf9355b53f3a9c0e06806921efc5",
+    "created_utc": "2026-08-12T07:48:01.966280+00:00",
     "git": {
       "branch": "main",
-      "commit_sha": "0cb5f244a05ee1b7a4e3359e40e23fd3bd2a1c77",
+      "commit_sha": "a6eb1699e21db48d22795647646dea1b754c5ee3",
       "is_dirty": "yes"
     },
-    "winner": "catboost_tuned_top60",
+    "winner": "xgboost_top_120",
+    "winner_family": "xgboost",
+    "view": "ALL_ADMISSIBLE",
     "ensemble_accepted": false,
-    "n_features": 60,
+    "ensemble_decision": "SINGLE_MODEL_KEPT",
+    "n_features_selected": 120,
+    "n_features": 120,
     "calibrator": "platt",
     "policy_thresholds": {
-      "critical_risk": 0.9638304837100166,
-      "urgent_risk": 0.048153197236171764,
-      "standard_risk": 0.017246147513913988,
+      "critical_risk": 0.9338487190474695,
+      "urgent_risk": 0.09773832436704985,
+      "standard_risk": 0.013182620557866929,
       "anomaly_escalation_pct": 99.0,
       "policy_version": "1.0"
     },
     "data_fingerprint_sha256": "7d1be90fe23b57460184f2f7566d572cc3a40fc6d17d436fe33219e80eabc204",
-    "oof_pr_auc": 0.8077340678700281
+    "oof_pr_auc": 0.76904,
+    "oof_pr_auc_std": 0.02663,
+    "leakage_status": "FIREWALL_ADMITTED_ONLY",
+    "supersedes": {
+      "winner": "catboost_tuned_top60",
+      "oof_pr_auc": 0.8077340678700281,
+      "why": "the previous bundle selected F3898, F3913, F3914 and F3916, which the Feature Availability Firewall classifies as post-resolution leakage; its PR-AUC was inflated by them"
+    }
   }
 }
