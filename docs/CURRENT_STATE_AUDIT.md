@@ -28,7 +28,7 @@
 - **Topic.pdf (PS2):** binary classification of suspicious/mule accounts from portal data; **feature 3924 is the target variable**; 18 "commonly used" bank features listed (F115, F321, F527, F531, F670, F1692, F2082, F2122, F2582, F2678, F2737, F2956, F3043, F3836, F3887, F3889, F3891, F3894).
 - **Submission PDF claims requiring re-verification from raw data:** 9,082 rows × 3,924 columns; 81 positives vs 9,001 negatives (0.89%); 8 interpretable categorical columns (F2230, F3886, F3888–F3893); F3912 suspected target leak (|r|≈0.969, single-feature PR-AUC≈0.94, inflates full model to PR-AUC≈1.000); leakage-free LightGBM PR-AUC≈0.908±0.016; top-15 features ≈0.872.
 
-None of the submission numbers are treated as results. Every one is recomputed by this pipeline and only pipeline-generated values are reported.
+None of the submission numbers are treated as results. Every one is recomputed by this pipeline and only pipeline-generated values are reported. In particular the design document's "leakage-free LightGBM PR-AUC≈0.908±0.016" did not survive recomputation: it was measured before the Feature Availability Firewall quarantined the post-resolution columns. The recomputed leakage-free figure is **0.7690 ± 0.0266** (`xgboost_top_120`, `artifacts/metrics/tournament_v2.json`); the pre-firewall accepted model's 0.8077 is retired as leakage-inflated.
 
 ## Environment
 

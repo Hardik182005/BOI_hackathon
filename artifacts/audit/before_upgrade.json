@@ -1,0 +1,201 @@
+{
+  "captured_utc": "2026-08-12T07:06:54.471424+00:00",
+  "purpose": "Immutable snapshot of the repository as it stood BEFORE the Trinetra upgrade, so every claim in docs/UPGRADE_GAP_ANALYSIS.md is checkable.",
+  "inventory": {
+    "python_modules": 62,
+    "python_loc": 9347,
+    "test_files": 11,
+    "test_loc": 1054,
+    "frontend_tsx": 11,
+    "config_files": [
+      "base.yaml",
+      "data.yaml",
+      "feature_availability.yaml",
+      "leakage_quarantine.yaml",
+      "ollama.yaml",
+      "thresholds.yaml",
+      "train.yaml"
+    ],
+    "docs": [
+      "ASSUMPTIONS_AND_LIMITS.md",
+      "BACKEND_RELIABILITY_REPORT.md",
+      "CALIBRATION_AND_THRESHOLD_REPORT.md",
+      "CURRENT_STATE_AUDIT.md",
+      "DATA_AUDIT_REPORT.md",
+      "DATA_DICTIONARY.md",
+      "DEMO_SCRIPT.md",
+      "DEPLOYMENT_GUIDE.md",
+      "DRIFT_MONITORING_REPORT.md",
+      "EXPLAINABILITY_REPORT.md",
+      "FEATURE_SELECTION_REPORT.md",
+      "FINAL_ACCURACY_AND_MODEL_SELECTION_REPORT.md",
+      "FINAL_CALIBRATION_AND_THRESHOLD_REPORT.md",
+      "FINAL_DATA_AND_LEAKAGE_AUDIT.md",
+      "FINAL_E2E_REPORT.md",
+      "FINAL_FEATURE_SELECTION_REPORT.md",
+      "FINAL_FRONTEND_UI_REPORT.md",
+      "FINAL_HALLUCINATION_GUARDRAIL_REPORT.md",
+      "FINAL_PERFORMANCE_REPORT.md",
+      "FINAL_RELEASE_GATE.md",
+      "FINAL_RELEASE_TEST_REPORT.md",
+      "FINAL_RESULTS.md",
+      "FINAL_SECURITY_REPORT.md",
+      "FINAL_TEST_INITIAL_AUDIT.md",
+      "IMPLEMENTATION_PLAN.md",
+      "JUDGE_QA.md",
+      "LEAKAGE_AUDIT.md",
+      "MODEL_CARD.md",
+      "MODEL_TOURNAMENT_REPORT.md",
+      "NO_MCP_NO_BROWSER_AGENT_COMPLIANCE.md",
+      "OLLAMA_GUARDRAILS_REPORT.md",
+      "ONE_COMMAND_RUN_GUIDE.md",
+      "ROBUSTNESS_REPORT.md",
+      "SECURITY_AND_PRIVACY_REPORT.md",
+      "TRINETRA_LENS_REPORT.md"
+    ],
+    "cli_entrypoints": [
+      "advanced",
+      "audit_data",
+      "audit_env",
+      "build_lenses",
+      "demo",
+      "evaluate",
+      "export_submission",
+      "final_report",
+      "make_splits",
+      "qa_final_summary",
+      "qa_harness",
+      "release_gate",
+      "tournament",
+      "tournament_v2",
+      "train"
+    ],
+    "frontend_pages": [
+      "AlertQueue",
+      "CaseDetail",
+      "DriftMonitoring",
+      "FeatureIntelligence",
+      "ModelCard",
+      "ModelPerformance",
+      "Overview"
+    ]
+  },
+  "accepted_model_before_upgrade": {
+    "winner": "catboost_tuned_top60",
+    "n_features": 60,
+    "calibrator": "platt",
+    "oof_pr_auc": 0.8077340678700281,
+    "bundle_sha256": "04fafaee25ae82c7a5a2e6ec5757d77eea99e33138e47167f76706aae17c8e7b",
+    "created_utc": "2026-07-10T20:47:21.082140+00:00",
+    "ensemble_accepted": false
+  },
+  "oof_leaderboard_before_upgrade": {
+    "dummy_prevalence": {
+      "n_repeats": 5,
+      "pr_auc_mean": 0.00871,
+      "pr_auc_std": 0.0,
+      "runtime_seconds": 59.6
+    },
+    "logistic_l2": {
+      "n_repeats": 5,
+      "pr_auc_mean": 0.23283,
+      "pr_auc_std": 0.01203,
+      "runtime_seconds": 70.1
+    },
+    "lightgbm_baseline": {
+      "n_repeats": 5,
+      "pr_auc_mean": 0.61416,
+      "pr_auc_std": 0.04737,
+      "runtime_seconds": 736.0
+    },
+    "REJECTED_leakage_lgbm_with_F3912": {
+      "n_repeats": 2,
+      "pr_auc_mean": 0.9419,
+      "pr_auc_std": 0.01186,
+      "runtime_seconds": 176.1
+    },
+    "lightgbm_tuned_full": {
+      "n_repeats": 5,
+      "pr_auc_mean": 0.76372,
+      "pr_auc_std": 0.02229,
+      "runtime_seconds": 710.2
+    },
+    "lightgbm_tuned_top60": {
+      "n_repeats": 5,
+      "pr_auc_mean": 0.77166,
+      "pr_auc_std": 0.0528,
+      "runtime_seconds": 51.5
+    },
+    "lightgbm_tuned_top30": {
+      "n_repeats": 5,
+      "pr_auc_mean": 0.75623,
+      "pr_auc_std": 0.0255,
+      "runtime_seconds": 51.9
+    },
+    "lightgbm_tuned_top15": {
+      "n_repeats": 5,
+      "pr_auc_mean": 0.64397,
+      "pr_auc_std": 0.04197,
+      "runtime_seconds": 39.4
+    },
+    "xgboost_tuned_top60": {
+      "n_repeats": 5,
+      "pr_auc_mean": 0.75596,
+      "pr_auc_std": 0.06584,
+      "runtime_seconds": 57.3
+    },
+    "catboost_tuned_top60": {
+      "n_repeats": 5,
+      "pr_auc_mean": 0.80773,
+      "pr_auc_std": 0.04503,
+      "runtime_seconds": 142.2
+    },
+    "tabpfn_top60": {
+      "n_repeats": 1,
+      "pr_auc_mean": 0.89696,
+      "pr_auc_std": 0.0,
+      "runtime_seconds": 3144.3
+    }
+  },
+  "quarantine_before_upgrade": [
+    "F3924",
+    "F3912",
+    "F2230",
+    "__UNNAMED__0"
+  ],
+  "leakage_found_in_accepted_model": {
+    "top60_availability_classes": {
+      "BEHAVIORAL": 51,
+      "ALERT_CONTEXT": 4,
+      "POST_RESOLUTION_LEAKAGE": 3,
+      "PROFILE": 1,
+      "PRE_EXISTING_RISK_CONTEXT": 1
+    },
+    "forbidden_features_used": [
+      {
+        "feature": "F3898",
+        "variable_name": "MIN_RESOLVE_DAYS",
+        "class": "POST_RESOLUTION_LEAKAGE"
+      },
+      {
+        "feature": "F3914",
+        "variable_name": "FALSE_POSITIVE",
+        "class": "POST_RESOLUTION_LEAKAGE"
+      },
+      {
+        "feature": "F3913",
+        "variable_name": "OTHER_RESOLUTION",
+        "class": "POST_RESOLUTION_LEAKAGE"
+      }
+    ],
+    "conditional_quarantine_used": [
+      {
+        "feature": "F3916",
+        "variable_name": "L3_FLG",
+        "class": "PRE_EXISTING_RISK_CONTEXT"
+      }
+    ],
+    "verdict": "The accepted model consumed three post-resolution fields and one undetermined-timing risk flag. Its 0.8077 OOF PR-AUC is not a valid estimate of hidden-validation performance."
+  },
+  "feature_set_overlap_old_vs_new_top60": 12
+}
