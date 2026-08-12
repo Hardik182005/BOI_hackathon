@@ -1,0 +1,9 @@
+gen1_model,gen2_model,gen1_pr_auc_5rep,gen1_pr_auc_first3rep,gen2_pr_auc_3rep,delta_repeat_count,delta_feature_set,delta_total
+lightgbm_tuned_top15,lightgbm_top_15,0.64397,0.61244,0.33566,-0.03153,-0.27678,-0.30832
+lightgbm_tuned_full,lightgbm_full_pool,0.76372,0.75439,0.58743,-0.00933,-0.16696,-0.17629
+catboost_tuned_top60,catboost_top_60,0.80773,0.82518,0.6963,0.01745,-0.12887,-0.11143
+lightgbm_tuned_top30,lightgbm_top_30,0.75623,0.7504,0.66281,-0.00583,-0.08758,-0.09342
+lightgbm_tuned_top60,lightgbm_top_60,0.77166,0.7833,0.69918,0.01164,-0.08412,-0.07249
+dummy_prevalence,dummy_prevalence,0.00871,0.00871,0.00871,0.0,0.0,0.0
+tabpfn_top60,tabpfn_top_60,0.89696,0.89696,0.911,0.0,0.01405,0.01405
+xgboost_tuned_top60,xgboost_top_60,0.75596,0.72383,0.74082,-0.03213,0.01699,-0.01514
