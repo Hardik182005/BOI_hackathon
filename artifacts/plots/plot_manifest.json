@@ -1,0 +1,95 @@
+{
+  "generated_utc": "2026-08-13T02:33:58+00:00",
+  "spec_section": "56",
+  "data_version": "7d1be90fe23b",
+  "champion": "xgboost_top_120",
+  "required": 16,
+  "written": 14,
+  "skipped": 2,
+  "failed": 0,
+  "title_contract": "every figure states split, model ID and data version",
+  "plots": [
+    {
+      "plot": "precision-recall curve",
+      "status": "WRITTEN",
+      "file": "final_pr_curve.png"
+    },
+    {
+      "plot": "ROC curve",
+      "status": "WRITTEN",
+      "file": "final_roc_curve.png"
+    },
+    {
+      "plot": "calibration curve",
+      "status": "WRITTEN",
+      "file": "final_calibration_curve.png"
+    },
+    {
+      "plot": "confusion matrix",
+      "status": "WRITTEN",
+      "file": "final_confusion_matrices.png"
+    },
+    {
+      "plot": "Recall@TopK curve",
+      "status": "WRITTEN",
+      "file": "final_recall_at_topk.png"
+    },
+    {
+      "plot": "Precision@TopK curve",
+      "status": "WRITTEN",
+      "file": "final_precision_at_topk.png"
+    },
+    {
+      "plot": "score distribution by class",
+      "status": "WRITTEN",
+      "file": "final_score_distribution.png"
+    },
+    {
+      "plot": "fold AP distribution",
+      "status": "WRITTEN",
+      "file": "final_fold_ap_distribution.png"
+    },
+    {
+      "plot": "seed stability",
+      "status": "WRITTEN",
+      "file": "final_seed_stability.png"
+    },
+    {
+      "plot": "feature selection frequency",
+      "status": "WRITTEN",
+      "file": "final_selection_frequency.png"
+    },
+    {
+      "plot": "top SHAP importance",
+      "status": "SKIPPED",
+      "reason": "missing artifacts/metrics/global_shap_importance.json",
+      "produced_by": "muleguard.cli.global_shap"
+    },
+    {
+      "plot": "leakage ablation",
+      "status": "WRITTEN",
+      "file": "final_leakage_ablation.png"
+    },
+    {
+      "plot": "alert-context ablation",
+      "status": "WRITTEN",
+      "file": "final_alert_context_ablation.png"
+    },
+    {
+      "plot": "feature-subset ablation",
+      "status": "WRITTEN",
+      "file": "final_feature_subset_ablation.png"
+    },
+    {
+      "plot": "positive-removal stability",
+      "status": "WRITTEN",
+      "file": "final_positive_removal.png"
+    },
+    {
+      "plot": "adversarial validation / shift plot",
+      "status": "SKIPPED",
+      "reason": "missing artifacts/metrics/nested_shift_shield.json",
+      "produced_by": "muleguard.cli.nested_ses --stages shift"
+    }
+  ]
+}
