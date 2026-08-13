@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-07-10T23:02:24.937245+00:00",
+  "generated_utc": "2026-08-13T17:49:52.164095+00:00",
   "backend": "http://127.0.0.1:8001",
   "n_checks": 6,
   "n_passed": 6,
@@ -21,12 +21,12 @@
       "detail": ""
     },
     {
-      "check": "case_CASE-45C8DE5165_queue_equals_detail",
+      "check": "case_CASE-1D16D2774B_queue_equals_detail",
       "passed": true,
       "detail": ""
     },
     {
-      "check": "case_CASE-DF00B7CDAC_queue_equals_detail",
+      "check": "case_CASE-FDC57EB161_queue_equals_detail",
       "passed": true,
       "detail": ""
     },
@@ -45,18 +45,18 @@
       "model_version": "1.0.0"
     },
     {
-      "case_id": "CASE-45C8DE5165",
+      "case_id": "CASE-1D16D2774B",
       "consistent": true,
-      "risk": 0.960187583909551,
-      "tier": "URGENT_REVIEW",
-      "model_version": "1.0.0"
+      "risk": 0.98358154296875,
+      "tier": "CRITICAL_REVIEW",
+      "model_version": "2.0.0"
     },
     {
-      "case_id": "CASE-DF00B7CDAC",
+      "case_id": "CASE-FDC57EB161",
       "consistent": true,
-      "risk": 5.60569752649096e-08,
-      "tier": "STANDARD_REVIEW",
-      "model_version": "1.0.0"
+      "risk": 0.98358154296875,
+      "tier": "CRITICAL_REVIEW",
+      "model_version": "2.0.0"
     }
   ]
 }

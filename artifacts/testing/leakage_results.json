@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-07-10T23:01:35.667650+00:00",
+  "generated_utc": "2026-08-13T17:48:54.220615+00:00",
   "backend": "http://127.0.0.1:8001",
   "n_checks": 6,
   "n_passed": 6,
@@ -39,8 +39,8 @@
   "__provenance__": {
     "spec_section": "57",
     "spec_name_of": "artifacts/testing/leakage_test_results.json",
-    "source_sha256": "2bf79831084fa93f8a459d1d697d73a8468a8c183975e579d3eeefc4564604f4",
-    "regenerated_utc": "2026-08-13T02:28:10+00:00",
+    "source_sha256": "3ba1eb025d50adb79a9e6445746055b49ca9203cab947d446e9f5f30b028f088",
+    "regenerated_utc": "2026-08-13T18:02:48+00:00",
     "note": "Content is the source file's, unmodified. This file exists because the final-validation prompt names it; the source is the working copy the pipeline writes."
   }
 }

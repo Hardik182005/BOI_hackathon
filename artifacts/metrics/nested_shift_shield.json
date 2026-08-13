@@ -1,0 +1,476 @@
+{
+  "generated_utc": "2026-08-13T17:26:38.068992+00:00",
+  "sections": [
+    "23",
+    "54 (inputs)"
+  ],
+  "question": "Are the outer folds exchangeable, which selected features shift between them, and does fold-local calibration hold?",
+  "design": {
+    "protocol": "NESTED repeated CV, paired on byte-identical outer folds",
+    "outer": "stratified 5-fold x 3 repeats = 15 outer folds",
+    "inner": "stratified 4-fold within outer-train",
+    "fold_source": "muleguard.models.nested.build_outer_folds (the same function the nested tournament uses)",
+    "fitted_inside_outer_train_only": [
+      "preprocessing (constant/duplicate removal, imputation, scaling)",
+      "feature ranking and feature-set choice",
+      "ensemble weights, stacker coefficients, calibration",
+      "label-noise flags (fold-local arm)"
+    ],
+    "outer_validation_labels": "used once per arm, for scoring only",
+    "feature_set_size": 120,
+    "hyperparameters": "each family at its default configuration, identical across arms - not tuned per arm",
+    "yardstick": "paired differences on fixed folds. The project's 0.0905 PR-AUC seed-noise floor is an UNPAIRED figure and does not apply here; each comparison is judged against its own std_of_paired_diff.",
+    "power_warning": "each outer-validation fold holds ~13 positives, so fold-level average precision is extremely coarse and almost nothing in this programme can reach significance. Null results mean 'no effect of this size', never 'no effect'.",
+    "adversarial_classifier": "lightgbm, 4-fold CV, outer-train rows labelled 0 and outer-validation rows 1, on the fold's own selected columns",
+    "external_upload_arm": "NOT RUN - no judge upload exists in this session. The within-dataset arm below cannot substitute for it.",
+    "calibration": "Platt scaling fitted on the inner-OOF predictions of the outer-training rows, applied once to outer-val"
+  },
+  "firewall": {
+    "hard_quarantine_checked": [
+      "F2230",
+      "F3892",
+      "F3898",
+      "F3899",
+      "F3912",
+      "F3913",
+      "F3914",
+      "F3915",
+      "F3916",
+      "F3917",
+      "F3918",
+      "F3924",
+      "__UNNAMED__0"
+    ],
+    "quarantined_columns_in_model_frame": [],
+    "quarantined_columns_in_any_fold_matrix": [],
+    "n_model_features": 3925,
+    "n_columns_surviving_fold_preprocessing": [
+      2836,
+      2850,
+      2851,
+      2853,
+      2854,
+      2855,
+      2856,
+      2858,
+      2860,
+      2861,
+      2864,
+      2879
+    ],
+    "target_column_excluded": true
+  },
+  "adversarial_validation": {
+    "auc_per_fold": [
+      0.4986,
+      0.4966,
+      0.5247,
+      0.4811,
+      0.4695,
+      0.5098,
+      0.4751,
+      0.5241,
+      0.4985,
+      0.5058,
+      0.494,
+      0.5124,
+      0.5066,
+      0.5056,
+      0.495
+    ],
+    "auc_mean": 0.49982,
+    "expected": "0.5 - the outer split is random and stratified",
+    "check_band": [
+      0.45,
+      0.55
+    ],
+    "within_band": true,
+    "interpretation": "an AUC materially above 0.55 would mean the outer folds are not exchangeable, which would invalidate every paired comparison in this programme"
+  },
+  "ood": {
+    "rate_per_fold": [
+      0.0096,
+      0.0179,
+      0.011,
+      0.0165,
+      0.0076,
+      0.0138,
+      0.0083,
+      0.0172,
+      0.0158,
+      0.0103,
+      0.0083,
+      0.0124,
+      0.02,
+      0.0158,
+      0.0096
+    ],
+    "rate_mean": 0.01294,
+    "definition": "share of validation rows with at least one selected feature outside the training min-max range; a blunt extrapolation proxy, not a density model"
+  },
+  "feature_shift": {
+    "thresholds": {
+      "SHIFT_PRONE": "mean KS >= 0.10 or mean missing-rate shift >= 0.05 or unseen-category rate >= 0.02",
+      "WATCH": "mean KS >= 0.05 or selected in fewer than half the folds",
+      "STABLE": "otherwise"
+    },
+    "class_counts": {
+      "SHIFT_PRONE": 1,
+      "WATCH": 438,
+      "STABLE": 72
+    },
+    "n_distinct_features_selected": 511,
+    "top_20_by_ks": [
+      {
+        "feature": "F3044",
+        "selected_in_folds": 1,
+        "selection_frequency": 0.0667,
+        "mean_ks": 0.1142,
+        "mean_missing_rate_shift": 0.0021,
+        "mean_unseen_category_rate": 0.0,
+        "class": "SHIFT_PRONE"
+      },
+      {
+        "feature": "F2598",
+        "selected_in_folds": 1,
+        "selection_frequency": 0.0667,
+        "mean_ks": 0.0971,
+        "mean_missing_rate_shift": 0.0021,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F2572",
+        "selected_in_folds": 1,
+        "selection_frequency": 0.0667,
+        "mean_ks": 0.0942,
+        "mean_missing_rate_shift": 0.0031,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F2551",
+        "selected_in_folds": 2,
+        "selection_frequency": 0.1333,
+        "mean_ks": 0.078,
+        "mean_missing_rate_shift": 0.0047,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F2859",
+        "selected_in_folds": 1,
+        "selection_frequency": 0.0667,
+        "mean_ks": 0.0724,
+        "mean_missing_rate_shift": 0.0117,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F2610",
+        "selected_in_folds": 1,
+        "selection_frequency": 0.0667,
+        "mean_ks": 0.0716,
+        "mean_missing_rate_shift": 0.0121,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F2727",
+        "selected_in_folds": 1,
+        "selection_frequency": 0.0667,
+        "mean_ks": 0.0713,
+        "mean_missing_rate_shift": 0.0151,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F2527",
+        "selected_in_folds": 2,
+        "selection_frequency": 0.1333,
+        "mean_ks": 0.0706,
+        "mean_missing_rate_shift": 0.0116,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F2671",
+        "selected_in_folds": 1,
+        "selection_frequency": 0.0667,
+        "mean_ks": 0.0627,
+        "mean_missing_rate_shift": 0.004,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F2755",
+        "selected_in_folds": 1,
+        "selection_frequency": 0.0667,
+        "mean_ks": 0.0619,
+        "mean_missing_rate_shift": 0.0099,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F3136",
+        "selected_in_folds": 14,
+        "selection_frequency": 0.9333,
+        "mean_ks": 0.0569,
+        "mean_missing_rate_shift": 0.0094,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F309",
+        "selected_in_folds": 1,
+        "selection_frequency": 0.0667,
+        "mean_ks": 0.0561,
+        "mean_missing_rate_shift": 0.0024,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F2236",
+        "selected_in_folds": 1,
+        "selection_frequency": 0.0667,
+        "mean_ks": 0.0559,
+        "mean_missing_rate_shift": 0.0124,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F3138",
+        "selected_in_folds": 3,
+        "selection_frequency": 0.2,
+        "mean_ks": 0.0558,
+        "mean_missing_rate_shift": 0.007,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F2392",
+        "selected_in_folds": 1,
+        "selection_frequency": 0.0667,
+        "mean_ks": 0.0519,
+        "mean_missing_rate_shift": 0.0207,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F3043",
+        "selected_in_folds": 3,
+        "selection_frequency": 0.2,
+        "mean_ks": 0.0514,
+        "mean_missing_rate_shift": 0.0049,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F3099",
+        "selected_in_folds": 2,
+        "selection_frequency": 0.1333,
+        "mean_ks": 0.0496,
+        "mean_missing_rate_shift": 0.009,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F2585",
+        "selected_in_folds": 2,
+        "selection_frequency": 0.1333,
+        "mean_ks": 0.0489,
+        "mean_missing_rate_shift": 0.0084,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F172",
+        "selected_in_folds": 1,
+        "selection_frequency": 0.0667,
+        "mean_ks": 0.0486,
+        "mean_missing_rate_shift": 0.0128,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      },
+      {
+        "feature": "F2780",
+        "selected_in_folds": 1,
+        "selection_frequency": 0.0667,
+        "mean_ks": 0.0477,
+        "mean_missing_rate_shift": 0.0176,
+        "mean_unseen_category_rate": 0.0,
+        "class": "WATCH"
+      }
+    ]
+  },
+  "calibration": {
+    "per_fold": [
+      {
+        "repeat": 0,
+        "fold": 0,
+        "ece_raw": 0.00129,
+        "ece_calibrated": 0.00229,
+        "brier_raw": 0.001988,
+        "brier_calibrated": 0.002067
+      },
+      {
+        "repeat": 0,
+        "fold": 1,
+        "ece_raw": 0.00305,
+        "ece_calibrated": 0.00488,
+        "brier_raw": 0.001527,
+        "brier_calibrated": 0.001299
+      },
+      {
+        "repeat": 0,
+        "fold": 2,
+        "ece_raw": 0.00247,
+        "ece_calibrated": 0.00242,
+        "brier_raw": 0.002312,
+        "brier_calibrated": 0.002188
+      },
+      {
+        "repeat": 0,
+        "fold": 3,
+        "ece_raw": 0.00522,
+        "ece_calibrated": 0.00496,
+        "brier_raw": 0.005228,
+        "brier_calibrated": 0.005572
+      },
+      {
+        "repeat": 0,
+        "fold": 4,
+        "ece_raw": 0.00462,
+        "ece_calibrated": 0.00428,
+        "brier_raw": 0.004775,
+        "brier_calibrated": 0.004905
+      },
+      {
+        "repeat": 1,
+        "fold": 0,
+        "ece_raw": 0.00348,
+        "ece_calibrated": 0.00264,
+        "brier_raw": 0.004243,
+        "brier_calibrated": 0.004318
+      },
+      {
+        "repeat": 1,
+        "fold": 1,
+        "ece_raw": 0.0018,
+        "ece_calibrated": 0.00246,
+        "brier_raw": 0.002569,
+        "brier_calibrated": 0.0026
+      },
+      {
+        "repeat": 1,
+        "fold": 2,
+        "ece_raw": 0.00395,
+        "ece_calibrated": 0.00274,
+        "brier_raw": 0.003656,
+        "brier_calibrated": 0.003497
+      },
+      {
+        "repeat": 1,
+        "fold": 3,
+        "ece_raw": 0.00326,
+        "ece_calibrated": 0.00222,
+        "brier_raw": 0.003298,
+        "brier_calibrated": 0.003388
+      },
+      {
+        "repeat": 1,
+        "fold": 4,
+        "ece_raw": 0.00316,
+        "ece_calibrated": 0.00536,
+        "brier_raw": 0.001557,
+        "brier_calibrated": 0.001609
+      },
+      {
+        "repeat": 2,
+        "fold": 0,
+        "ece_raw": 0.00372,
+        "ece_calibrated": 0.00273,
+        "brier_raw": 0.003326,
+        "brier_calibrated": 0.003338
+      },
+      {
+        "repeat": 2,
+        "fold": 1,
+        "ece_raw": 0.0023,
+        "ece_calibrated": 0.0029,
+        "brier_raw": 0.002768,
+        "brier_calibrated": 0.002675
+      },
+      {
+        "repeat": 2,
+        "fold": 2,
+        "ece_raw": 0.00223,
+        "ece_calibrated": 0.00298,
+        "brier_raw": 0.00233,
+        "brier_calibrated": 0.002538
+      },
+      {
+        "repeat": 2,
+        "fold": 3,
+        "ece_raw": 0.004,
+        "ece_calibrated": 0.0021,
+        "brier_raw": 0.004087,
+        "brier_calibrated": 0.004036
+      },
+      {
+        "repeat": 2,
+        "fold": 4,
+        "ece_raw": 0.00273,
+        "ece_calibrated": 0.00219,
+        "brier_raw": 0.002895,
+        "brier_calibrated": 0.002975
+      }
+    ],
+    "ece_raw_mean": 0.00315,
+    "ece_calibrated_mean": 0.00314,
+    "ece_calibrated_std_across_folds": 0.00109,
+    "paired_ece_change": {
+      "comparison": "platt_on_inner_oof vs uncalibrated",
+      "baseline_arm": "uncalibrated",
+      "test_arm": "platt_on_inner_oof",
+      "n_folds": 15,
+      "mean_paired_diff": -1e-05,
+      "median_paired_diff": -0.00026,
+      "std_of_paired_diff": 0.00116,
+      "ci95_of_mean": [
+        -0.00065,
+        0.00063
+      ],
+      "per_fold_diff": [
+        0.001,
+        0.00183,
+        -5e-05,
+        -0.00026,
+        -0.00034,
+        -0.00084,
+        0.00066,
+        -0.00121,
+        -0.00104,
+        0.0022,
+        -0.00099,
+        0.0006,
+        0.00075,
+        -0.0019,
+        -0.00054
+      ],
+      "n_folds_improved": 6,
+      "n_folds_worse": 9,
+      "n_folds_tied": 0,
+      "sign_test_p_two_sided": 0.60724,
+      "wilcoxon_p_two_sided": 0.84692,
+      "paired_t_p_two_sided": 0.97734,
+      "paired_t_statistic": -0.0289,
+      "n_tests_below_0.05": 0,
+      "tests_disagree": false,
+      "min_detectable_effect_80pct_power": 0.00084,
+      "yardstick": "paired on identical outer folds - judge against std_of_paired_diff=0.00116, NOT against the project's 0.0905 unpaired seed-noise floor"
+    },
+    "note": "lower ECE is better, so a NEGATIVE mean paired difference means calibration helped"
+  },
+  "runtime_seconds": 83.4
+}

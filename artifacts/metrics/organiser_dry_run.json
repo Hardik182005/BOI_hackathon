@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-08-12T10:59:38.685796+00:00",
+  "generated_utc": "2026-08-13T17:56:53.569227+00:00",
   "spec": "section 42 - dry-run the organiser validation experience",
   "mock_file": {
     "path": "artifacts\\dry_run\\mock_hidden_validation.xlsx",
@@ -20,7 +20,7 @@
       "variant": "baseline",
       "http_status": 200,
       "overall": "WARN",
-      "seal_id": "seal-20260812T105904-bb6f8f7f",
+      "seal_id": "seal-20260813T175609-6f2c8686",
       "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
       "compatibility_score": 99.97,
       "compatibility_band": "HIGH_COMPATIBILITY",
@@ -49,7 +49,7 @@
       "variant": "baseline_csv",
       "http_status": 200,
       "overall": "WARN",
-      "seal_id": "seal-20260812T105909-eb12de92",
+      "seal_id": "seal-20260813T175614-6cfc40d6",
       "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
       "compatibility_score": 99.97,
       "compatibility_band": "HIGH_COMPATIBILITY",
@@ -78,7 +78,7 @@
       "variant": "shuffled_column_order",
       "http_status": 200,
       "overall": "WARN",
-      "seal_id": "seal-20260812T105914-1ade1479",
+      "seal_id": "seal-20260813T175621-69366080",
       "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
       "compatibility_score": 99.97,
       "compatibility_band": "HIGH_COMPATIBILITY",
@@ -107,7 +107,7 @@
       "variant": "extra_columns",
       "http_status": 200,
       "overall": "WARN",
-      "seal_id": "seal-20260812T105919-7701507b",
+      "seal_id": "seal-20260813T175627-7ba0fcf4",
       "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
       "compatibility_score": 99.97,
       "compatibility_band": "HIGH_COMPATIBILITY",
@@ -136,7 +136,7 @@
       "variant": "f3912_present",
       "http_status": 200,
       "overall": "WARN",
-      "seal_id": "seal-20260812T105923-8635ddc7",
+      "seal_id": "seal-20260813T175633-36b13a2c",
       "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
       "compatibility_score": 99.97,
       "compatibility_band": "HIGH_COMPATIBILITY",
@@ -165,7 +165,7 @@
       "variant": "resolution_fields_present",
       "http_status": 200,
       "overall": "WARN",
-      "seal_id": "seal-20260812T105928-2c298fe8",
+      "seal_id": "seal-20260813T175639-1bad67da",
       "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
       "compatibility_score": 99.97,
       "compatibility_band": "HIGH_COMPATIBILITY",
@@ -194,7 +194,7 @@
       "variant": "category_changes",
       "http_status": 200,
       "overall": "WARN",
-      "seal_id": "seal-20260812T105932-d410c44a",
+      "seal_id": "seal-20260813T175645-a139bd04",
       "prediction_sha256": "4718c126b285ba325f50014a838ec06a30c269b8e31ca5b3861bd0469e6dcecf",
       "compatibility_score": 99.85,
       "compatibility_band": "HIGH_COMPATIBILITY",
@@ -223,7 +223,7 @@
       "variant": "missing_optional_fields",
       "http_status": 200,
       "overall": "WARN",
-      "seal_id": "seal-20260812T105937-3e267adc",
+      "seal_id": "seal-20260813T175651-22b12134",
       "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
       "compatibility_score": 99.97,
       "compatibility_band": "HIGH_COMPATIBILITY",
@@ -286,8 +286,8 @@
   "offline_label_comparison": {
     "http_status": 200,
     "state": "METRICS_REVEALED",
-    "sealed_utc": "2026-08-12T10:59:04.490653+00:00",
-    "revealed_utc": "2026-08-12T10:59:38.459657+00:00",
+    "sealed_utc": "2026-08-13T17:56:09.442357+00:00",
+    "revealed_utc": "2026-08-13T17:56:53.209601+00:00",
     "seal_verified": true,
     "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
     "metrics": {
@@ -308,9 +308,36 @@
         "50": 0.24,
         "100": 0.14
       },
-      "mcc_at_top_100": 0.32749697111983994
+      "mcc_at_top_100": 0.32749697111983994,
+      "operating_threshold": 0.013182620557866929,
+      "operating_threshold_source": "policy.standard_risk",
+      "confusion_matrix": {
+        "tp": 16,
+        "fp": 233,
+        "fn": 1,
+        "tn": 1568
+      },
+      "accuracy": 0.8712871287128713,
+      "balanced_accuracy": 0.9059019498971159,
+      "precision": 0.0642570281124498,
+      "recall": 0.9411764705882353,
+      "specificity": 0.8706274292059967,
+      "f1": 0.12030075187969924,
+      "f2": 0.2523659305993691,
+      "mcc": 0.22725911182558778,
+      "accuracy_note": "accuracy is reported for completeness only; at this prevalence a model that flags nothing scores near 1.0 while catching no mules",
+      "brier": 0.0048900923791727205,
+      "ece": 0.009130827375560934,
+      "ece_bins": 10,
+      "generalization_gap": {
+        "external_ap": 0.7262714933700882,
+        "nested_cv_ap_mean": 0.8065329466039595,
+        "nested_cv_model": "catboost",
+        "gap": -0.08026145323387124,
+        "interpretation": "external AP minus nested-CV AP mean; a large negative value means the external set is harder than cross-validation suggested"
+      }
     },
-    "integrity_statement": "Predictions were sealed at 2026-08-12T10:59:04.490653+00:00 with SHA-256 cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649. The file was re-hashed at reveal time and matched. These metrics therefore belong to predictions that existed before any label was read."
+    "integrity_statement": "Predictions were sealed at 2026-08-13T17:56:09.442357+00:00 with SHA-256 cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649. The file was re-hashed at reveal time and matched. These metrics therefore belong to predictions that existed before any label was read."
   },
   "leakage_statement": "the revealed metric cannot have leaked into training: the target column was dropped from the uploaded workbook before it left this process, the API withholds any label column it finds before scoring, and the labels were supplied only at reveal time against a prediction file whose hash was already recorded",
   "verdict": "PASS"

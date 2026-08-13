@@ -1,7 +1,17 @@
 {
-  "generated_utc": "2026-08-12T07:39:08.059521+00:00",
+  "generated_utc": "2026-08-13T02:53:19.184309+00:00",
   "rule": "addendum UPDATE 13: generalization_score = PR_AUC_mean - 0.5 * PR_AUC_std + 0.1 * Recall@100. Applied only within a 0.01 PR-AUC band of the leader; inside that band the simpler and more stable model wins.",
+  "eligibility_rule": "A candidate is promotable only if it can score one account inside 5.0s. Accuracy does not override this: a score an analyst cannot get in time is not a product. Families with no measured latency stay eligible - an unmeasured cost is recorded as unknown, never assumed.",
   "raw_pr_auc_leader": "xgboost_top_120",
+  "raw_pr_auc_leader_including_unservable": "tabpfn_top_60",
+  "excluded_for_serving_cost": [
+    {
+      "model": "tabpfn_top_60",
+      "oof_pr_auc_mean": 0.911,
+      "interactive_score_seconds": 438.1,
+      "note": "scored higher than the promoted model and was not beaten on accuracy; it is benched on serving cost"
+    }
+  ],
   "models_within_tie_band": [
     "xgboost_top_120"
   ],
@@ -18,7 +28,9 @@
     "oof_roc_auc_mean": 0.95771,
     "recall_at_100": 0.78125,
     "generalization_score": 0.83385,
-    "seconds": 32.3
+    "seconds": 32.3,
+    "interactive_score_seconds": null,
+    "promotion_eligible": true
   },
   "tie_break_applied": false
 }

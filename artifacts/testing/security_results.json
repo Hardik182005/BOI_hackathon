@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-08-12T10:21:00.998344+00:00",
+  "generated_utc": "2026-08-13T17:50:05.249822+00:00",
   "backend": "http://127.0.0.1:8001",
   "n_checks": 8,
   "n_passed": 8,
@@ -8,7 +8,7 @@
     {
       "check": "security_pytest_suite",
       "passed": true,
-      "detail": "49 passed, 1 warning in 4.41s"
+      "detail": "49 passed, 1 warning in 6.84s"
     },
     {
       "check": "sql_injection_in_path_safe",

@@ -1,0 +1,133 @@
+{
+  "generated_utc": "2026-08-13T17:29:42.064611+00:00",
+  "sections": [
+    "54"
+  ],
+  "question": "How robust is this model to the things a hidden validation set will change?",
+  "design": {
+    "protocol": "NESTED repeated CV, paired on byte-identical outer folds",
+    "outer": "stratified 5-fold x 3 repeats = 15 outer folds",
+    "inner": "stratified 4-fold within outer-train",
+    "fold_source": "muleguard.models.nested.build_outer_folds (the same function the nested tournament uses)",
+    "fitted_inside_outer_train_only": [
+      "preprocessing (constant/duplicate removal, imputation, scaling)",
+      "feature ranking and feature-set choice",
+      "ensemble weights, stacker coefficients, calibration",
+      "label-noise flags (fold-local arm)"
+    ],
+    "outer_validation_labels": "used once per arm, for scoring only",
+    "feature_set_size": 120,
+    "hyperparameters": "each family at its default configuration, identical across arms - not tuned per arm",
+    "yardstick": "paired differences on fixed folds. The project's 0.0905 PR-AUC seed-noise floor is an UNPAIRED figure and does not apply here; each comparison is judged against its own std_of_paired_diff.",
+    "power_warning": "each outer-validation fold holds ~13 positives, so fold-level average precision is extremely coarse and almost nothing in this programme can reach significance. Null results mean 'no effect of this size', never 'no effect'."
+  },
+  "firewall": {
+    "hard_quarantine_checked": [
+      "F2230",
+      "F3892",
+      "F3898",
+      "F3899",
+      "F3912",
+      "F3913",
+      "F3914",
+      "F3915",
+      "F3916",
+      "F3917",
+      "F3918",
+      "F3924",
+      "__UNNAMED__0"
+    ],
+    "quarantined_columns_in_model_frame": [],
+    "quarantined_columns_in_any_fold_matrix": [],
+    "n_model_features": 3925,
+    "n_columns_surviving_fold_preprocessing": [
+      2836,
+      2850,
+      2851,
+      2853,
+      2854,
+      2855,
+      2856,
+      2858,
+      2860,
+      2861,
+      2864,
+      2879
+    ],
+    "target_column_excluded": true
+  },
+  "missing_inputs": [],
+  "components_reported_separately": {
+    "cv_stability": {
+      "fold_ap_mean": 0.83763,
+      "fold_ap_std_across_15_folds": 0.07993,
+      "note": "fold-level AP on ~13 positives is intrinsically noisy; this spread is mostly sampling, not model instability"
+    },
+    "seed_stability": {
+      "family": "xgboost",
+      "mean_probability_std_across_seeds": 0.000853,
+      "mean_rank_std_across_seeds": 0.054592,
+      "fold_ap_std_single": 0.10031,
+      "fold_ap_std_bag": 0.10175
+    },
+    "positive_removal_stability": {
+      "positive_removal_pr_auc_relative_drop": 0.01766,
+      "positive_removal_pr_auc_std": 0.02632,
+      "prediction_rank_stability": 0.90887,
+      "reference_fold_ap_mean": 0.78161,
+      "stressed_fold_ap_mean": 0.7678
+    },
+    "feature_stability": {
+      "feature_rank_correlation_mean": 0.39438,
+      "class_counts": {
+        "SHIFT_PRONE": 1,
+        "WATCH": 438,
+        "STABLE": 72
+      }
+    },
+    "adversarial_validation_auc": 0.49982,
+    "ood_rate": 0.01294,
+    "calibration_stability": {
+      "ece_calibrated_mean": 0.00314,
+      "ece_calibrated_std_across_folds": 0.00109
+    }
+  },
+  "thresholds_used": {
+    "HIGH": {
+      "positive_removal_pr_auc_rel_drop_max": 0.15,
+      "positive_removal_pr_auc_std_max": 0.06,
+      "prediction_rank_stability_min": 0.9,
+      "family_dropout_worst_rel_drop_max": 0.3
+    },
+    "MEDIUM": {
+      "positive_removal_pr_auc_rel_drop_max": 0.3,
+      "positive_removal_pr_auc_std_max": 0.12,
+      "prediction_rank_stability_min": 0.75,
+      "family_dropout_worst_rel_drop_max": 0.5
+    }
+  },
+  "extra_criterion": {
+    "folds_exchangeable": "adversarial AUC in [0.45, 0.55]"
+  },
+  "criteria_by_level": {
+    "HIGH": {
+      "positive_removal_pr_auc_rel_drop": true,
+      "positive_removal_pr_auc_std": true,
+      "prediction_rank_stability": true,
+      "folds_exchangeable": true
+    },
+    "MEDIUM": {
+      "positive_removal_pr_auc_rel_drop": true,
+      "positive_removal_pr_auc_std": true,
+      "prediction_rank_stability": true,
+      "folds_exchangeable": true
+    }
+  },
+  "generalization_robustness": "HIGH",
+  "rule": "the components above are the report. The single HIGH/MEDIUM/LOW label is a summary of published thresholds only, it is not a new score, and it is never used to select a model.",
+  "not_covered": [
+    "no external / judge-uploaded dataset exists in this session, so the adversarial-validation component measures fold exchangeability WITHIN one dataset and says nothing about a distribution the model has not seen",
+    "the locked test set is a HISTORICAL HOLDOUT and was not read here"
+  ],
+  "runtime_seconds": 0.0
+}

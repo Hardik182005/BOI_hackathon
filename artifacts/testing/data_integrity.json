@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-07-10T23:01:35.574331+00:00",
+  "generated_utc": "2026-08-13T17:48:54.132822+00:00",
   "backend": "http://127.0.0.1:8001",
   "n_checks": 11,
   "n_passed": 11,
@@ -86,8 +86,8 @@
   "__provenance__": {
     "spec_section": "57",
     "spec_name_of": "artifacts/testing/data_integrity_results.json",
-    "source_sha256": "899c7a4d687edc80b4c39a8d68f204b6017edd094703f628c775bebc8474e97d",
-    "regenerated_utc": "2026-08-13T02:28:10+00:00",
+    "source_sha256": "02fd3604e6f49f65abe37f50b1b00b5e3c75fe5f13a78c82174150e5d8a3a8dd",
+    "regenerated_utc": "2026-08-13T18:02:48+00:00",
     "note": "Content is the source file's, unmodified. This file exists because the final-validation prompt names it; the source is the working copy the pipeline writes."
   }
 }

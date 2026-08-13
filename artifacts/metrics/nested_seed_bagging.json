@@ -1,0 +1,476 @@
+{
+  "generated_utc": "2026-08-13T17:43:57.380349+00:00",
+  "sections": [
+    "18"
+  ],
+  "question": "Does averaging a family over 5 seeds improve or stabilise it?",
+  "design": {
+    "protocol": "NESTED repeated CV, paired on byte-identical outer folds",
+    "outer": "stratified 5-fold x 3 repeats = 15 outer folds",
+    "inner": "stratified 4-fold within outer-train",
+    "fold_source": "muleguard.models.nested.build_outer_folds (the same function the nested tournament uses)",
+    "fitted_inside_outer_train_only": [
+      "preprocessing (constant/duplicate removal, imputation, scaling)",
+      "feature ranking and feature-set choice",
+      "ensemble weights, stacker coefficients, calibration",
+      "label-noise flags (fold-local arm)"
+    ],
+    "outer_validation_labels": "used once per arm, for scoring only",
+    "feature_set_size": 120,
+    "hyperparameters": "each family at its default configuration, identical across arms - not tuned per arm",
+    "yardstick": "paired differences on fixed folds. The project's 0.0905 PR-AUC seed-noise floor is an UNPAIRED figure and does not apply here; each comparison is judged against its own std_of_paired_diff.",
+    "power_warning": "each outer-validation fold holds ~13 positives, so fold-level average precision is extremely coarse and almost nothing in this programme can reach significance. Null results mean 'no effect of this size', never 'no effect'.",
+    "seeds_per_fold": [
+      "fold_seed + 0",
+      "fold_seed + 7919",
+      "fold_seed + 15838",
+      "fold_seed + 23757",
+      "fold_seed + 31676"
+    ],
+    "single_seed_arm": "seed offset 0 - the model that would have shipped"
+  },
+  "firewall": {
+    "hard_quarantine_checked": [
+      "F2230",
+      "F3892",
+      "F3898",
+      "F3899",
+      "F3912",
+      "F3913",
+      "F3914",
+      "F3915",
+      "F3916",
+      "F3917",
+      "F3918",
+      "F3924",
+      "__UNNAMED__0"
+    ],
+    "quarantined_columns_in_model_frame": [],
+    "quarantined_columns_in_any_fold_matrix": [],
+    "n_model_features": 3925,
+    "n_columns_surviving_fold_preprocessing": [
+      2836,
+      2850,
+      2851,
+      2853,
+      2854,
+      2855,
+      2856,
+      2858,
+      2860,
+      2861,
+      2864,
+      2879
+    ],
+    "target_column_excluded": true
+  },
+  "families": {
+    "xgboost": {
+      "fold_ap_single_mean": 0.78161,
+      "fold_ap_bag_mean": 0.7904,
+      "fold_ap_rankbag_mean": 0.78713,
+      "fold_ap_std_single": 0.10031,
+      "fold_ap_std_bag": 0.10175,
+      "mean_probability_std_across_seeds": 0.000853,
+      "mean_rank_std_across_seeds": 0.054592,
+      "per_fold_per_seed_ap": [
+        [
+          0.85967,
+          0.85568,
+          0.85411,
+          0.85345,
+          0.85768
+        ],
+        [
+          0.96378,
+          0.98218,
+          0.97966,
+          0.97272,
+          0.97234
+        ],
+        [
+          0.8167,
+          0.81351,
+          0.80701,
+          0.76332,
+          0.78889
+        ],
+        [
+          0.54048,
+          0.52917,
+          0.54345,
+          0.53257,
+          0.52068
+        ],
+        [
+          0.75033,
+          0.75055,
+          0.7549,
+          0.75356,
+          0.74716
+        ],
+        [
+          0.63098,
+          0.64459,
+          0.63481,
+          0.62372,
+          0.63825
+        ],
+        [
+          0.80456,
+          0.81938,
+          0.80036,
+          0.81544,
+          0.8178
+        ],
+        [
+          0.82594,
+          0.83497,
+          0.82458,
+          0.8306,
+          0.84598
+        ],
+        [
+          0.75908,
+          0.76953,
+          0.76388,
+          0.78496,
+          0.78645
+        ],
+        [
+          0.91384,
+          0.90851,
+          0.88519,
+          0.91674,
+          0.92258
+        ],
+        [
+          0.72674,
+          0.76235,
+          0.7457,
+          0.75685,
+          0.75008
+        ],
+        [
+          0.83665,
+          0.81053,
+          0.83412,
+          0.82916,
+          0.80407
+        ],
+        [
+          0.76609,
+          0.78678,
+          0.80803,
+          0.81148,
+          0.8097
+        ],
+        [
+          0.73946,
+          0.74475,
+          0.76944,
+          0.75395,
+          0.71889
+        ],
+        [
+          0.78982,
+          0.79395,
+          0.77899,
+          0.77697,
+          0.78735
+        ]
+      ],
+      "paired_prob_mean_vs_single": {
+        "comparison": "seed_bag_prob_mean vs single_seed",
+        "baseline_arm": "single_seed",
+        "test_arm": "seed_bag_prob_mean",
+        "n_folds": 15,
+        "mean_paired_diff": 0.00879,
+        "median_paired_diff": 0.00599,
+        "std_of_paired_diff": 0.0166,
+        "ci95_of_mean": [
+          -0.0004,
+          0.01799
+        ],
+        "per_fold_diff": [
+          -0.0032,
+          0.02004,
+          -0.00766,
+          -0.00772,
+          0.00111,
+          0.01853,
+          0.01574,
+          0.00599,
+          0.01111,
+          0.00751,
+          0.03725,
+          -0.00846,
+          0.04683,
+          0.00013,
+          -0.00533
+        ],
+        "n_folds_improved": 10,
+        "n_folds_worse": 5,
+        "n_folds_tied": 0,
+        "sign_test_p_two_sided": 0.30176,
+        "wilcoxon_p_two_sided": 0.10699,
+        "paired_t_p_two_sided": 0.0595,
+        "paired_t_statistic": 2.0507,
+        "n_tests_below_0.05": 0,
+        "tests_disagree": false,
+        "min_detectable_effect_80pct_power": 0.01201,
+        "yardstick": "paired on identical outer folds - judge against std_of_paired_diff=0.01660, NOT against the project's 0.0905 unpaired seed-noise floor"
+      },
+      "paired_rank_mean_vs_single": {
+        "comparison": "seed_bag_rank_mean vs single_seed",
+        "baseline_arm": "single_seed",
+        "test_arm": "seed_bag_rank_mean",
+        "n_folds": 15,
+        "mean_paired_diff": 0.00552,
+        "median_paired_diff": 0.00214,
+        "std_of_paired_diff": 0.01324,
+        "ci95_of_mean": [
+          -0.00181,
+          0.01285
+        ],
+        "per_fold_diff": [
+          -0.00347,
+          0.00856,
+          -0.01227,
+          -0.00528,
+          0.00089,
+          0.00214,
+          0.01263,
+          0.01281,
+          0.00912,
+          0.00751,
+          0.02529,
+          -0.00342,
+          0.03841,
+          -0.00425,
+          -0.00589
+        ],
+        "n_folds_improved": 9,
+        "n_folds_worse": 6,
+        "n_folds_tied": 0,
+        "sign_test_p_two_sided": 0.60724,
+        "wilcoxon_p_two_sided": 0.18762,
+        "paired_t_p_two_sided": 0.12883,
+        "paired_t_statistic": 1.614,
+        "n_tests_below_0.05": 0,
+        "tests_disagree": false,
+        "min_detectable_effect_80pct_power": 0.00958,
+        "yardstick": "paired on identical outer folds - judge against std_of_paired_diff=0.01324, NOT against the project's 0.0905 unpaired seed-noise floor"
+      },
+      "deterministic_under_reseeding": false,
+      "decision": "NO_CHANGE"
+    },
+    "histgb": {
+      "fold_ap_single_mean": 0.80244,
+      "fold_ap_bag_mean": 0.80244,
+      "fold_ap_rankbag_mean": 0.80244,
+      "fold_ap_std_single": 0.11709,
+      "fold_ap_std_bag": 0.11709,
+      "mean_probability_std_across_seeds": 0.0,
+      "mean_rank_std_across_seeds": 0.0,
+      "per_fold_per_seed_ap": [
+        [
+          0.8609,
+          0.8609,
+          0.8609,
+          0.8609,
+          0.8609
+        ],
+        [
+          0.98859,
+          0.98859,
+          0.98859,
+          0.98859,
+          0.98859
+        ],
+        [
+          0.89502,
+          0.89502,
+          0.89502,
+          0.89502,
+          0.89502
+        ],
+        [
+          0.51885,
+          0.51885,
+          0.51885,
+          0.51885,
+          0.51885
+        ],
+        [
+          0.68806,
+          0.68806,
+          0.68806,
+          0.68806,
+          0.68806
+        ],
+        [
+          0.66342,
+          0.66342,
+          0.66342,
+          0.66342,
+          0.66342
+        ],
+        [
+          0.84081,
+          0.84081,
+          0.84081,
+          0.84081,
+          0.84081
+        ],
+        [
+          0.82028,
+          0.82028,
+          0.82028,
+          0.82028,
+          0.82028
+        ],
+        [
+          0.78004,
+          0.78004,
+          0.78004,
+          0.78004,
+          0.78004
+        ],
+        [
+          0.97907,
+          0.97907,
+          0.97907,
+          0.97907,
+          0.97907
+        ],
+        [
+          0.77547,
+          0.77547,
+          0.77547,
+          0.77547,
+          0.77547
+        ],
+        [
+          0.84269,
+          0.84269,
+          0.84269,
+          0.84269,
+          0.84269
+        ],
+        [
+          0.8467,
+          0.8467,
+          0.8467,
+          0.8467,
+          0.8467
+        ],
+        [
+          0.71326,
+          0.71326,
+          0.71326,
+          0.71326,
+          0.71326
+        ],
+        [
+          0.82347,
+          0.82347,
+          0.82347,
+          0.82347,
+          0.82347
+        ]
+      ],
+      "paired_prob_mean_vs_single": {
+        "comparison": "seed_bag_prob_mean vs single_seed",
+        "baseline_arm": "single_seed",
+        "test_arm": "seed_bag_prob_mean",
+        "n_folds": 15,
+        "mean_paired_diff": 0.0,
+        "median_paired_diff": 0.0,
+        "std_of_paired_diff": 0.0,
+        "ci95_of_mean": [
+          0.0,
+          0.0
+        ],
+        "per_fold_diff": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "n_folds_improved": 0,
+        "n_folds_worse": 0,
+        "n_folds_tied": 15,
+        "sign_test_p_two_sided": 1.0,
+        "wilcoxon_p_two_sided": null,
+        "paired_t_p_two_sided": 1.0,
+        "paired_t_statistic": 0.0,
+        "n_tests_below_0.05": 0,
+        "tests_disagree": false,
+        "min_detectable_effect_80pct_power": 0.0,
+        "yardstick": "paired on identical outer folds - judge against std_of_paired_diff=0.00000, NOT against the project's 0.0905 unpaired seed-noise floor"
+      },
+      "paired_rank_mean_vs_single": {
+        "comparison": "seed_bag_rank_mean vs single_seed",
+        "baseline_arm": "single_seed",
+        "test_arm": "seed_bag_rank_mean",
+        "n_folds": 15,
+        "mean_paired_diff": 0.0,
+        "median_paired_diff": 0.0,
+        "std_of_paired_diff": 0.0,
+        "ci95_of_mean": [
+          0.0,
+          0.0
+        ],
+        "per_fold_diff": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "n_folds_improved": 0,
+        "n_folds_worse": 0,
+        "n_folds_tied": 15,
+        "sign_test_p_two_sided": 1.0,
+        "wilcoxon_p_two_sided": null,
+        "paired_t_p_two_sided": 1.0,
+        "paired_t_statistic": 0.0,
+        "n_tests_below_0.05": 0,
+        "tests_disagree": false,
+        "min_detectable_effect_80pct_power": 0.0,
+        "yardstick": "paired on identical outer folds - judge against std_of_paired_diff=0.00000, NOT against the project's 0.0905 unpaired seed-noise floor"
+      },
+      "deterministic_under_reseeding": false,
+      "decision": "NO_CHANGE"
+    }
+  },
+  "rule": {
+    "ADOPT": "mean paired gain > 0 AND at least 2 of the 3 paired tests p < 0.05",
+    "ADOPT_FOR_STABILITY_ONLY": "not ADOPT, the 95% CI contains 0 (tied), and the across-fold AP spread decreases",
+    "NO_CHANGE": "otherwise - keep the single-seed model, which is 5x cheaper",
+    "NOT_APPLICABLE": "the family is deterministic under reseeding, so the comparison has no content - checked before the others"
+  },
+  "runtime_seconds": 1354.8
+}

@@ -1,0 +1,13 @@
+{
+  "mode": "reuse",
+  "retraining_performed": false,
+  "started_utc": "2026-08-13T17:30:09Z",
+  "finished_utc": "2026-08-13T17:57:04Z",
+  "steps_passed": 9,
+  "steps_failed": 6,
+  "failed_steps": "metric battery (NESTED) nested promotion check required plots artifact reconciliation release test suite final verdict (A-L)",
+  "metric_battery_source": "artifacts/predictions/nested_oof.parquet",
+  "metric_battery_protocol": "NESTED",
+  "verdict": "FAIL",
+  "log": "logs/final_validation.log"
+}

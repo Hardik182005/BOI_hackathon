@@ -1,13 +1,12 @@
 {
-  "generated_utc": "2026-08-13T02:28:10+00:00",
+  "generated_utc": "2026-08-13T18:02:48+00:00",
   "spec_sections": [
     "57",
     "58"
   ],
   "counts": {
-    "DERIVED": 17,
-    "PENDING": 2,
-    "PRESENT": 7
+    "DERIVED": 20,
+    "PRESENT": 8
   },
   "artifacts": [
     {
@@ -19,8 +18,8 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "5fa7cc5944dc37632c4d1508b64528aafeb1ead132a06c260830978d2216b881",
-      "bytes": 1743
+      "sha256": "e8557bc8156bdcb8e9762e0ab76d322e687ff5fed8e9b0d4a363bff50dead8cb",
+      "bytes": 1744
     },
     {
       "spec": "artifacts/testing/data_integrity.json",
@@ -31,7 +30,7 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "8a569a77ba5154625b862369abdfbfeb396e0c807444c3c13c466950c6c96cda",
+      "sha256": "6def8ee459376d11769657cb031d48343e1c2a271ae4a300327c7b7b776fb7b5",
       "bytes": 2258
     },
     {
@@ -43,7 +42,7 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "95c44552eb6d59c5a594e98b94efe0dc61ba09b0a42afc2e3043d36036b495ec",
+      "sha256": "b324b5c8d92c16c8f1db22191025c310538562fcc99a5d968abcc2d4d265f57a",
       "bytes": 4855
     },
     {
@@ -55,7 +54,7 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "6544ff69629f4ddfd641e7bf49f4b4da71497ca42aa53b3c134fecb27cca148b",
+      "sha256": "7c7969bb07065d1dbfe78f4e6159879e962b68588fc44f1bfc7919fa1a702135",
       "bytes": 1252
     },
     {
@@ -67,8 +66,8 @@
       "pending_run": "muleguard.cli.nested_cv --repeats 3 --inner 4",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "3eec0099d61bbcbdc14ddd633df0037ba43a8cb9ecbc5bd223c6ce1150fe639d",
-      "bytes": 5435
+      "sha256": "7c56792cfecf1f0f4fd7058f2b8200b8a1bea8011fb65260af91cf16de8b0c8d",
+      "bytes": 42052
     },
     {
       "spec": "artifacts/testing/positive_removal_results.json",
@@ -79,11 +78,9 @@
       "note": "",
       "pending_run": "muleguard.cli.nested_ses --stages posremoval",
       "status": "DERIVED",
-      "detail": {
-        "protocol": "FLAT_FALLBACK"
-      },
-      "sha256": "ec6400de6d3fffabf745685b4e716e027965d1f4cf84a1f7da273ba0eb16a357",
-      "bytes": 3101
+      "detail": {},
+      "sha256": "61df9688c81f4696353dc2442348ea8e715cddb4b3b3b8795475955ebcb9ad58",
+      "bytes": 8702
     },
     {
       "spec": "artifacts/testing/adversarial_validation.json",
@@ -92,7 +89,10 @@
       ],
       "note": "",
       "pending_run": "muleguard.cli.nested_ses --stages shift",
-      "status": "PENDING"
+      "status": "DERIVED",
+      "detail": {},
+      "sha256": "8d666d27cf013e1de352c205e2d603b41264ab4a381784ed4a51531f6ac967a6",
+      "bytes": 14222
     },
     {
       "spec": "artifacts/testing/calibration_results.json",
@@ -103,8 +103,8 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "b087f3952176fbc26340b42af15a1724d927ab6ca9ef1e846cb600674494324d",
-      "bytes": 27843
+      "sha256": "2a2eff9495ef190c650afc5161073cc95bdee7174536f30e9ef88188d946aab4",
+      "bytes": 28034
     },
     {
       "spec": "artifacts/testing/threshold_results.json",
@@ -115,8 +115,8 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "19180a714ae0b7754a8f1d81179f28563007fb33f2eb1945a821de7d2492aafe",
-      "bytes": 17891
+      "sha256": "0518ed593c31b5b58c9050f8d4175a9daf901c0c6c314be56406f2b24e818e66",
+      "bytes": 17759
     },
     {
       "spec": "artifacts/testing/backend_results.json",
@@ -127,7 +127,7 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "8f13d26a3aa9df227f7e6b8a3953a5d71a00f3f13feefd2ce4f8addf54a2a0fb",
+      "sha256": "423ef4cb03563c6b120765e0351f241e9c67dc59c5cbbcbcb7b3b02769c1d0bd",
       "bytes": 2311
     },
     {
@@ -139,15 +139,17 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "a854c1d9db9bd29006a7c680fcba74bf09b6cbe598dc269c06c646a5a47d0ea0",
-      "bytes": 1963
+      "sha256": "92eb824353cac9f6b9f90f148efdad3cf031ec218c78e84f72361502d5fd73c0",
+      "bytes": 1960
     },
     {
       "spec": "artifacts/testing/offline_results.json",
       "sources": [],
       "note": "written by scripts/test_offline.sh",
       "pending_run": "bash scripts/test_offline.sh",
-      "status": "PENDING"
+      "status": "PRESENT",
+      "sha256": "050ce0a45847ef5c83605c26467d8e17b81e08f0e36e8e8021325eac0aacf77d",
+      "bytes": 320
     },
     {
       "spec": "artifacts/testing/security_results.json",
@@ -155,7 +157,7 @@
       "note": "written directly by the security suite",
       "pending_run": "",
       "status": "PRESENT",
-      "sha256": "b2de5366de7c3f27d69e9739ea6fab79478d310e6929ad5efb8bc585c96042ab",
+      "sha256": "e9ef51a4b408ab1f7d5a4db7f4c111975c93d16a006b81f5e01e0b638caf52f2",
       "bytes": 1124
     },
     {
@@ -176,8 +178,8 @@
       "pending_run": "muleguard.cli.nested_cv --repeats 3 --inner 4",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "3eec0099d61bbcbdc14ddd633df0037ba43a8cb9ecbc5bd223c6ce1150fe639d",
-      "bytes": 5435
+      "sha256": "7c56792cfecf1f0f4fd7058f2b8200b8a1bea8011fb65260af91cf16de8b0c8d",
+      "bytes": 42052
     },
     {
       "spec": "artifacts/metrics/final_budget_metrics.csv",
@@ -202,8 +204,8 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "b087f3952176fbc26340b42af15a1724d927ab6ca9ef1e846cb600674494324d",
-      "bytes": 27843
+      "sha256": "2a2eff9495ef190c650afc5161073cc95bdee7174536f30e9ef88188d946aab4",
+      "bytes": 28034
     },
     {
       "spec": "artifacts/metrics/feature_subset_ablation.csv",
@@ -215,11 +217,11 @@
       "pending_run": "muleguard.cli.nested_ses --stages families",
       "status": "DERIVED",
       "detail": {
-        "rows": 13,
-        "protocol": "FLAT_FALLBACK"
+        "rows": 9,
+        "protocol": "NESTED"
       },
-      "sha256": "8b0a23a9602e9bf8193dd54d71560742a62be131dfc575b598d599bc8989bfcc",
-      "bytes": 775
+      "sha256": "c87bc9067f20b0f1711fde46bd6a8ee02d89b5cc8ad7cad556e2de4481143aff",
+      "bytes": 669
     },
     {
       "spec": "artifacts/metrics/alert_context_ablation.csv",
@@ -255,10 +257,10 @@
       "status": "DERIVED",
       "detail": {
         "copied_from": "artifacts/predictions/nested_oof.parquet",
-        "sha256": "eae0988c9a317d3b155c0cd367bff1c9caf9c6cc3eab2637cbbc283824468488"
+        "sha256": "5e1a5e5d190131b1360bd5ca67476ea109ebc8563ba88fec2b1acdd504cc9c4a"
       },
-      "sha256": "eae0988c9a317d3b155c0cd367bff1c9caf9c6cc3eab2637cbbc283824468488",
-      "bytes": 107464
+      "sha256": "5e1a5e5d190131b1360bd5ca67476ea109ebc8563ba88fec2b1acdd504cc9c4a",
+      "bytes": 1060092
     },
     {
       "spec": "artifacts/predictions/final_model_oof_predictions.parquet",
@@ -303,6 +305,33 @@
       "bytes": 48322
     },
     {
+      "spec": "artifacts/features/final_selected_features.json",
+      "sources": [
+        "artifacts/features/selected_features_v2.json"
+      ],
+      "note": "post-firewall stability selection behind the champion's 120 features",
+      "pending_run": "",
+      "status": "DERIVED",
+      "detail": {},
+      "sha256": "b55dbf1e34689b277f40cdd275db1f16d078bc2d33918415bc080a570d69b58d",
+      "bytes": 68496
+    },
+    {
+      "spec": "artifacts/features/final_selection_frequency.csv",
+      "sources": [
+        "artifacts/features/selection_frequency_v2.csv"
+      ],
+      "note": "post-firewall per-fold selection frequencies",
+      "pending_run": "",
+      "status": "DERIVED",
+      "detail": {
+        "copied_from": "artifacts/features/selection_frequency_v2.csv",
+        "sha256": "5aebda65f6610bc666d6f7e4fb7614eb2211cf6d495b0ae0c5b891450961c5ae"
+      },
+      "sha256": "5aebda65f6610bc666d6f7e4fb7614eb2211cf6d495b0ae0c5b891450961c5ae",
+      "bytes": 14065
+    },
+    {
       "spec": "artifacts/features/quarantined_features.json",
       "sources": [],
       "note": "",
@@ -316,7 +345,6 @@
     "docs/DESCRIPTION_VALIDATION_REPORT.md",
     "docs/FEATURE_AVAILABILITY_FIREWALL.md",
     "docs/FINAL_LEAKAGE_FORENSICS.md",
-    "docs/NESTED_CV_MODEL_TOURNAMENT.md",
     "docs/HIDDEN_VALIDATION_READINESS.md",
     "docs/POSITIVE_REMOVAL_STABILITY.md",
     "docs/ADVERSARIAL_VALIDATION_REPORT.md",

@@ -300,12 +300,5 @@
       "n_dropped": 6
     }
   ],
-  "runtime_seconds": 797.7,
-  "__provenance__": {
-    "spec_section": "57",
-    "spec_name_of": "artifacts/metrics/nested_positive_removal.json",
-    "source_sha256": "690c5c9414dd455b61524bef5fac7c5f289a0f05e2df2f16c065704f78c1b392",
-    "regenerated_utc": "2026-08-13T18:02:48+00:00",
-    "note": "Content is the source file's, unmodified. This file exists because the final-validation prompt names it; the source is the working copy the pipeline writes."
-  }
+  "runtime_seconds": 797.7
 }

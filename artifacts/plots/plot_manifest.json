@@ -1,12 +1,12 @@
 {
-  "generated_utc": "2026-08-13T02:33:58+00:00",
+  "generated_utc": "2026-08-13T17:43:46+00:00",
   "spec_section": "56",
   "data_version": "7d1be90fe23b",
   "champion": "xgboost_top_120",
   "required": 16,
-  "written": 14,
-  "skipped": 2,
-  "failed": 0,
+  "written": 15,
+  "skipped": 0,
+  "failed": 1,
   "title_contract": "every figure states split, model ID and data version",
   "plots": [
     {
@@ -61,9 +61,8 @@
     },
     {
       "plot": "top SHAP importance",
-      "status": "SKIPPED",
-      "reason": "missing artifacts/metrics/global_shap_importance.json",
-      "produced_by": "muleguard.cli.global_shap"
+      "status": "WRITTEN",
+      "file": "final_shap_importance.png"
     },
     {
       "plot": "leakage ablation",
@@ -77,8 +76,8 @@
     },
     {
       "plot": "feature-subset ablation",
-      "status": "WRITTEN",
-      "file": "final_feature_subset_ablation.png"
+      "status": "FAILED",
+      "reason": "AttributeError(\"'str' object has no attribute 'get'\")"
     },
     {
       "plot": "positive-removal stability",
@@ -87,9 +86,8 @@
     },
     {
       "plot": "adversarial validation / shift plot",
-      "status": "SKIPPED",
-      "reason": "missing artifacts/metrics/nested_shift_shield.json",
-      "produced_by": "muleguard.cli.nested_ses --stages shift"
+      "status": "WRITTEN",
+      "file": "final_adversarial_validation.png"
     }
   ]
 }

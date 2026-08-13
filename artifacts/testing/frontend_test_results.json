@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-07-10T23:05:07.192596+00:00",
+  "generated_utc": "2026-08-13T17:50:57.035555+00:00",
   "backend": "http://127.0.0.1:8001",
   "n_checks": 7,
   "n_passed": 7,
@@ -8,7 +8,7 @@
     {
       "check": "vitest_suite",
       "passed": true,
-      "detail": "t at \u001b[22m 04:34:56 \u001b[2m   Duration \u001b[22m 2.83s\u001b[2m (transform 180ms, setup 131ms, collect 1.19s, tests 79ms, environment 924ms, prepare 164ms)\u001b[22m  "
+      "detail": "s width(100%) and height(100%),        or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the        height and width.  "
     },
     {
       "check": "production_build",
@@ -38,7 +38,7 @@
     {
       "check": "dev_server_serves_html",
       "passed": true,
-      "detail": ""
+      "detail": "HTTP 200"
     }
   ]
 }

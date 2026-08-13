@@ -1,16 +1,18 @@
 {
-  "generated_utc": "2026-07-10T23:08:51.019460+00:00",
-  "verdict": "PASS",
-  "blockers": [],
+  "generated_utc": "2026-08-13T17:55:48.846717+00:00",
+  "verdict": "FAIL",
+  "blockers": [
+    "ML release gate: FAIL"
+  ],
   "environment": {
-    "commit": "c8e0d253acf8719f5d9453e8be7efe51649219ac",
+    "commit": "f280c6fc576b61bbe4edb4c2981ff5fa253e831f",
     "os": "Windows-11-10.0.22631-SP0",
     "python": "3.13.2",
     "compute_mode": "cpu_16gb",
     "ram_gb": 16.93,
     "cuda": false,
     "dataset_sha256": "7d1be90fe23b57460184f2f7566d572cc3a40fc6d17d436fe33219e80eabc204",
-    "bundle_sha256": "04fafaee25ae82c7a5a2e6ec5757d77eea99e33138e47167f76706aae17c8e7b"
+    "bundle_sha256": "d12914de5abee99aa18b80e3d41ae2da800dbf9355b53f3a9c0e06806921efc5"
   },
   "dataset": {
     "rows": 9082,
@@ -23,7 +25,7 @@
       "F2230",
       "__UNNAMED__0"
     ],
-    "selected_features": 60
+    "selected_features": 120
   },
   "model": {
     "winner": "catboost_tuned_top60",
@@ -110,8 +112,8 @@
     },
     "security_results": {
       "all_passed": true,
-      "n_passed": 7,
-      "n_checks": 7
+      "n_passed": 8,
+      "n_checks": 8
     },
     "frontend_test_results": {
       "all_passed": true,
@@ -125,12 +127,12 @@
     }
   },
   "totals": {
-    "qa_checks": 89,
-    "qa_passed": 89,
+    "qa_checks": 90,
+    "qa_passed": 90,
     "pytest_backend": 93,
     "vitest_frontend": 3
   },
-  "ml_release_gate": "PASS",
+  "ml_release_gate": "FAIL",
   "final_artifact_aliases": [
     "final_model_comparison.csv",
     "final_oof_metrics.json",

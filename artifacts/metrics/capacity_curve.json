@@ -47,7 +47,7 @@
     }
   ],
   "provenance": {
-    "generated_utc": "2026-08-12T12:33:57+00:00",
+    "generated_utc": "2026-08-13T17:43:34+00:00",
     "generator": "muleguard.cli.capacity_curve",
     "champion_model": "xgboost_top_120",
     "champion_source": "artifacts\\metrics\\lens_stack_oof_v2.json",

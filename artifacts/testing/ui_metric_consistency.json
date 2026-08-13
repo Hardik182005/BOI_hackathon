@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-07-10T23:02:24.937245+00:00",
+  "generated_utc": "2026-08-13T17:49:52.164095+00:00",
   "backend": "http://127.0.0.1:8001",
   "n_checks": 6,
   "n_passed": 6,
@@ -21,12 +21,12 @@
       "detail": ""
     },
     {
-      "check": "case_CASE-45C8DE5165_queue_equals_detail",
+      "check": "case_CASE-1D16D2774B_queue_equals_detail",
       "passed": true,
       "detail": ""
     },
     {
-      "check": "case_CASE-DF00B7CDAC_queue_equals_detail",
+      "check": "case_CASE-FDC57EB161_queue_equals_detail",
       "passed": true,
       "detail": ""
     },
@@ -45,25 +45,25 @@
       "model_version": "1.0.0"
     },
     {
-      "case_id": "CASE-45C8DE5165",
+      "case_id": "CASE-1D16D2774B",
       "consistent": true,
-      "risk": 0.960187583909551,
-      "tier": "URGENT_REVIEW",
-      "model_version": "1.0.0"
+      "risk": 0.98358154296875,
+      "tier": "CRITICAL_REVIEW",
+      "model_version": "2.0.0"
     },
     {
-      "case_id": "CASE-DF00B7CDAC",
+      "case_id": "CASE-FDC57EB161",
       "consistent": true,
-      "risk": 5.60569752649096e-08,
-      "tier": "STANDARD_REVIEW",
-      "model_version": "1.0.0"
+      "risk": 0.98358154296875,
+      "tier": "CRITICAL_REVIEW",
+      "model_version": "2.0.0"
     }
   ],
   "__provenance__": {
     "spec_section": "57",
     "spec_name_of": "artifacts/testing/api_frontend_consistency.json",
-    "source_sha256": "cceea680d0ca6c8571595a9e2c8e772cf9edbbd729a3872d1a68b95bb9b6d73e",
-    "regenerated_utc": "2026-08-13T02:28:10+00:00",
+    "source_sha256": "828755c8b0d1dc5bafc6c53e91e90ea0075cb8805e51c2587bb1f5c20b4fdc39",
+    "regenerated_utc": "2026-08-13T18:02:48+00:00",
     "note": "Content is the source file's, unmodified. This file exists because the final-validation prompt names it; the source is the working copy the pipeline writes."
   }
 }

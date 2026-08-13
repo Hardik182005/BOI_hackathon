@@ -1,0 +1,182 @@
+{
+  "generated_utc": "2026-08-13T17:42:30.716668+00:00",
+  "question": "Does the model promoted on the flat protocol survive the nested protocol, which is the primary one?",
+  "deployed": {
+    "model": "xgboost_top_120",
+    "family": "xgboost",
+    "bundle_version": "2.0.0",
+    "flat_oof_pr_auc_mean": 0.76904
+  },
+  "rule": "The nested leaderboard is filtered by the serving-cost veto (5.0s to score one account), then the leader defines a 0.01 PR-AUC tie band, and inside that band generalization_score = PR_AUC_mean - 0.5 * PR_AUC_std + 0.1 * Recall@100 picks the more stable model. Identical to the flat promotion rule, so any difference in outcome comes from the protocol, not the tie-break.",
+  "nested_run": {
+    "generated_utc": "2026-08-13T14:06:25.482811+00:00",
+    "design": {
+      "outer": "stratified 5-fold x 3 repeats (identical to the flat tournament folds)",
+      "inner": "stratified 4-fold within outer-train",
+      "selection": "LightGBM gain ranking fitted on each inner-train partition only; frequencies pooled within the outer fold",
+      "tuning": "bounded Optuna TPE, objective = inner-CV average precision",
+      "feature_sizes_offered": [
+        30,
+        60,
+        120
+      ],
+      "outer_validation_use": "predicted once, never fed back"
+    },
+    "families_scored": [
+      "catboost",
+      "histgb",
+      "xgboost",
+      "lightgbm",
+      "extratrees",
+      "logistic_l1l2"
+    ],
+    "repeats_per_family": {
+      "catboost": 3,
+      "histgb": 3,
+      "xgboost": 3,
+      "lightgbm": 3,
+      "extratrees": 3,
+      "logistic_l1l2": 3
+    }
+  },
+  "leaderboard": [
+    {
+      "model": "catboost",
+      "nested_pr_auc_mean": 0.80653,
+      "nested_pr_auc_std": 0.00845,
+      "nested_roc_auc_mean": 0.96311,
+      "feature_size_mode": 120,
+      "nested_recall_at_100": 0.82812,
+      "generalization_score": 0.88512,
+      "interactive_score_seconds": null,
+      "promotion_eligible": true
+    },
+    {
+      "model": "histgb",
+      "nested_pr_auc_mean": 0.76735,
+      "nested_pr_auc_std": 0.02949,
+      "nested_roc_auc_mean": 0.94071,
+      "feature_size_mode": 120,
+      "nested_recall_at_100": 0.79688,
+      "generalization_score": 0.8323,
+      "interactive_score_seconds": null,
+      "promotion_eligible": true
+    },
+    {
+      "model": "xgboost",
+      "nested_pr_auc_mean": 0.75393,
+      "nested_pr_auc_std": 0.0074,
+      "nested_roc_auc_mean": 0.94366,
+      "feature_size_mode": 120,
+      "nested_recall_at_100": 0.76562,
+      "generalization_score": 0.82679,
+      "interactive_score_seconds": null,
+      "promotion_eligible": true
+    },
+    {
+      "model": "lightgbm",
+      "nested_pr_auc_mean": 0.70046,
+      "nested_pr_auc_std": 0.02362,
+      "nested_roc_auc_mean": 0.92945,
+      "feature_size_mode": 120,
+      "nested_recall_at_100": 0.71354,
+      "generalization_score": 0.76,
+      "interactive_score_seconds": null,
+      "promotion_eligible": true
+    },
+    {
+      "model": "extratrees",
+      "nested_pr_auc_mean": 0.54839,
+      "nested_pr_auc_std": 0.06962,
+      "nested_roc_auc_mean": 0.92422,
+      "feature_size_mode": 120,
+      "nested_recall_at_100": 0.58333,
+      "generalization_score": 0.57191,
+      "interactive_score_seconds": null,
+      "promotion_eligible": true
+    },
+    {
+      "model": "logistic_l1l2",
+      "nested_pr_auc_mean": 0.16386,
+      "nested_pr_auc_std": 0.00308,
+      "nested_roc_auc_mean": 0.88235,
+      "feature_size_mode": 120,
+      "nested_recall_at_100": 0.35417,
+      "generalization_score": 0.19774,
+      "interactive_score_seconds": null,
+      "promotion_eligible": true
+    }
+  ],
+  "nested_leader": "catboost",
+  "models_within_tie_band": [
+    "catboost"
+  ],
+  "nested_promoted": "catboost",
+  "nested_promoted_detail": {
+    "model": "catboost",
+    "nested_pr_auc_mean": 0.80653,
+    "nested_pr_auc_std": 0.00845,
+    "nested_roc_auc_mean": 0.96311,
+    "feature_size_mode": 120,
+    "nested_recall_at_100": 0.82812,
+    "generalization_score": 0.88512,
+    "interactive_score_seconds": null,
+    "promotion_eligible": true
+  },
+  "deployed_family_under_nested": {
+    "model": "xgboost",
+    "nested_pr_auc_mean": 0.75393,
+    "nested_pr_auc_std": 0.0074,
+    "nested_roc_auc_mean": 0.94366,
+    "feature_size_mode": 120,
+    "nested_recall_at_100": 0.76562,
+    "generalization_score": 0.82679,
+    "interactive_score_seconds": null,
+    "promotion_eligible": true
+  },
+  "benched_on_serving_cost": [],
+  "verdict": "CHAMPION_CHALLENGED",
+  "why": "the nested protocol promotes catboost, not the shipped xgboost",
+  "nested_gap_over_deployed": 0.0526,
+  "paired_check": {
+    "deployed_family": "xgboost",
+    "promoted_family": "catboost",
+    "per_repeat": [
+      {
+        "repeat": 0,
+        "deployed_ap": 0.75603,
+        "promoted_ap": 0.80061,
+        "delta": 0.04458
+      },
+      {
+        "repeat": 1,
+        "deployed_ap": 0.76176,
+        "promoted_ap": 0.80051,
+        "delta": 0.03876
+      },
+      {
+        "repeat": 2,
+        "deployed_ap": 0.744,
+        "promoted_ap": 0.81848,
+        "delta": 0.07447
+      }
+    ],
+    "repeats_favouring_promoted": "3/3",
+    "paired_delta_mean": 0.05279,
+    "paired_delta_ci95": [
+      0.02374,
+      0.08602
+    ],
+    "share_of_resamples_favouring_promoted": 1.0,
+    "n_boot": 2000,
+    "excludes_zero": true,
+    "reading": "The interval is on the *difference* between two families scored on identical rows. It is not comparable to the single-family intervals in metric_battery.json, which are marginal and much wider by construction."
+  },
+  "what_acting_on_this_costs": [
+    "re-fit the calibrator and the conformal layer on the new scores",
+    "re-freeze the policy thresholds against the new score distribution",
+    "re-open the locked test, which is single-touch by construction",
+    "re-run the release suite, because every QA number names the model"
+  ],
+  "not_done_automatically": "This file records the finding. Swapping the champion is a decision with a locked-test cost attached and is not taken by a report."
+}

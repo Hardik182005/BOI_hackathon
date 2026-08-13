@@ -1,9 +1,9 @@
 {
-  "captured_utc": "2026-07-10T18:37:46.141142+00:00",
+  "captured_utc": "2026-08-13T17:30:30.162679+00:00",
   "git": {
     "branch": "main",
-    "commit_sha": "1f222e1708cea177236e275bee408bcd51a40f26",
-    "is_dirty": "no"
+    "commit_sha": "f280c6fc576b61bbe4edb4c2981ff5fa253e831f",
+    "is_dirty": "yes"
   },
   "python": "3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)]",
   "python_executable": "E:\\BOI\\BOI_hackathon\\.venv\\Scripts\\python.exe",
@@ -12,8 +12,8 @@
   "cpu_count_logical": 8,
   "cpu_count_physical": 4,
   "ram_total_gb": 16.93,
-  "ram_available_gb": 2.66,
-  "disk_free_gb": 1675.55,
+  "ram_available_gb": 1.39,
+  "disk_free_gb": 1602.66,
   "cuda_available": false,
   "gpu_names": [],
   "compute_mode": "cpu_16gb",
@@ -46,8 +46,8 @@
   "__provenance__": {
     "spec_section": "57",
     "spec_name_of": "artifacts/environment_snapshot.json",
-    "source_sha256": "c81e6d23e98cd8fb83aa266708d25e7906f8f8ef904f881c28095a16c149d14e",
-    "regenerated_utc": "2026-08-13T02:28:10+00:00",
+    "source_sha256": "3725e7fc5e0b52fba58135f1a271325a09083837a473d33810a41e18e46b7888",
+    "regenerated_utc": "2026-08-13T18:02:48+00:00",
     "note": "Content is the source file's, unmodified. This file exists because the final-validation prompt names it; the source is the working copy the pipeline writes."
   }
 }

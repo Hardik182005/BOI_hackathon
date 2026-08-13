@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-07-10T23:01:32.597451+00:00",
+  "generated_utc": "2026-08-13T17:48:50.573132+00:00",
   "backend": "http://127.0.0.1:8001",
   "n_checks": 15,
   "n_passed": 15,
@@ -13,7 +13,7 @@
     {
       "check": "health_ready",
       "passed": true,
-      "detail": "{'status': 'ready', 'model_version': '1.0.0', 'winner': 'catboost_tuned_top60', 'ollama_model': 'llama3.2:3b', 'ollama_r"
+      "detail": "{'status': 'ready', 'model_version': '2.0.0', 'winner': 'xgboost_top_120', 'ollama_model': 'llama3.2:3b', 'ollama_requir"
     },
     {
       "check": "ollama_not_required",
@@ -28,7 +28,7 @@
     {
       "check": "score_single",
       "passed": true,
-      "detail": "{\"request_id\":\"adbfa77d-e09e-4ec6-9b99-d34b444c343a\",\"correlation_id\":\"a8257e95-85cf-4882-9c9f-57ec6dc8d4b8\",\"account_re"
+      "detail": "{\"request_id\":\"7e5832ad-f78e-4453-8fa9-96be2b4eaf74\",\"correlation_id\":\"ff7b85c1-2c57-4f6e-89d9-50f7501de61e\",\"account_re"
     },
     {
       "check": "deterministic_rescore",

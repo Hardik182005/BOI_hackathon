@@ -1,0 +1,367 @@
+{
+  "generated_utc": "2026-08-13T03:00:13+00:00",
+  "champion": "xgboost_top_120",
+  "family": "xgboost",
+  "n_features": 120,
+  "n_dev_rows": 7264,
+  "n_repeats": 3,
+  "rows_attributed": 21792,
+  "attribution_method": {
+    "method": "EXACT_TREESHAP",
+    "implementation": "muleguard.explain.reason_codes.tree_shap",
+    "aggregation": "mean |SHAP| over all out-of-fold attributions, averaged over rows and repeats alike",
+    "out_of_fold": "each row is attributed by a model that did not train on it, so the ranking is not an in-sample artefact",
+    "fidelity": "EXACT - every fold refit reproduced its stored out-of-fold scores to 0.0 absolute"
+  },
+  "what_this_is_not": "A causal statement. SHAP explains this model's output, not the mechanics of money muling.",
+  "ranking": [
+    {
+      "rank": 1,
+      "feature": "F3908",
+      "mean_abs_shap": 0.5515264281442337,
+      "mean_signed_shap": -0.3467136514694505,
+      "share_of_total_abs": 0.03742550950609733
+    },
+    {
+      "rank": 2,
+      "feature": "F3105",
+      "mean_abs_shap": 0.37341819460696585,
+      "mean_signed_shap": -0.3015484081666025,
+      "share_of_total_abs": 0.02533943158270179
+    },
+    {
+      "rank": 3,
+      "feature": "F3805",
+      "mean_abs_shap": 0.3590352426716585,
+      "mean_signed_shap": -0.2980833424695613,
+      "share_of_total_abs": 0.024363432470217165
+    },
+    {
+      "rank": 4,
+      "feature": "F2029",
+      "mean_abs_shap": 0.2788090005670175,
+      "mean_signed_shap": -0.22422197596792257,
+      "share_of_total_abs": 0.018919435893972412
+    },
+    {
+      "rank": 5,
+      "feature": "F3873",
+      "mean_abs_shap": 0.27173421036304357,
+      "mean_signed_shap": -0.1727958775827013,
+      "share_of_total_abs": 0.018439354406448068
+    },
+    {
+      "rank": 6,
+      "feature": "MG_RAIL_FRAGMENTATION",
+      "mean_abs_shap": 0.26430831326612114,
+      "mean_signed_shap": -0.08264247593900706,
+      "share_of_total_abs": 0.017935447488827992
+    },
+    {
+      "rank": 7,
+      "feature": "F2489",
+      "mean_abs_shap": 0.26415725181456357,
+      "mean_signed_shap": -0.1955690306888978,
+      "share_of_total_abs": 0.017925196752865448
+    },
+    {
+      "rank": 8,
+      "feature": "F2999",
+      "mean_abs_shap": 0.2590543352034649,
+      "mean_signed_shap": -0.22550645133647274,
+      "share_of_total_abs": 0.01757892276780892
+    },
+    {
+      "rank": 9,
+      "feature": "F3810",
+      "mean_abs_shap": 0.252479148506243,
+      "mean_signed_shap": -0.18361878535120849,
+      "share_of_total_abs": 0.017132743401447006
+    },
+    {
+      "rank": 10,
+      "feature": "F120",
+      "mean_abs_shap": 0.23438007225899268,
+      "mean_signed_shap": -0.1726108269544425,
+      "share_of_total_abs": 0.015904575329026182
+    },
+    {
+      "rank": 11,
+      "feature": "F366",
+      "mean_abs_shap": 0.22751595445316444,
+      "mean_signed_shap": -0.1813140475627434,
+      "share_of_total_abs": 0.015438789660228068
+    },
+    {
+      "rank": 12,
+      "feature": "F364",
+      "mean_abs_shap": 0.22319429211329433,
+      "mean_signed_shap": -0.16937943037035882,
+      "share_of_total_abs": 0.015145530068793487
+    },
+    {
+      "rank": 13,
+      "feature": "F158",
+      "mean_abs_shap": 0.22269274799834263,
+      "mean_signed_shap": -0.12551283188678444,
+      "share_of_total_abs": 0.015111496261737295
+    },
+    {
+      "rank": 14,
+      "feature": "F3492",
+      "mean_abs_shap": 0.21469219070524195,
+      "mean_signed_shap": -0.15211966734450644,
+      "share_of_total_abs": 0.014568594022157379
+    },
+    {
+      "rank": 15,
+      "feature": "F3807",
+      "mean_abs_shap": 0.2096426658518339,
+      "mean_signed_shap": -0.17720802940110977,
+      "share_of_total_abs": 0.014225943097815679
+    },
+    {
+      "rank": 16,
+      "feature": "F3811",
+      "mean_abs_shap": 0.20826963986244146,
+      "mean_signed_shap": -0.1694437687267466,
+      "share_of_total_abs": 0.014132772227670745
+    },
+    {
+      "rank": 17,
+      "feature": "F1922",
+      "mean_abs_shap": 0.2076377087927775,
+      "mean_signed_shap": -0.1675396949359149,
+      "share_of_total_abs": 0.014089890615751466
+    },
+    {
+      "rank": 18,
+      "feature": "F471",
+      "mean_abs_shap": 0.2006427012876267,
+      "mean_signed_shap": -0.17318369498511943,
+      "share_of_total_abs": 0.013615223026819936
+    },
+    {
+      "rank": 19,
+      "feature": "F1819",
+      "mean_abs_shap": 0.19627105690834282,
+      "mean_signed_shap": -0.1531286041817126,
+      "share_of_total_abs": 0.013318571751513544
+    },
+    {
+      "rank": 20,
+      "feature": "F3640",
+      "mean_abs_shap": 0.1912182718296583,
+      "mean_signed_shap": -0.1527074089659468,
+      "share_of_total_abs": 0.01297569959463275
+    },
+    {
+      "rank": 21,
+      "feature": "F3103",
+      "mean_abs_shap": 0.19009942770354374,
+      "mean_signed_shap": -0.1482860737435093,
+      "share_of_total_abs": 0.012899777010798214
+    },
+    {
+      "rank": 22,
+      "feature": "F1323",
+      "mean_abs_shap": 0.18042385140529638,
+      "mean_signed_shap": -0.15212048447954848,
+      "share_of_total_abs": 0.012243211243051673
+    },
+    {
+      "rank": 23,
+      "feature": "F466",
+      "mean_abs_shap": 0.1781877802682168,
+      "mean_signed_shap": -0.14318308816257203,
+      "share_of_total_abs": 0.012091475809667879
+    },
+    {
+      "rank": 24,
+      "feature": "F2390",
+      "mean_abs_shap": 0.17611260438630585,
+      "mean_signed_shap": -0.13526951426451428,
+      "share_of_total_abs": 0.011950658415011731
+    },
+    {
+      "rank": 25,
+      "feature": "F2350",
+      "mean_abs_shap": 0.17327704373610353,
+      "mean_signed_shap": -0.1336364607803972,
+      "share_of_total_abs": 0.011758242790566786
+    },
+    {
+      "rank": 26,
+      "feature": "F2681",
+      "mean_abs_shap": 0.1710506229498663,
+      "mean_signed_shap": -0.12948293264041738,
+      "share_of_total_abs": 0.011607162211200419
+    },
+    {
+      "rank": 27,
+      "feature": "F3091",
+      "mean_abs_shap": 0.1703799264546533,
+      "mean_signed_shap": -0.096696793770475,
+      "share_of_total_abs": 0.011561650052985697
+    },
+    {
+      "rank": 28,
+      "feature": "F3799",
+      "mean_abs_shap": 0.1693154172575246,
+      "mean_signed_shap": -0.14001235842879822,
+      "share_of_total_abs": 0.011489414531633583
+    },
+    {
+      "rank": 29,
+      "feature": "F3642",
+      "mean_abs_shap": 0.16559406314127245,
+      "mean_signed_shap": -0.11279827522636335,
+      "share_of_total_abs": 0.011236890687360201
+    },
+    {
+      "rank": 30,
+      "feature": "F2581",
+      "mean_abs_shap": 0.16149729429012527,
+      "mean_signed_shap": -0.12764009540126536,
+      "share_of_total_abs": 0.010958891930167743
+    }
+  ],
+  "fold_checks": [
+    {
+      "repeat": 0,
+      "fold": 0,
+      "n_validation_rows": 1453,
+      "max_abs_score_difference_vs_stored_oof": 0.0,
+      "reproduces_stored_oof": true,
+      "n_features_kept_by_fold_preprocessor": 120,
+      "seconds": 5.45
+    },
+    {
+      "repeat": 0,
+      "fold": 1,
+      "n_validation_rows": 1453,
+      "max_abs_score_difference_vs_stored_oof": 0.0,
+      "reproduces_stored_oof": true,
+      "n_features_kept_by_fold_preprocessor": 120,
+      "seconds": 2.51
+    },
+    {
+      "repeat": 0,
+      "fold": 2,
+      "n_validation_rows": 1453,
+      "max_abs_score_difference_vs_stored_oof": 0.0,
+      "reproduces_stored_oof": true,
+      "n_features_kept_by_fold_preprocessor": 120,
+      "seconds": 2.32
+    },
+    {
+      "repeat": 0,
+      "fold": 3,
+      "n_validation_rows": 1453,
+      "max_abs_score_difference_vs_stored_oof": 0.0,
+      "reproduces_stored_oof": true,
+      "n_features_kept_by_fold_preprocessor": 120,
+      "seconds": 2.5
+    },
+    {
+      "repeat": 0,
+      "fold": 4,
+      "n_validation_rows": 1452,
+      "max_abs_score_difference_vs_stored_oof": 0.0,
+      "reproduces_stored_oof": true,
+      "n_features_kept_by_fold_preprocessor": 120,
+      "seconds": 4.24
+    },
+    {
+      "repeat": 1,
+      "fold": 0,
+      "n_validation_rows": 1453,
+      "max_abs_score_difference_vs_stored_oof": 0.0,
+      "reproduces_stored_oof": true,
+      "n_features_kept_by_fold_preprocessor": 120,
+      "seconds": 3.55
+    },
+    {
+      "repeat": 1,
+      "fold": 1,
+      "n_validation_rows": 1453,
+      "max_abs_score_difference_vs_stored_oof": 0.0,
+      "reproduces_stored_oof": true,
+      "n_features_kept_by_fold_preprocessor": 120,
+      "seconds": 4.54
+    },
+    {
+      "repeat": 1,
+      "fold": 2,
+      "n_validation_rows": 1453,
+      "max_abs_score_difference_vs_stored_oof": 0.0,
+      "reproduces_stored_oof": true,
+      "n_features_kept_by_fold_preprocessor": 120,
+      "seconds": 3.48
+    },
+    {
+      "repeat": 1,
+      "fold": 3,
+      "n_validation_rows": 1453,
+      "max_abs_score_difference_vs_stored_oof": 0.0,
+      "reproduces_stored_oof": true,
+      "n_features_kept_by_fold_preprocessor": 120,
+      "seconds": 2.4
+    },
+    {
+      "repeat": 1,
+      "fold": 4,
+      "n_validation_rows": 1452,
+      "max_abs_score_difference_vs_stored_oof": 0.0,
+      "reproduces_stored_oof": true,
+      "n_features_kept_by_fold_preprocessor": 120,
+      "seconds": 2.76
+    },
+    {
+      "repeat": 2,
+      "fold": 0,
+      "n_validation_rows": 1453,
+      "max_abs_score_difference_vs_stored_oof": 0.0,
+      "reproduces_stored_oof": true,
+      "n_features_kept_by_fold_preprocessor": 120,
+      "seconds": 2.0
+    },
+    {
+      "repeat": 2,
+      "fold": 1,
+      "n_validation_rows": 1453,
+      "max_abs_score_difference_vs_stored_oof": 0.0,
+      "reproduces_stored_oof": true,
+      "n_features_kept_by_fold_preprocessor": 120,
+      "seconds": 2.87
+    },
+    {
+      "repeat": 2,
+      "fold": 2,
+      "n_validation_rows": 1453,
+      "max_abs_score_difference_vs_stored_oof": 0.0,
+      "reproduces_stored_oof": true,
+      "n_features_kept_by_fold_preprocessor": 120,
+      "seconds": 2.04
+    },
+    {
+      "repeat": 2,
+      "fold": 3,
+      "n_validation_rows": 1453,
+      "max_abs_score_difference_vs_stored_oof": 0.0,
+      "reproduces_stored_oof": true,
+      "n_features_kept_by_fold_preprocessor": 120,
+      "seconds": 2.26
+    },
+    {
+      "repeat": 2,
+      "fold": 4,
+      "n_validation_rows": 1452,
+      "max_abs_score_difference_vs_stored_oof": 0.0,
+      "reproduces_stored_oof": true,
+      "n_features_kept_by_fold_preprocessor": 120,
+      "seconds": 2.9
+    }
+  ],
+  "total_seconds": 50.0
+}
