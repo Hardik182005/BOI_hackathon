@@ -95,16 +95,34 @@ def xgb_fit_predict(Xtr, ytr, Xva, seed):
 FAMILIES = {"histgb": hgb_fit_predict, "xgboost": xgb_fit_predict}
 
 
-def _make_augmentor(registry: dict[str, Any], *, max_flags: int) -> Any:
-    """Build the ``augment`` hook for :func:`nested.build_outer_folds`."""
+def _make_augmentor(registry: dict[str, Any], *, max_flags: int,
+                    exclude: tuple[str, ...] = ()) -> Any:
+    """Build the ``augment`` hook for :func:`nested.build_outer_folds`.
+
+    Args:
+        exclude: substrings; any generated column whose name contains one is
+            dropped before the block is appended. This exists for the
+            suspect-family arm - if the WITH arm only wins because of a column
+            whose provenance could not be established, that is a reason to
+            reject it, and the only way to find out is to run the comparison
+            again without it. With an empty tuple the block is byte-identical
+            to :meth:`MissingnessSignature.augment`.
+    """
     fitted: list[MissingnessSignature] = []
 
     def augment(Xtr_raw, Xva_raw, names):
         sig = MissingnessSignature.fit(
             Xtr_raw, list(names), registry, max_flags=max_flags)
         fitted.append(sig)
-        return (sig.augment(Xtr_raw), sig.augment(Xva_raw),
-                sig.augmented_names())
+        if not exclude:
+            return (sig.augment(Xtr_raw), sig.augment(Xva_raw),
+                    sig.augmented_names())
+        keep = [j for j, n in enumerate(sig.names)
+                if not any(tok in n for tok in exclude)]
+        block_names = [sig.names[j] for j in keep]
+        return (np.hstack([Xtr_raw, sig.transform(Xtr_raw)[:, keep]]),
+                np.hstack([Xva_raw, sig.transform(Xva_raw)[:, keep]]),
+                list(names) + block_names)
 
     augment.fitted = fitted  # type: ignore[attr-defined]
     return augment
@@ -158,7 +176,15 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--n-feat", type=int, default=120)
     ap.add_argument("--max-flags", type=int, default=200)
     ap.add_argument("--seed", type=int, default=None)
+    ap.add_argument("--exclude-contains", default="",
+                    help="comma-separated substrings; generated columns whose "
+                         "name contains one are dropped from the WITH arm")
+    ap.add_argument("--out", default="missingness_ablation.json",
+                    help="artifact filename under artifacts/metrics/")
     args = ap.parse_args(argv)
+
+    exclude = tuple(t for t in (s.strip() for s in args.exclude_contains.split(","))
+                    if t)
 
     configure()
     seed = args.seed if args.seed is not None else settings.GLOBAL_SEED
@@ -181,7 +207,10 @@ def main(argv: list[str] | None = None) -> int:
              without["pr_auc_mean"], without["pr_auc_std"])
 
     log.info("ARM 2/2: WITH missingness signature, fitted inside each outer fold")
-    augment = _make_augmentor(registry, max_flags=args.max_flags)
+    if exclude:
+        log.info("WITH arm excludes generated columns containing: %s",
+                 ", ".join(exclude))
+    augment = _make_augmentor(registry, max_flags=args.max_flags, exclude=exclude)
     with_folds = nested.build_outer_folds(
         frame, n_repeats=args.repeats, augment=augment)
     with_scores, with_per_fold = _score_folds(
@@ -202,6 +231,20 @@ def main(argv: list[str] | None = None) -> int:
     k = max(n_improved, len(diff) - n_improved)
     p_sign = min(1.0, 2.0 * sum(comb(len(diff), i) for i in range(k, len(diff) + 1))
                  / 2 ** len(diff))
+
+    # The sign test ignores magnitude, so it is deliberately hard to please: a
+    # fold that improves by 0.0003 counts the same as one that improves by 0.20.
+    # Two tests that do use magnitude are recorded alongside it, not to find a
+    # kinder p-value but so that a disagreement between them is visible in the
+    # artifact instead of being resolved silently in favour of whichever number
+    # suits. Where they disagree, the write-up has to explain the disagreement.
+    from scipy import stats
+
+    t_stat, p_t = stats.ttest_rel(b, a)
+    try:
+        w_stat, p_w = stats.wilcoxon(diff)
+    except ValueError:  # pragma: no cover - only if every difference is zero
+        w_stat, p_w = float("nan"), float("nan")
 
     # --- indicator stability ----------------------------------------------
     counts: dict[str, int] = {}
@@ -238,6 +281,7 @@ def main(argv: list[str] | None = None) -> int:
             "seed": seed,
             "signature_fitted": "inside each outer fold, on training rows only",
             "max_flags": args.max_flags,
+            "excluded_from_with_arm": list(exclude),
         },
         "without": without,
         "with": with_arm,
@@ -249,9 +293,18 @@ def main(argv: list[str] | None = None) -> int:
             "n_folds_improved": n_improved,
             "n_folds": n_folds,
             "sign_test_p_two_sided": round(p_sign, 5),
+            "wilcoxon_p_two_sided": round(float(p_w), 5),
+            "paired_t_p_two_sided": round(float(p_t), 5),
+            "paired_t_statistic": round(float(t_stat), 4),
             "note": ("Paired on identical folds, so the relevant yardstick is the "
                      "spread of the paired difference, not the 0.0905 unpaired "
                      "seed-noise floor."),
+            "test_disagreement_note": (
+                "The sign test discards magnitude and is the most conservative of "
+                "the three. If it disagrees with the magnitude-aware tests, the "
+                "cause is a few large positive gains against several near-zero "
+                "differences, and the write-up must say so rather than quote the "
+                "most favourable p-value."),
         },
         "indicator_stability": {
             "missingness_cols_selected_per_fold": per_fold_selected,
@@ -274,7 +327,7 @@ def main(argv: list[str] | None = None) -> int:
     }
 
     settings.METRICS_DIR.mkdir(parents=True, exist_ok=True)
-    path = settings.METRICS_DIR / "missingness_ablation.json"
+    path = settings.METRICS_DIR / args.out
     path.write_text(json.dumps(out, indent=2), encoding="utf-8")
     log.info("wrote %s", path)
 
