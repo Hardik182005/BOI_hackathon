@@ -11,6 +11,7 @@ and demanding exact agreement.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import numpy as np
@@ -589,6 +590,10 @@ def test_written_artifact_avoids_overclaiming_vocabulary():
     if not ART.exists():
         pytest.skip("metric_battery.json has not been generated yet")
     text = ART.read_text().lower()
+    # Whole-word matching, not substring: "proven" occurs inside "provenance",
+    # and a check that fires on its own metadata block teaches the next person
+    # to delete the check rather than to fix the wording.
     for word in ("state of the art", "guaranteed", "proven", "flawless",
                  "production ready", "perfect model"):
-        assert word not in text, f"artifact overclaims with {word!r}"
+        assert re.search(rf"\b{re.escape(word)}\b", text) is None, (
+            f"artifact overclaims with {word!r}")
