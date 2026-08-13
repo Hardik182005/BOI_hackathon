@@ -13,19 +13,19 @@
 [![QA Checks](https://img.shields.io/badge/QA%20Checks-89%2F89%20PASS-brightgreen?style=for-the-badge)](docs/FINAL_RELEASE_TEST_REPORT.md)
 [![Tests](https://img.shields.io/badge/Tests-96%20passed%20%C2%B7%200%20failed-brightgreen?style=for-the-badge)](artifacts/testing/)
 
-[![PR-AUC Locked Test](https://img.shields.io/badge/PR--AUC%20(locked%20test)-0.824-blue?style=flat-square)](docs/FINAL_RESULTS.md)
-[![PR-AUC Dev OOF](https://img.shields.io/badge/PR--AUC%20(dev%20OOF%205%C3%975)-0.808%20%C2%B1%200.045-blue?style=flat-square)](artifacts/metrics/oof_metrics.json)
-[![ROC-AUC](https://img.shields.io/badge/ROC--AUC-0.991-blue?style=flat-square)](docs/FINAL_RESULTS.md)
-[![Recall@25](https://img.shields.io/badge/Recall%40top--25-88.2%25-blue?style=flat-square)](docs/FINAL_RESULTS.md)
-[![Critical Tier Precision](https://img.shields.io/badge/CRITICAL%20tier%20precision-100%25%20(12%2F12)-blue?style=flat-square)](docs/FINAL_RESULTS.md)
-[![Brier](https://img.shields.io/badge/Brier-0.0026-9cf?style=flat-square)](docs/FINAL_CALIBRATION_AND_THRESHOLD_REPORT.md)
-[![ECE](https://img.shields.io/badge/ECE-0.0027-9cf?style=flat-square)](docs/FINAL_CALIBRATION_AND_THRESHOLD_REPORT.md)
-[![Throughput](https://img.shields.io/badge/Inference-688%20rows%2Fs%20CPU-9cf?style=flat-square)](docs/FINAL_PERFORMANCE_REPORT.md)
+[![PR-AUC Locked Test](https://img.shields.io/badge/PR--AUC%20(locked%20test)-0.726-blue?style=flat-square)](artifacts/metrics/holdout_metrics.json)
+[![PR-AUC Dev OOF](https://img.shields.io/badge/PR--AUC%20(dev%20OOF%203%C3%975)-0.769%20%C2%B1%200.027-blue?style=flat-square)](artifacts/metrics/metric_battery.json)
+[![ROC-AUC](https://img.shields.io/badge/ROC--AUC%20(dev%20OOF)-0.958-blue?style=flat-square)](artifacts/metrics/metric_battery.json)
+[![Recall@100](https://img.shields.io/badge/Recall%40top--100%20(dev%20OOF)-78.1%25-blue?style=flat-square)](artifacts/metrics/capacity_curve.json)
+[![Critical Tier Precision](https://img.shields.io/badge/CRITICAL%20tier%20precision%20(dev%20OOF)-100%25%20(25%2F25)-blue?style=flat-square)](artifacts/metrics/metric_battery.json)
+[![Brier](https://img.shields.io/badge/Brier%20(dev%20OOF)-0.0031-9cf?style=flat-square)](artifacts/metrics/final_calibration.json)
+[![ECE](https://img.shields.io/badge/ECE%20(dev%20OOF%2C%2010%20uniform%20bins)-0.0015-9cf?style=flat-square)](artifacts/metrics/final_calibration.json)
+[![Throughput](https://img.shields.io/badge/Inference-688%20rows%2Fs%20%C2%B7%20re--measure%20pending-9cf?style=flat-square)](docs/FINAL_PERFORMANCE_REPORT.md)
 
 [![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat-square&logo=python&logoColor=white)](pyproject.toml)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)](src/muleguard/api/main.py)
 [![React](https://img.shields.io/badge/React-18%20%2B%20TypeScript-61DAFB?style=flat-square&logo=react&logoColor=black)](frontend/)
-[![CatBoost](https://img.shields.io/badge/Winner-CatBoost%20top--60-yellow?style=flat-square)](docs/FINAL_ACCURACY_AND_MODEL_SELECTION_REPORT.md)
+[![XGBoost](https://img.shields.io/badge/Champion-XGBoost%20top--120-yellow?style=flat-square)](artifacts/metrics/promotion_decision_v2.json)
 [![Ollama](https://img.shields.io/badge/LLM-optional%20%C2%B7%20guarded%20%C2%B7%20local-lightgrey?style=flat-square)](docs/FINAL_HALLUCINATION_GUARDRAIL_REPORT.md)
 [![No MCP](https://img.shields.io/badge/No%20MCP%20%C2%B7%20No%20browser%20agents%20%C2%B7%20No%20internet-verified-lightgrey?style=flat-square)](docs/NO_MCP_NO_BROWSER_AGENT_COMPLIANCE.md)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
@@ -41,26 +41,87 @@
 
 ## 📊 Headline results (all measured, all traceable to artifacts)
 
+The shipping model is **`xgboost_top_120`**, trained entirely behind the Feature
+Availability Firewall. Every number below is its own. Each row names the split
+it was measured on, because the two splits do not agree and pretending they do
+is how a leaderboard number becomes a lie.
+
+**Locked test** — sealed predictions, one single touch, natural prevalence
+(n = 1,818 accounts · 17 mules · 0.94%):
+
 | Metric | Value | Where |
 |---|---|---|
-| **PR-AUC — locked test** (single touch, natural prevalence) | **0.8242** (95% CI 0.654–0.958) | `artifacts/metrics/locked_test_metrics.json` |
-| **PR-AUC — dev OOF** (5×5 repeated stratified CV) | **0.8077 ± 0.0450** | `artifacts/metrics/oof_metrics.json` |
-| ROC-AUC (secondary context only) | 0.9908 | same |
-| **Recall @ top-25 alert budget** | **88.2%** (15/17 mules) at 60% precision | same |
-| Recall @ top-100 | 94.1% | same |
-| **Precision in CRITICAL_REVIEW tier** | **100%** — 12 alerts, 12 true mules, 0 false positives | same |
-| Calibration | Brier **0.00258** · ECE **0.0027** | same |
-| Conformal abstention / OOD rate | 0.55% / 0.11% | same |
-| Inference throughput | **688 rows/s** on a laptop CPU | same |
+| **PR-AUC — locked test** | **0.7263** | `artifacts/metrics/holdout_metrics.json` → `current_champion` |
+| ROC-AUC (secondary context only) | 0.9665 | same |
+| Lift over prevalence | **77.7×** | same |
+| Recall @ top-25 alert budget | 70.6% (12/17 mules) at 48% precision | same |
+| Recall @ top-100 | 82.4% (14/17 mules) | same |
+| Seal | SHA-256 sealed before reveal, re-hashed at reveal, **matched** | `artifacts/sealed_validation/` |
+
+With 17 positives, that number carries a wide interval by construction — it is a
+**single-touch sanity check on a frozen model, not the estimate to plan with.**
+The estimate to plan with is the development OOF, which has 64 positives and is
+averaged over repeats:
+
+**Development OOF** — 3×5 repeated stratified CV, leakage-free v2
+(n = 7,264 · 64 mules · 0.88%):
+
+| Metric | Value | Where |
+|---|---|---|
+| **PR-AUC — dev OOF** | **0.7690 ± 0.0266** (95% CI 0.676–0.853) | `artifacts/metrics/metric_battery.json` → `FLAT:xgboost_top_120` |
+| ROC-AUC (secondary context only) | 0.9577 (95% CI 0.922–0.986) | same |
+| **Recall @ top-25 alert budget** | 39.1% at **100% precision** — 25 alerts, 25 true mules, **0 false positives** | same |
+| Recall @ top-50 | 64.6% at 82.7% precision (1.2 FP per 1,000 legitimate accounts) | same |
+| Recall @ top-100 | 78.1% at 50.0% precision — 2 reviews per mule caught | same |
+| Calibration | Brier **0.00313** · ECE **0.00149** (10 uniform bins) · Brier skill vs base rate **0.642** | same |
+| Single-account scoring latency | p50 **0.31 s** · p95 **0.42 s** (interactive budget: 5 s) | same → `operational` |
+| Batch throughput | 688 rows/s on a laptop CPU | same |
 | No-skill baseline (prevalence) | 0.0088 | for scale |
+
+**Nested CV** — the primary protocol, 5-fold × 3 repeats outer with 4-fold inner
+selection and tuning:
+
+| Family | **PR-AUC — nested CV** | Where |
+|---|---|---|
+| **catboost** | **0.8065 ± 0.0084** | `artifacts/metrics/nested_cv.json` |
+| histgb | 0.7674 ± 0.0295 | same |
+| **xgboost** — the shipped family | **0.7539 ± 0.0074** | same |
+| lightgbm | 0.7005 ± 0.0236 | same |
+| extratrees · logistic · dummy | 0.5484 · 0.1639 · 0.0091 | same |
+
+**The shipped family places third, and that is published rather than smoothed
+over.** Paired on the same accounts in the same folds — not by comparing two
+overlapping marginal intervals — catboost is ahead by **+0.0528 PR-AUC, 95% CI
+[0.0237, 0.0862]**, which excludes zero. `muleguard.cli.nested_promotion`
+therefore records `CHAMPION_CHALLENGED` and **exits non-zero**, failing the
+validation script. The bundle was not swapped: acting means re-fitting the
+calibrator and conformal layer, re-freezing thresholds, and re-opening a
+locked test that is single-touch by construction. The finding, the interval and
+that bill are in
+[`docs/NESTED_CV_MODEL_TOURNAMENT.md`](docs/NESTED_CV_MODEL_TOURNAMENT.md).
+
+The preliminary 1-repeat run scored 0.6679 for XGBoost, and this README used to
+read that as "nesting costs roughly 0.10 PR-AUC". The finished run does not
+support it: nested is **lower** than flat for xgboost (−0.015) but **higher**
+for catboost (+0.110), so the flat protocol is not uniformly optimistic. In-fold
+tuning is not the explanation either — that hypothesis was tested on all 15
+outer folds and rejected
+([`docs/TUNING_OVERFIT_HYPOTHESIS.md`](docs/TUNING_OVERFIT_HYPOTHESIS.md)).
 
 **The leakage story (our audit found leaks the design document missed):**
 
-| Run | PR-AUC | Status |
+| Run | Dev OOF PR-AUC | Status |
 |---|---|---|
 | LightGBM **clean** (quarantine enforced) | 0.614 ± 0.047 | ✅ honest baseline |
-| CatBoost tuned on **60 stability-selected features** | **0.808 ± 0.045** | ✅ **shipped winner** |
+| XGBoost tuned on **120 post-firewall features** | **0.769 ± 0.027** | ✅ **shipped winner** |
+| CatBoost on 60 features, **pre-firewall** | 0.808 ± 0.045 | ⛔ **RETIRED** — its feature set contained quarantined columns |
 | LightGBM **+ F3912** | 0.942 ± 0.012 | 🚫 **REJECTED LEAKAGE — evidence only** |
+
+The retired row is the most flattering number this repository has ever produced,
+and it is wrong twice over: it belongs to a model that is not deployed, and that
+model saw quarantined features. It is kept visible on purpose — deleting it would
+make the drop look like it never happened. Full trace:
+[`docs/HISTORICAL_METRIC_RECONCILIATION.md`](docs/HISTORICAL_METRIC_RECONCILIATION.md).
 
 Quarantined with measured evidence: **`F3924`** (target) · **`F3912`** (|corr| 0.97, single-feature CV PR-AUC 0.94) · **`F2230`** (snapshot month ≡ label: *all* 9,001 negatives are Oct-2025, *all* 81 positives are Sep/Nov/Dec) · **`__UNNAMED__0`** (row index — the file is physically sorted by label). Full evidence: [`docs/FINAL_DATA_AND_LEAKAGE_AUDIT.md`](docs/FINAL_DATA_AND_LEAKAGE_AUDIT.md).
 
@@ -71,10 +132,10 @@ Quarantined with measured evidence: **`F3924`** (target) · **`F3912`** (|corr| 
 ```
                           ┌─────────────────────────────────────────────┐
  DataSet.xlsx (immutable) │  LENS 1 · DETECT                            │
- ├─ SHA-256 fingerprint   │  CatBoost winner + LGBM/XGB agreement       │
- ├─ leakage firewall      │  60 stability-selected features             │
+ ├─ SHA-256 fingerprint   │  XGBoost winner + LGBM/CatBoost agreement   │
+ ├─ leakage firewall      │  120 stability-selected features            │
  ├─ locked test (1 touch) │  Platt-calibrated probability               │
- └─ 5×5 repeated CV       └──────────────────┬──────────────────────────┘
+ └─ nested + 3×5 rep. CV  └──────────────────┬──────────────────────────┘
                           ┌──────────────────▼──────────────────────────┐
                           │  LENS 2 · SPARE THE LOOK-ALIKE              │
                           │  hard-negative verifier · Mondrian conformal│
@@ -130,7 +191,7 @@ Starts backend + frontend, waits for real health checks, then prints:
 [run]   Backend:    http://127.0.0.1:8001
 [run]   API docs:   http://127.0.0.1:8001/docs
 [run]   Health:     http://127.0.0.1:8001/health/ready
-[run]   Model:      catboost_tuned_top60 v1.0.0
+[run]   Model:      xgboost_top_120 v2.0.0
 [run]   Local LLM:  llama3.2:3b  (scoring never depends on it)
 ```
 
@@ -138,21 +199,30 @@ Starts backend + frontend, waits for real health checks, then prints:
 
 ### 🔁 Full training pipeline (reproduces every number from raw data)
 
+This is the **post-firewall (generation-2)** path — the one that produced the
+shipped model. The generation-1 commands (`tournament`, `build_lenses`,
+`train baselines`) still exist and still run, but their feature sets predate the
+quarantine, so their output is evidence about the past, not a build step.
+
 ```bash
 .venv/Scripts/python -m muleguard.cli.audit_env        # environment snapshot
 .venv/Scripts/python -m muleguard.cli.audit_data       # ingest + fingerprint + leakage firewall (~10 min)
-.venv/Scripts/python -m muleguard.cli.make_splits      # immutable locked test + 5×5 CV folds
-.venv/Scripts/python -m muleguard.cli.train baselines  # dummy / logistic / LightGBM + leakage ablation (~20 min)
-.venv/Scripts/python -m muleguard.cli.tournament select     # stability selection (~40 min)
-.venv/Scripts/python -m muleguard.cli.tournament tune       # Optuna LGBM/XGB/CatBoost (~2-3 h, resumable)
-.venv/Scripts/python -m muleguard.cli.tournament finalists  # 5×5 OOF + ensemble decision (~1 h)
+.venv/Scripts/python -m muleguard.cli.make_splits      # immutable locked test + repeated stratified CV folds
+.venv/Scripts/python -m muleguard.cli.nested_cv --repeats 3 --inner 4   # primary protocol: selection + tuning inside each fold (hours)
+.venv/Scripts/python -m muleguard.cli.nested_ses --stages all --n-jobs 2 # stability / ensembles / shift, all nested
+.venv/Scripts/python -m muleguard.cli.tournament_v2    # post-firewall champion selection + serving-cost veto
 .venv/Scripts/python -m muleguard.cli.advanced         # TabPFN/TabICL/AutoGluon (guarded challengers)
-.venv/Scripts/python -m muleguard.cli.build_lenses     # calibration + conformal + verifier + OOD + policy freeze
+.venv/Scripts/python -m muleguard.cli.build_lenses_v2  # calibration + conformal + verifier + OOD + policy freeze
+.venv/Scripts/python -m muleguard.cli.shield_v2        # adversarial validation + robustness shield
 .venv/Scripts/python -m muleguard.cli.evaluate         # 🔒 locked test — exactly ONCE
-.venv/Scripts/python -m muleguard.evaluation.plots     # all evidence plots
+.venv/Scripts/python -m muleguard.evaluation.plots_final # the 16 required evidence figures
 .venv/Scripts/python -m muleguard.cli.demo --via-api   # judge demo scenarios
 .venv/Scripts/python -m muleguard.cli.final_report     # docs/FINAL_RESULTS.md from artifacts
 ```
+
+Or in one command: `./scripts/final_validation.sh --full-retrain` (hours). Without
+the flag, the same script **verifies without retraining** — which is the path a
+judge demo takes.
 
 Every stage is **resumable** (Optuna SQLite study, per-model OOF replacement) and **seeded** (seed 42 everywhere). A second run of `evaluate` refuses — the locked test is single-touch by construction.
 

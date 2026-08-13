@@ -91,6 +91,17 @@ else
 fi
 step "metric battery ($BATTERY_PROTOCOL)" "$PY" -m muleguard.cli.metric_battery \
   --source "$BATTERY_SOURCE" --protocol "$BATTERY_PROTOCOL"
+# Does the shipped champion survive the primary protocol? Read-only, and it
+# fails the run when the nested evidence promotes something else - a challenge
+# that exits 0 is a challenge nobody reads.
+step "nested promotion check" "$PY" -m muleguard.cli.nested_promotion
+# Pairs the tuned and untuned arms on all 15 outer folds. Read-only, and it
+# aborts rather than reports if the prediction store and the leaderboard
+# disagree about what the nested run measured.
+step "tuning overfit test"    "$PY" -m muleguard.cli.tuning_overfit
+# §58. The nested write-up, generated after the arbiter so it quotes this run's
+# verdict on the shipped champion rather than the previous one's.
+step "nested tournament report" "$PY" -m muleguard.cli.nested_report
 step "analyst capacity curve" "$PY" -m muleguard.cli.capacity_curve
 # §56. Redraws the required figures from whatever predictions are current, so a
 # plot can never show a model the metrics no longer describe.
@@ -118,6 +129,11 @@ step "competition export"     "$PY" -m muleguard.cli.export_submission
 # any blocker is unresolved or any pass criterion is unmet, which is the point:
 # this script cannot report success over evidence that does not exist.
 step "final verdict (A-L)"    "$PY" -m muleguard.cli.final_verdict
+# §58. Written last, so it quotes the verdict this run just produced
+# rather than the previous run's. It never fails the script: the
+# decision belongs to the steps above, and a report that could veto
+# them would be a second, quieter place for the verdict to live.
+step "final validation report" "$PY" -m muleguard.cli.final_report
 
 # --- 6. verdict -----------------------------------------------------------
 FINISHED_UTC="$(date -u +%Y-%m-%dT%H:%M:%SZ)"

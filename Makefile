@@ -142,6 +142,27 @@ reconcile-artifacts:
 experiment-ledger:
 	$(PY) -m muleguard.cli.experiment_ledger
 
+# Does the shipped champion survive the nested (primary) protocol? Exit 0
+# confirmed, 1 challenged, 2 while the nested run is incomplete. Read-only.
+nested-promotion:
+	$(PY) -m muleguard.cli.nested_promotion
+
+# Resolves docs/TUNING_OVERFIT_HYPOTHESIS.md by pairing the tuned and untuned
+# arms on all 15 outer folds. Reads stored predictions; retrains nothing.
+tuning-overfit:
+	$(PY) -m muleguard.cli.tuning_overfit
+
+# Section 58. The nested tournament write-up, generated from the nested run's
+# own artifacts - including the verdict on the shipped champion.
+nested-report:
+	$(PY) -m muleguard.cli.nested_report
+
+# Section 58. The top-level validation report: the argument around the A-L
+# answer, generated from artifacts so it cannot drift. Always exits 0 - it
+# reports, it does not decide.
+final-report:
+	$(PY) -m muleguard.cli.final_report
+
 # Section 65. Assembles the A-L final response from artifacts. Exit 0 only when
 # every blocker is clear and every criterion met; 2 while evidence is open.
 final-verdict:

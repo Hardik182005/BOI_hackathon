@@ -35,8 +35,13 @@ stability_selection:
   frequency_thresholds: [0.6, 0.8]
   compact_sizes: [15, 30, 60]
 
+# Read by the GENERATION-1 pipeline (cli/tournament.py) only. The shipped
+# champion came from cli/tournament_v2.py, which hardcodes 3 repeats and the
+# ladder (15, 30, 60, 120, 250); the primary estimate is models/nested.py
+# (outer 5-fold x 3 repeats, inner 4-fold). Values are kept, not corrected, so
+# the retired run stays reproducible - see docs/HISTORICAL_METRIC_RECONCILIATION.md.
 tournament:
-  repeats_for_finalists: 5    # 5x5 repeated stratified CV for headline OOF numbers
+  repeats_for_finalists: 5    # generation-1 headline OOF numbers (RETIRED)
   repeats_for_scouting: 1     # single 5-fold during tuning
 
 ensemble:
