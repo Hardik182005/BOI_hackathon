@@ -1,5 +1,5 @@
-import { api, fmtNum, fmtPct } from "../api";
-import { Empty, ErrorState, Loading, usePoll } from "../components";
+import { api, fmtCi, fmtNum, fmtPct, lockedHeadline } from "../api";
+import { Empty, ErrorState, Loading, RetiredArtifactNotice, usePoll } from "../components";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell, ReferenceLine, Legend,
@@ -13,6 +13,7 @@ export default function ModelPerformance() {
   if (error) return <ErrorState msg={error} />;
 
   const lt = data?.locked_test;
+  const head = lockedHeadline(lt);
   const oof = data?.oof?.models ?? {};
   const ablation = data?.leakage_ablation;
   const ensemble = data?.ensemble_decision;
@@ -39,16 +40,21 @@ export default function ModelPerformance() {
         Primary metric: PR-AUC (Average Precision) at natural prevalence.
         Dev = repeated stratified 5-fold out-of-fold; locked test touched once.
       </p>
+      <RetiredArtifactNotice head={head} />
 
       <div className="grid cols-4">
         <div className="card">
           <h3>PR-AUC · locked test</h3>
-          <div className="stat">{fmtNum(lt?.pr_auc?.point)}</div>
-          <div className="stat-sub">95% CI {fmtNum(lt?.pr_auc?.ci_low)}–{fmtNum(lt?.pr_auc?.ci_high)} · bootstrap n=2000</div>
+          <div className="stat">{fmtNum(head.prAuc)}</div>
+          <div className="stat-sub">
+            {head.fromDeployedModel
+              ? <>{fmtCi(head.prAucCi)} · bootstrap n=2000</>
+              : <>deployed scorer on the sealed split · {fmtCi(head.prAucCi)}</>}
+          </div>
         </div>
         <div className="card">
           <h3>ROC-AUC (secondary)</h3>
-          <div className="stat">{fmtNum(lt?.roc_auc?.point)}</div>
+          <div className="stat">{fmtNum(head.rocAuc)}</div>
           <div className="stat-sub">reported for context only — misleading alone at 0.9% prevalence</div>
         </div>
         <div className="card">

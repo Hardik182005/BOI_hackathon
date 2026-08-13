@@ -51,6 +51,28 @@ export function TierBadge({ tier }: { tier: string }) {
   return <span className={`tier ${tier}`}>{tier.replace("_", " ")}</span>;
 }
 
+/** Shown when the stored locked-test artifact belongs to a model that no longer
+ *  serves. The headline PR-AUC is re-attributed by `lockedHeadline`, but the
+ *  tier, calibration and budget panels on these pages still come from the
+ *  stored file, and a reader has no way to tell that from the numbers alone.
+ *  Saying it once, in the same words on every page, is cheaper than a footnote
+ *  per panel and harder to miss than none. */
+export function RetiredArtifactNotice(
+  { head }: { head: { fromDeployedModel: boolean; model?: string; prAuc?: number } },
+) {
+  if (head.fromDeployedModel) return null;
+  return (
+    <div className="notice human">
+      <b>Read this before the numbers:</b> the stored locked-test artifact was
+      produced by a model the leakage firewall has since retired. The PR-AUC
+      above is the <b>deployed</b> scorer{head.model ? <> (<code>{head.model}</code>)</> : null}
+      {" "}on the same split. Panels below that read the artifact directly —
+      risk-tier distribution, calibration, budget recall — still describe the
+      retired run and are not the deployed model's behaviour.
+    </div>
+  );
+}
+
 export function HumanReviewNotice() {
   return (
     <div className="notice human">

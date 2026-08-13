@@ -1,5 +1,5 @@
-import { api, fmtNum, fmtPct } from "../api";
-import { Empty, ErrorState, HumanReviewNotice, Loading, usePoll } from "../components";
+import { api, fmtCi, fmtNum, fmtPct, lockedHeadline } from "../api";
+import { Empty, ErrorState, HumanReviewNotice, Loading, RetiredArtifactNotice, usePoll } from "../components";
 
 // Analyst-budget framing of the locked-test evaluation. Every figure on this
 // page is a field of /v1/metrics/summary. The only arithmetic performed here is
@@ -27,6 +27,7 @@ export default function BusinessValue() {
   const fpr: any[] = lt.recall_at_fpr ?? [];
   const tiers: any[] = lt.tier_distribution ?? [];
   const reviewTiers = tiers.filter((t) => t.tier !== "MONITOR");
+  const head = lockedHeadline(lt);
 
   return (
     <>
@@ -37,6 +38,7 @@ export default function BusinessValue() {
         {" "}{lt.n_positives} true mules ({fmtPct(lt.prevalence, 2)} prevalence).
       </p>
       <HumanReviewNotice />
+      <RetiredArtifactNotice head={head} />
 
       <div className="grid cols-4">
         <div className="card">
@@ -51,9 +53,9 @@ export default function BusinessValue() {
         </div>
         <div className="card">
           <h3>PR-AUC · locked test</h3>
-          <div className="stat">{fmtNum(lt.pr_auc?.point)}</div>
+          <div className="stat">{fmtNum(head.prAuc)}</div>
           <div className="stat-sub">
-            no-skill baseline {fmtNum(lt.prevalence, 4)} · 95% CI {fmtNum(lt.pr_auc?.ci_low)}–{fmtNum(lt.pr_auc?.ci_high)}
+            no-skill baseline {fmtNum(lt.prevalence, 4)} · {fmtCi(head.prAucCi)}
           </div>
         </div>
         <div className="card">

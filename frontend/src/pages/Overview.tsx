@@ -1,5 +1,5 @@
-import { api, fmtNum, fmtPct } from "../api";
-import { Empty, ErrorState, HumanReviewNotice, Loading, TierBadge, usePoll } from "../components";
+import { api, fmtCi, fmtNum, fmtPct, lockedHeadline } from "../api";
+import { Empty, ErrorState, HumanReviewNotice, Loading, RetiredArtifactNotice, TierBadge, usePoll } from "../components";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 const TIER_ORDER = ["CRITICAL_REVIEW", "URGENT_REVIEW", "STANDARD_REVIEW", "OOD_REVIEW", "MONITOR"];
@@ -18,6 +18,10 @@ export default function Overview() {
   if (metrics.error) return <ErrorState msg={metrics.error} />;
 
   const lt = metrics.data?.locked_test;
+  // Ranking headline resolved to whichever model actually serves; the tier and
+  // calibration blocks below still come from the stored artifact and are
+  // labelled as such.
+  const head = lockedHeadline(lt);
   const lens = metrics.data?.lens_stack_oof;
   const tierRows: any[] = lt?.tier_distribution ?? [];
   const tierData = TIER_ORDER.map((t) => ({
@@ -37,6 +41,7 @@ export default function Overview() {
         dev out-of-fold). Split and metric are stated on every panel.
       </p>
       <HumanReviewNotice />
+      <RetiredArtifactNotice head={head} />
       <div className="grid cols-4">
         <div className="card">
           <h3>Accounts scored (locked test)</h3>
@@ -54,10 +59,13 @@ export default function Overview() {
           }
         >
           <h3>PR-AUC · locked test <span className="stat-sub">(primary metric)</span></h3>
-          <div className="stat">{fmtNum(lt?.pr_auc?.point)}</div>
+          <div className="stat">{fmtNum(head.prAuc)}</div>
           <div className="stat-sub">
-            95% CI {fmtNum(lt?.pr_auc?.ci_low)}–{fmtNum(lt?.pr_auc?.ci_high)} ·
-            no-skill = {fmtNum(lt?.prevalence, 4)}
+            {fmtCi(head.prAucCi)} · no-skill = {fmtNum(lt?.prevalence, 4)}
+            {head.fromDeployedModel ? null : (
+              <> · deployed scorer <code>{head.model}</code>, not the retired
+              artifact on this page</>
+            )}
           </div>
         </div>
         <div className="card">

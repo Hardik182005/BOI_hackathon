@@ -1,5 +1,5 @@
-import { api, fmtNum } from "../api";
-import { ErrorState, Loading, usePoll } from "../components";
+import { api, fmtCi, fmtNum, lockedHeadline } from "../api";
+import { ErrorState, Loading, RetiredArtifactNotice, usePoll } from "../components";
 
 export default function ModelCard() {
   const model = usePoll(() => api.model(), []);
@@ -8,10 +8,12 @@ export default function ModelCard() {
 
   const m = model.data;
   const lt = metrics.data?.locked_test;
+  const head = lockedHeadline(lt);
 
   return (
     <>
       <h2 className="page-title">Model Card — MuleGuard · Trinetra</h2>
+      <RetiredArtifactNotice head={head} />
       <p className="page-sub">
         Purpose, data, exclusions, limits and safety constraints of the deployed
         scoring bundle. Values load from the signed model manifest.
@@ -41,13 +43,13 @@ export default function ModelCard() {
           <h3>Current version</h3>
           <table className="data">
             <tbody>
-              <tr><td>Bundle version</td><td>{m?.winner ?? "–"} v{m ? "1.0.0" : "–"}</td></tr>
+              <tr><td>Bundle version</td><td>{m?.winner ?? "–"} v{m?.model_version ?? "–"}</td></tr>
               <tr><td>Bundle SHA-256</td><td style={{ fontSize: 11 }}>{m?.bundle_sha256?.slice(0, 32)}…</td></tr>
               <tr><td>Features used</td><td>{m?.n_features} (stability-selected, compact)</td></tr>
               <tr><td>Calibrator</td><td>{m?.calibrator}</td></tr>
               <tr><td>Git commit</td><td style={{ fontSize: 11 }}>{m?.git?.commit_sha?.slice(0, 12)}</td></tr>
               <tr><td>Dev OOF PR-AUC</td><td>{fmtNum(m?.oof_pr_auc)}</td></tr>
-              <tr><td>Locked-test PR-AUC</td><td>{fmtNum(lt?.pr_auc?.point)} (CI {fmtNum(lt?.pr_auc?.ci_low)}–{fmtNum(lt?.pr_auc?.ci_high)})</td></tr>
+              <tr><td>Locked-test PR-AUC</td><td>{fmtNum(head.prAuc)} ({fmtCi(head.prAucCi)})</td></tr>
             </tbody>
           </table>
         </div>

@@ -111,6 +111,69 @@ export const api = {
     request(`/v1/graph/account/${encodeURIComponent(account)}`),
 };
 
+/** The locked-test headline, attributed to the model that actually serves.
+ *
+ * `locked_test` in the metrics summary is the stored evaluation artifact, and
+ * that artifact belongs to `catboost_tuned_top60` - a model the Feature
+ * Availability Firewall retired. The backend annotates the block
+ * (`describes_deployed_model`, `deployed_scorer_result`, `retired_warning`)
+ * rather than overwriting it, because its tier and calibration sections have no
+ * post-firewall equivalent yet. So the ranking headline has to be resolved here,
+ * once, instead of in every page: a dashboard that prints a retired model's
+ * PR-AUC as its primary metric is stating a number no judge could reproduce
+ * against the running scorer.
+ *
+ * `deployed_scorer_result.pr_auc` is a bare float; the retired block nests it
+ * under `.point` with a bootstrap interval. Both shapes are normalised here.
+ */
+export type LockedHeadline = {
+  prAuc?: number;
+  prAucCi?: [number | undefined, number | undefined];
+  rocAuc?: number;
+  model?: string;
+  n?: number;
+  nPositives?: number;
+  /** false when the served artifact belongs to a retired model */
+  fromDeployedModel: boolean;
+  retiredModelWarning?: string;
+};
+
+export function lockedHeadline(lt: Json | null | undefined): LockedHeadline {
+  const num = (x: any): number | undefined =>
+    typeof x === "number" ? x : (typeof x?.point === "number" ? x.point : undefined);
+  if (!lt) return { fromDeployedModel: true };
+
+  const deployed = lt.deployed_scorer_result;
+  if (lt.describes_deployed_model === false && deployed) {
+    return {
+      prAuc: num(deployed.pr_auc),
+      // The sealed single-touch evaluation stores no bootstrap interval, and
+      // inventing one from the retired run would be worse than showing none.
+      prAucCi: undefined,
+      rocAuc: num(deployed.roc_auc),
+      model: deployed.model,
+      n: deployed.n,
+      nPositives: deployed.n_positives,
+      fromDeployedModel: false,
+      retiredModelWarning: lt.retired_warning,
+    };
+  }
+  return {
+    prAuc: num(lt.pr_auc),
+    prAucCi: [lt.pr_auc?.ci_low, lt.pr_auc?.ci_high],
+    rocAuc: num(lt.roc_auc),
+    n: lt.n,
+    nPositives: lt.n_positives,
+    fromDeployedModel: true,
+  };
+}
+
+export function fmtCi(ci: [number | undefined, number | undefined] | undefined,
+                      digits = 3): string {
+  if (!ci || ci[0] == null || ci[1] == null) return "no bootstrap interval stored";
+  return `95% CI ${fmtNum(ci[0], digits)}–${fmtNum(ci[1], digits)}`;
+}
+
 export function fmtPct(x: number | null | undefined, digits = 1): string {
   return x == null ? "–" : `${(100 * x).toFixed(digits)}%`;
 }
