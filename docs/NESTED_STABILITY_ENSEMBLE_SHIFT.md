@@ -131,6 +131,13 @@ would hand it a winner's curse and make every ensemble look better than it is.
   across-fold AP spread decreases.
 * **NO_CHANGE** otherwise - the single-seed model is 5x cheaper and a tie does
   not buy a 5x bill.
+* **NOT_APPLICABLE** when the family has no stochastic component, so the five
+  seeds fit the identical model and the arm cannot move. `histgb` is the case
+  here: sklearn's `HistGradientBoosting` draws no random subsample, so
+  `random_state` never reaches the fit. Reporting NO_CHANGE for such a family
+  would read as evidence that seed averaging was tried and did not help. It was
+  not tried - there was nothing to average, and a measured zero and an
+  arithmetically impossible one are different claims.
 
 Seeds are `fold_seed + {0, 7919, 15838, 23757, 31676}`, the offsets already used
 in `seed_variance_v2.json`, so the nested and flat numbers differ by protocol

@@ -40,12 +40,23 @@ is the most useful part of this document.
   --model retired_gen1_pre_firewall_stack --protocol HOLDOUT_REFERENCE --n-boot 2000
 ```
 
-`--source` is required and never defaulted. When the full nested run lands, the
-first command is re-run against its predictions with `--protocol NESTED` and the
-document gains a fourth entry; nothing here has to be rewritten by hand. Each run
-records the source file's SHA-256 prefix, size, mtime and the `generated_utc` of
-its companion metrics file, so a number can always be traced to the exact array it
-came from.
+The full nested run landed on 2026-08-13 and was added with two more invocations
+— the nested store is keyed per *family*, because the nested protocol chooses the
+feature-set size inside each fold and there is no one `xgboost_top_120` in it:
+
+```bash
+.venv/Scripts/python.exe -m muleguard.cli.metric_battery \
+  --source artifacts/predictions/nested_oof.parquet --model xgboost \
+  --protocol NESTED --n-boot 2000
+
+.venv/Scripts/python.exe -m muleguard.cli.metric_battery \
+  --source artifacts/predictions/nested_oof.parquet --model catboost \
+  --protocol NESTED --n-boot 2000
+```
+
+`--source` is required and never defaulted. Each run records the source file's
+SHA-256 prefix, size, mtime and the `generated_utc` of its companion metrics
+file, so a number can always be traced to the exact array it came from.
 
 ---
 
@@ -55,17 +66,19 @@ This is the part a reader should take away before any individual metric.
 
 | Protocol | Status | May be used for | In this document |
 |---|---|---|---|
-| **NESTED** (full) | **PRIMARY — not yet available** | the honest headline | pending; see §7 |
-| NESTED_PRELIMINARY | superseded, under-powered | nothing | quoted only to show the optimism gap |
+| **NESTED** (full) | **PRIMARY — available since 2026-08-13** | the honest headline | §7 |
+| NESTED_PRELIMINARY | superseded, under-powered | nothing | §7.3, kept only as a record of what a weak run claimed |
 | **FLAT** | historical development estimate | model selection (already done) | the numbers in §6 |
 | HOLDOUT | **reference only, never selection** | a labelled historical footnote | §9, and it is inadmissible |
 
-The full nested run was still executing when this battery was computed — catboost
-was mid-way through its folds and xgboost had not started. Its
-`artifacts/metrics/nested_cv.json` on disk is still the old 1-repeat / 2-trial
-run, so **no nested number in this document is the nested result.** The flat
-figures below are labelled historical throughout and the preliminary nested
-figures are labelled superseded. Nothing has been quietly promoted.
+The full nested run finished after §6 was written, so this document holds both:
+the flat figures below are the ones that describe the **shipped bundle** at its
+frozen thresholds, and the nested figures in §7 are the **primary estimate of the
+families**. Where they disagree, §7 wins on ranking and §6 wins on "what does the
+artefact on disk do at its frozen thresholds", and the reason is that the nested
+protocol re-chooses its feature-set size in every fold — it estimates a *method*,
+not a file. Nothing has been quietly promoted; the champion is still
+`xgboost_top_120` and §7.2 records that the nested evidence challenges it.
 
 The reason nested is primary and flat is not: in the flat protocol, feature
 selection pooled importance across every development fold, so each row helped
@@ -224,19 +237,68 @@ reproduces `tournament_v2.json` exactly. Those are reproductions, not new claims
 
 ---
 
-## 7. Preliminary nested (superseded — do not quote)
+## 7. Nested — the primary protocol
 
-One repeat, two Optuna trials. **PR-AUC 0.66792**, stratified CI [0.55686, 0.77186].
-Recorded only so the full run can be compared against it, and because the gap to
-the flat 0.76904 is informative in one specific way: the two intervals overlap
-heavily, so this run does **not** establish a selection-optimism penalty. It is
-too weak to establish anything. The real comparison waits for the full nested run.
+Two families were carried through the full battery: `xgboost`, because it is the
+shipped family, and `catboost`, because the nested leaderboard puts it first. The
+full seven-family leaderboard is in `artifacts/metrics/nested_cv.json` and is
+discussed in `docs/NESTED_CV_MODEL_TOURNAMENT.md`.
 
-One number from it deserves attention when the real run lands: alerts to catch
-90 % of mules was **3,569 — 49.13 % of the entire book** — against 579.7 in the
-flat run. Deep-tail recall is the least stable thing this system does, and any
-claim about catching 90 % of mules should be treated as unsupported until the
-nested run says otherwise.
+### 7.1 The two nested runs, side by side
+
+| | `NESTED:xgboost` (shipped family) | `NESTED:catboost` (nested leader) |
+|---|---:|---:|
+| PR-AUC (mean of 3 repeats) | 0.75393 ± 0.00740 | **0.80653 ± 0.00845** |
+| 95 % CI, account bootstrap | [0.65397, 0.84105] | [0.71704, 0.88502] |
+| ROC-AUC (secondary) | 0.94366 | 0.96310 |
+| Brier / skill vs base rate | 0.003275 / 0.6249 | 0.002663 / **0.6951** |
+| log-loss | 0.018122 | 0.014360 |
+| ECE (10 uniform bins) | 0.001370 | 0.001373 |
+| MCE | 0.4638 | 0.5454 |
+| recall @ 25 alerts | 39.06 % at 100 % precision | 39.06 % at 100 % precision |
+| recall @ 50 | 64.58 % at 82.67 % | **68.23 % at 87.33 %** |
+| recall @ 100 | 76.56 % at 49.00 % | **82.81 % at 53.00 %** |
+| alerts to catch 75 % of mules | 81.7 (1.12 % of book) | **57.3 (0.79 %)** |
+| alerts to catch 90 % of mules | 1,138.7 (**15.68 %**) | 596.0 (**8.20 %**) |
+
+The two marginal intervals overlap almost entirely. That is *not* the test of
+whether the difference is real, because both families scored the same accounts in
+the same folds; the paired interval is in §7.2 and it does not contain zero.
+
+Note the MCE column. Both models have an ECE near 0.0014 and an MCE near 0.5:
+average calibration is excellent and worst-bin calibration is terrible, because
+the top bin holds a handful of accounts. Quoting the ECE alone would be the more
+flattering and the less honest choice.
+
+### 7.2 The shipped family is not the nested winner
+
+Paired on identical rows across all three repeats, catboost − xgboost is
+**+0.05279 PR-AUC, 95 % CI [0.02374, 0.08602]**, excluding zero, with 3 of 3
+repeats and all 2,000 bootstrap replicates favouring catboost.
+`muleguard.cli.nested_promotion` records `CHAMPION_CHALLENGED` and exits 1.
+
+The bundle was not swapped. The reasoning, and the bill for acting on it —
+re-fitting the calibrator and conformal layer, re-freezing thresholds, and
+re-opening a single-touch locked test — is in `docs/NESTED_CV_MODEL_TOURNAMENT.md`
+§4. What matters for *this* document is narrower: the metrics in §6 describe the
+shipped bundle and remain correct for it, and they are not evidence that the
+shipped bundle is the best available model. It is not.
+
+### 7.3 The preliminary nested run (superseded — do not quote)
+
+One repeat, two Optuna trials. **PR-AUC 0.66792**, stratified CI [0.55686, 0.77186],
+and it needed **3,569 alerts — 49.13 % of the entire book** — to catch 90 % of
+mules. Kept because it was quoted while it was the only nested evidence there was,
+and because the full run corrects it in a specific direction worth recording: the
+real nested xgboost figure is 0.75393, not 0.66792, so the preliminary run
+understated its own family by 0.086. A one-repeat estimate is one realisation of
+the fold assignment; it was not a small version of the answer.
+
+Its deep-tail warning, though, survives intact. At 90 % recall the full run still
+needs 15.68 % of the book for xgboost and 8.20 % for catboost, against 579.7
+alerts in the flat run. **Deep-tail recall is the least stable thing this system
+does, and no claim about catching 90 % of mules is supported at a reviewable
+alert volume.**
 
 ---
 
@@ -365,9 +427,13 @@ magnitudes and is helped by a few large gains. **With 15 folds and 64 positives,
 "significant" and "not significant" are both inside the noise of which test you
 picked.** The interval is the honest summary: the effect is probably positive,
 plausibly as small as +0.007, and the lower bound is what a decision should be
-sized against. A follow-up arm excluding the suspect `FEES_AND_CHARGES` family is
-still running, so the gain is **not settled** — if it depends on that family, the
-constraint against accepting a win driven by a suspicious feature applies.
+sized against.
+
+The follow-up arm excluding the suspect `FEES_AND_CHARGES` family has since run
+(`artifacts/metrics/missingness_ablation_no_fees.json`, 2026-08-13) and the gain
+does not depend on it: **+0.0611 paired, 13 of 15 folds**, sign test p 0.00739,
+Wilcoxon p 0.01025, paired *t* p 0.00733 — all three agree, where in the original
+arm they did not. The signature is kept.
 
 ---
 
@@ -388,9 +454,12 @@ constraint against accepting a win driven by a suspicious feature applies.
   the tier structure — not these metrics — is where that judgement lives.
 - **The bootstrap resamples the mules we have.** It cannot represent a typology
   absent from these 64. Novel mule behaviour is outside every interval here.
-- **These are development estimates.** The primary nested figure is still
-  computing; the holdout is reference-only and inadmissible as shown. The strongest
-  honest claim available today is the flat estimate, labelled as such.
+- **These are development estimates.** The nested figures in §7 are the primary
+  ones and they are still development estimates: 7,264 accounts, 64 mules, one
+  book. The holdout is reference-only and inadmissible as shown.
+- **The best model measured here is not the model shipped.** §7.2 is a challenge
+  the champion lost on the primary protocol. Read the §6 numbers as "what the
+  deployed artefact does", never as "the best this project achieved".
 - **No adversarial adaptation is measured.** Mule operators respond to detection.
   Nothing in a static cross-validation captures that.
 
@@ -398,9 +467,14 @@ constraint against accepting a win driven by a suspicious feature applies.
 
 ## 12. Not computed, and why
 
-- **Full nested CV metrics.** The run had not finished; quoting the 1-repeat /
-  2-trial file as "the nested result" would misrepresent it. The CLI takes
-  `--source` so it can be re-run when the predictions land.
+- ~~**Full nested CV metrics.**~~ Computed on 2026-08-13 and reported in §7. The
+  entry is struck through rather than deleted: this section is the record of what
+  was missing, and a gap that closes should be visible as a gap that closed.
+- **Nested metrics for the other five families.** The battery was run for
+  `xgboost` and `catboost` only — the shipped family and the nested leader. The
+  remaining five have leaderboard PR-AUC and ROC-AUC in `nested_cv.json` but no
+  intervals, no budgets and no calibration figures. Nothing selects on them, so
+  the cost of computing them was not paid.
 - **A confidence interval for the champion's holdout result.** No per-row vector
   exists (§9), and generating one means touching a reference-only split again.
 - **Fresh latency measurement.** Every core was occupied by running

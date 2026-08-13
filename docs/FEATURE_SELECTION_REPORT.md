@@ -28,9 +28,12 @@ overlap between it and the leakage-free top-60 is 12 of 60.
    univariate-screened (top-500 |r|), median-imputed, standardised view.
    A feature is "selected" in a subsample if it enters the top-60 of either
    selector with positive importance.
-3. **Frequency aggregation** across folds → `selection_frequency.csv`;
-   compact sets frozen: top-15, top-30, top-60, freq ≥ 0.6 (16 features),
-   freq ≥ 0.8 (9 features).
+3. **Frequency aggregation** across folds → `selection_frequency_v2.csv`;
+   compact sets frozen for the current run: top-15, top-30, top-60, **top-120,
+   top-250** and the full clean pool, plus the frequency-threshold views. The
+   champion uses **top-120**. (The generation-1 ladder stopped at top-60 with
+   freq ≥ 0.6 → 16 features and freq ≥ 0.8 → 9 features; those counts belong to
+   `selection_frequency.csv`, the retired pre-firewall file.)
 
 ## Measured stability
 

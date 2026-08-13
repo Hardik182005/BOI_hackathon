@@ -261,8 +261,10 @@ every variant scored, the quarantine invariances held, and the sensitivity
 control differed — because any one of them alone is satisfiable by a broken
 harness.
 
-Tests: `tests/unit/test_validation_lab.py` (step order, compatibility bands,
-component weights), `tests/unit/test_sealed_validation.py` (seal/reveal, hash
-mismatch refusal, seal-id validation, reserved names),
-`tests/integration/test_validation_routes.py`,
-`tests/integration/test_batch_upload.py`.
+Tests: `tests/unit/test_sealed_validation.py` (seal/reveal, hash mismatch
+refusal, seal-id validation, reserved names, and the compatibility bands),
+`tests/integration/test_validation_api.py` (seal returns no metric, reveal only
+after the seal verifies, row-count mismatch, predictions edited after sealing,
+missing features stop at step 1), `tests/integration/test_batch_upload.py`.
+The step order and component weights are **not** separately tested — an earlier
+draft of this line cited a `test_validation_lab.py` that was never written.

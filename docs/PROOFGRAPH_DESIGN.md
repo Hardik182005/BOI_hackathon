@@ -225,8 +225,8 @@ registry without leaving the page.
 | Test | Guards |
 |---|---|
 | `tests/unit/test_proofgraph.py` | node/edge construction, traceability failure on a sourceless node, forbidden-term rejection, disagreement statuses, courtroom verdict boundaries |
-| `tests/unit/test_evidence_packet.py` | the packet's `source` fields resolve to real columns or metrics |
-| `tests/integration/test_proofgraph_route.py` | `/v1/proofgraph/{case_id}` returns both sides populated and the provenance statement |
+| *(no test)* | the packet's `source` fields resolve to real columns or metrics — **claimed by an earlier draft of this table, never written.** Traceability is enforced at construction (`test_proofgraph.py` fails a sourceless node), but nothing checks that a `source` string resolves to a column that exists. |
+| `tests/integration/test_proofgraph_api.py` | `/v1/proofgraph/{case_id}` returns both sides populated and the provenance statement; also the 404, the forbidden-language scan and the no-invented-edges check |
 | release gate `no_verdict_language` | scans served payloads for the forbidden vocabulary |
 
 ---

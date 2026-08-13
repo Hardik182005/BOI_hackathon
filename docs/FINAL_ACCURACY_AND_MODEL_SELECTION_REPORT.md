@@ -323,18 +323,36 @@ scarcity):
 | Measure | Value |
 |---|---:|
 | Reference PR-AUC | 0.74927 |
-| PR-AUC after positive removal | 0.7383 ± 0.0190 (min 0.71217) |
-| Relative drop | **1.46 %** |
-| Recall@100 | 0.7500 (std 0.0128) |
-| Recall@50 | 0.6458 (std 0.0147) |
-| Recall@25 | 0.3906 (std 0.0000) |
-| Feature-importance rank stability (Spearman) | 0.7654 |
-| Top-20 feature overlap between rounds | 0.70 |
-| All-row prediction rank stability (Spearman) | 0.1656 |
-| Top-K set overlap (Jaccard), K = 25 / 50 / 100 | 0.57 / 0.6588 / 0.43 |
+| PR-AUC after positive removal | 0.72398 ± 0.03545 (min 0.64135) |
+| Relative drop | **3.37 %** |
+| Recall@100 | 0.74271 (std 0.04029) |
+| Recall@50 | 0.63542 (std 0.02834) |
+| Recall@25 | 0.38854 (std 0.00531) |
+| Feature-importance rank stability (Spearman) | 0.7696 |
+| Top-20 feature overlap between rounds | 0.6805 |
+| All-row prediction rank stability (Spearman) | 0.3694 |
+| Top-K set overlap (Jaccard), K = 25 / 50 / 100 | 0.608 / 0.6771 / 0.4493 |
 
-The all-row Spearman figure of 0.1656 is reported unchanged because it is the
-figure the published robustness thresholds were defined on. Its caveat is
+An earlier draft of this table quoted a superseded run of the same experiment —
+a 1.46 % drop, min 0.71217, all-row Spearman 0.1656 — against the identical
+0.74927 reference. Every row above is re-read from
+`artifacts/metrics/stability_stress_v2.json` as it now stands. The correction
+runs against this document's interest: the drop roughly doubled and the worst
+round is materially lower than the earlier text implied.
+
+The feature-importance figure carries a further qualification. It is a **flat**
+measurement, and the flat stress fits feature selection once over pooled
+development data before its rounds begin, so removing training positives cannot
+disturb a selection that has already happened. Re-run inside the nested
+protocol, where selection is refit in every outer fold as a production refit
+would be, the same correlation falls to **0.3944**
+(`artifacts/metrics/nested_positive_removal.json`). Quote the nested figure:
+the model's *ranking* survives losing an eighth of its mules, but most of what
+it cites as evidence does not.
+
+The all-row Spearman figure — 0.3694 in the current artifact — is reported
+unchanged because it is the figure the published robustness thresholds were
+defined on. Its caveat is
 recorded in the artifact and repeated here: roughly 99 % of those rows are
 negatives whose calibrated scores sit in a narrow band near zero, so their
 relative order moves freely between rounds without any account changing review

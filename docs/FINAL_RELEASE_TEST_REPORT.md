@@ -1,6 +1,6 @@
 # Final Release Test Report
 
-Generated 2026-07-10T23:08:51.019460+00:00 · commit `c8e0d253acf8` · **Verdict: PASS**
+Generated 2026-08-13T17:55:48.846717+00:00 · commit `f280c6fc576b` · **Verdict: FAIL**
 
 ## Environment
 
@@ -10,46 +10,26 @@ Generated 2026-07-10T23:08:51.019460+00:00 · commit `c8e0d253acf8` · **Verdict
 | Python / Node | 3.13.2 / v24.16.0 |
 | Compute mode | cpu_16gb (16.93 GB RAM, CUDA=False) |
 | Dataset SHA-256 | `7d1be90fe23b57460184f2f7566d572c…` |
-| Model bundle SHA-256 | `04fafaee25ae82c7a5a2e6ec5757d77e…` |
+| Model bundle SHA-256 | `d12914de5abee99aa18b80e3d41ae2da…` |
 
 ## Dataset (verified)
 
 9,082 rows × 3,925 cols · 81 positives (0.8919%) ·
-quarantined at the time of this run: F3924 (target), F3912 (leak), F2230
-(month≡label), __UNNAMED__0 (index) · 60 selected features.
-
-**Superseded.** The quarantine is now 9 hard-quarantined columns (adding
-F3898, F3899, F3913, F3914, F3915) plus 3 conditionally quarantined
-(F3916/F3917/F3918) and the fairness exclusion F3892 —
-`configs/feature_availability.yaml`. Production feature count is 120.
+quarantined: F3924 (target), F3912 (leak), F2230 (month≡label), __UNNAMED__0 (index) ·
+120 selected features in production.
 
 ## Model
 
-**The model rows below are RETIRED.** They describe the pre-firewall bundle
-`catboost_tuned_top60`, whose top-60 set contained the post-resolution columns
-`F3898`, `F3913`, `F3914` and the undetermined `F3916`; its PR-AUC was inflated
-by them. Current champion: **`xgboost_top_120`, OOF PR-AUC 0.7690 ± 0.0266**,
-bundle `d12914de5abee99a…` — see
-`docs/FINAL_ACCURACY_AND_MODEL_SELECTION_REPORT.md`. The QA-suite and release-gate
-sections below were run against the retired bundle and have not been re-run.
-
 | Item | Value |
 |---|---|
-| Best single (5-repeat OOF) | **catboost_tuned_top60** — PR-AUC 0.8077 ± 0.0450 — **RETIRED, leakage-inflated** |
-| Locked test (production scorer) | PR-AUC 0.8242 (95% CI 0.6536–0.9584) — **RETIRED bundle; not re-measured under the current champion** |
-| Calibration | Brier 0.00258, ECE 0.0027 — retired; current OOF values 0.003128 / 0.001489 |
-| Ensemble | rejected by pre-registered ≥4/5-repeats rule — superseded by `SINGLE_MODEL_KEPT` in `ensemble_v2.json` |
+| Best single (5-repeat OOF) | **catboost_tuned_top60** — PR-AUC 0.8077 ± 0.0450 |
+| Locked test (production scorer) | PR-AUC 0.8242 (95% CI 0.6536–0.9584) |
+| Calibration | Brier 0.00258, ECE 0.0027 |
+| Ensemble | rejected by pre-registered ≥4/5-repeats rule |
 | Challengers | tabpfn:RAN, tabicl:SKIPPED, autogluon:SKIPPED (TabPFN 1-repeat OOF 0.8969585278109471) |
 | Throughput | 687.7 rows/s CPU |
 
-### Recall / precision at analyst budgets (locked test) — RETIRED BUNDLE
-
-The four rows below were measured on the retired bundle `04fafaee25ae82c7…`.
-They must not be attributed to the current champion, and the `top 100` row in
-particular ("100.0%") must not be quoted as a current result. The current
-model's measured recall at budget is reported out-of-fold in
-`docs/FINAL_ACCURACY_AND_MODEL_SELECTION_REPORT.md` §7 (top-100 recall
-0.828 calibrated OOF; 0.781 uncalibrated tournament mean).
+### Recall / precision at analyst budgets (locked test)
 
 | Budget | Recall | Precision |
 |---|---|---|
@@ -69,16 +49,16 @@ model's measured recall at budget is reported out-of-fold in
 | performance_results | PASS | 7/7 |
 | e2e_results | PASS | 10/10 |
 | api_frontend_consistency | PASS | 6/6 |
-| security_results | PASS | 7/7 |
+| security_results | PASS | 8/8 |
 | frontend_test_results | PASS | 7/7 |
 | batch_upload_results | PASS | 4/4 |
 
 Plus: backend pytest **93 passed**, frontend vitest **3 passed**, one-command
 startup log `artifacts/testing/one_command_startup.log`.
 
-## ML release gate (run against the RETIRED bundle — see `docs/FINAL_RELEASE_GATE.md`)
+## ML release gate
 
-| no_target_or_f3912_leakage | PASS **against the four-entry quarantine list only**; the same bundle fails under the firewall | 60 bundle features disjoint from 4 quarantined |
+| no_target_or_f3912_leakage | PASS | 120 bundle features disjoint from 4 quarantined |
 | no_split_overlap | PASS | test=1818 dev=7264 overlap=0 |
 | locked_test_single_touch | PASS | touches=3 forced=0 |
 | metrics_trace_to_predictions | PASS | 11 models verified |
@@ -89,9 +69,18 @@ startup log `artifacts/testing/one_command_startup.log`.
 | scoring_survives_ollama_outage | PASS | fallback ok; planted hallucination rejected for 8 reasons |
 | raw_data_unmodified | PASS | SHA-256 verified |
 | no_secrets_committed | PASS | .env not tracked |
-| tests_pass | PASS | -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html |
+| tests_pass | **FAIL** | 1 failed, 407 passed in 256.77s (0:04:16) |
 | probabilities_bounded | PASS | OOF + locked test bounded |
 | artifacts_complete | PASS | 19 artifacts present |
+| addendum_artifacts_complete | PASS | 10 addendum artifacts present |
+| robustness_grade_not_hand_picked | PASS | grade=LOW limited_by=['prediction_rank_stability'] |
+| label_audit_changed_nothing | PASS | 1 rows flagged, all HUMAN_REVIEW_ONLY |
+| merchant_verifier_cannot_lower_risk | PASS | risk held at 0.91/INVESTIGATE; confidence -> MEDIUM; 1 adjustments all carry their trigger |
+| graph_never_fabricates_edges | PASS | default UNAVAILABLE; contract forbids derived edges |
+| shield_reports_no_leaked_feature | PASS | 54 STABLE / 66 WATCH / 0 SHIFT_PRONE / 0 LEAKAGE |
+| no_forbidden_verdict_vocabulary | PASS | 5 forbidden verdict words absent from shipped source |
+| attack_surface_covered | PASS | 49 security tests collected covering sqli, xss, path_traversal, csv_injection |
+| organiser_dry_run_passed | PASS | 8/8 variants, invariance sound=True, model unchanged=True, locked-test PR-AUC 0.7262714933 |
 
 ## Defects
 
@@ -101,5 +90,5 @@ startup log `artifacts/testing/one_command_startup.log`.
   this hardware/Python; frontend has no dedicated batch-upload page (API
   endpoint + CSV download implemented; UI page is a roadmap item).
 
-## Verdict: **PASS**
-All release blockers clear.
+## Verdict: **FAIL**
+Blockers: ML release gate: FAIL

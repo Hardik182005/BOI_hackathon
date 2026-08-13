@@ -125,17 +125,29 @@ Permitted use of 0.72627 is narrow and worth naming exactly, because a
 
 A directional reading is available and is itself informative:
 
-| Estimate | PR-AUC |
-|---|---|
-| Flat repeated OOF, dev (selection basis) | 0.76904 ± 0.02663 |
-| Locked test, single touch | 0.72627 |
-| Preliminary nested CV (1 repeat, 2 Optuna trials) | 0.66792 |
+| Estimate | PR-AUC | Positives |
+|---|---|---|
+| Flat repeated OOF, dev (selection basis) | 0.76904 ± 0.02663 | 64 |
+| **Nested CV, `xgboost` family** (primary, finished 2026-08-13) | **0.75393 ± 0.00740** | 64 |
+| Locked test, single touch | 0.72627 | **17** |
+| ~~Preliminary nested CV (1 repeat, 2 Optuna trials)~~ | ~~0.66792~~ | superseded |
 
-The locked test sits **below** the flat OOF figure and **above** the
-preliminary nested figure. That is the ordering selection leakage predicts, and
-it is a reason to trust the nested estimate over the flat one — not a reason to
-promote the locked-test number to headline status. The full nested run
-supersedes the preliminary value.
+**This table changed when the full nested run landed, and the earlier reading of
+it did not survive.** While the only nested evidence was the 1-repeat 0.66792,
+the locked test sat between flat and nested, and this document read that as the
+ordering selection optimism predicts. It no longer holds: the locked test is now
+the **lowest** of the three, below the nested estimate rather than above it.
+
+What is still supported is the narrow claim: nested (0.75393) is below flat
+(0.76904) for the shipped family, which is the direction selection optimism
+predicts, at a magnitude — 0.015 — far smaller than the preliminary run implied.
+
+What is **not** supported is any reading of where the locked test falls. Seventeen
+positives cannot rank three estimators. A single draw of 17 mules moves PR-AUC by
+far more than the 0.04 separating these rows, so "the locked test is below the
+nested estimate" is a fact about one sample, not evidence that the nested protocol
+is still optimistic. It is recorded here because deleting it would look like
+tidying, and read as nothing more than that.
 
 ---
 
@@ -177,7 +189,7 @@ Two mechanical guarantees, both re-verified at the time of writing:
 | Nested CV rows ∩ locked test rows | **0** |
 | Locked-test row set changed since 2026-07-10? | no |
 
-`data/splits/nested_cv_assignments.parquet` therefore contains development rows
+`artifacts/splits/nested_cv_assignments.parquet` therefore contains development rows
 only. The locked test is outside the entire nested experiment by construction,
 not by convention.
 
@@ -214,5 +226,5 @@ after the fact would destroy the evidence a reader needs.
 | Champion + retired locked-test metrics, separated | `artifacts/metrics/holdout_metrics.json` |
 | Seal, hash, reveal timestamps | `artifacts/metrics/organiser_dry_run.json` → `offline_label_comparison`; `artifacts/sealed_validation/` |
 | Promotion decision and its basis | `artifacts/metrics/promotion_decision_v2.json` |
-| Nested fold assignments | `data/splits/nested_cv_assignments.parquet` |
+| Nested fold assignments | `artifacts/splits/nested_cv_assignments.parquet` |
 | Generation reconciliation | `docs/HISTORICAL_METRIC_RECONCILIATION.md` |

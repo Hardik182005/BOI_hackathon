@@ -1,9 +1,29 @@
 # Calibration and Threshold Report
 
-Measured values: `artifacts/metrics/lens_stack_oof.json` (selection +
-coverage), `artifacts/metrics/locked_test_metrics.json` (final Brier/ECE),
-`artifacts/metrics/threshold_table.csv` (confusion at tier thresholds),
-`artifacts/model_registry/policy_snapshot.json` (frozen thresholds).
+Describes the deployed champion **`xgboost_top_120`, bundle v2.0.0**.
+
+Measured values:
+
+| what | authoritative source | value |
+| --- | --- | --- |
+| calibrator selection + conformal coverage | `artifacts/metrics/lens_stack_oof_v2.json` | Platt wins: Brier **0.003128** vs isotonic 0.003159, ECE **0.001489** vs 0.001698 (dev OOF, 3×5) |
+| frozen tier thresholds | `artifacts/models/final_bundle.joblib` → `policy_thresholds` | critical 0.93385, urgent 0.09774, standard 0.01318 |
+| locked-test Brier / ECE | **not asserted** | the locked test is single-touch and was spent on the retired run; no calibration metric is claimed for the champion on it |
+
+Three unsuffixed files under `artifacts/` describe the **retired**,
+pre-firewall `catboost_tuned_top60` bundle and must not be read as current:
+`locked_test_metrics.json` (PR-AUC 0.82423, Brier 0.00258), `threshold_table.csv`
+and `final_threshold_table.csv` (the 12-alert / 100 %-precision CRITICAL row),
+and `artifacts/model_registry/policy_snapshot.json` (critical 0.96383). The
+snapshot file in particular disagrees with the bundle; **the bundle is what
+serves traffic**, and the snapshot has not been regenerated since the firewall.
+`policy_version` still reads `"1.0"` in both, which under-labels a threshold set
+that was re-frozen for generation 2 — recorded as a known defect in
+`docs/METRIC_BATTERY.md`, not silently corrected here.
+
+The retirement itself is documented in `docs/HISTORICAL_METRIC_RECONCILIATION.md`
+and `docs/LOCKED_TEST_RULING.md`; the generation-2 counterpart of this document
+is `docs/FINAL_CALIBRATION_AND_THRESHOLD_REPORT.md`.
 
 ## Why calibration matters here
 

@@ -157,11 +157,28 @@ spread is attributable to label scarcity and nothing else.
 Removing an eighth of the mules costs **3.4 %** of PR-AUC. The model is not
 resting on a handful of memorised positives.
 
-`feature_rank_stability` 0.77 answers a question the PR-AUC cannot: when the
-mules it learned from change, does the model keep citing the same evidence? A
-detector whose reasons rewrite themselves between refits cannot be explained to
-an analyst, and would produce a different ProofGraph for the same account
-depending on which positives happened to be in the training set.
+`feature_rank_stability` answers a question the PR-AUC cannot: when the mules it
+learned from change, does the model keep citing the same evidence? A detector
+whose reasons rewrite themselves between refits cannot be explained to an
+analyst, and would produce a different ProofGraph for the same account depending
+on which positives happened to be in the training set.
+
+**The 0.77 above is the flat protocol's answer, and it is the wrong one to
+quote.** The nested run of the same stress
+(`artifacts/metrics/nested_positive_removal.json`, 2026-08-13) reports
+`feature_rank_correlation_mean` **0.3944** — roughly half. The gap is structural
+rather than noise: the flat stress selects features **once**, over pooled
+development data, before the rounds begin, so dropping training positives cannot
+disturb a choice that has already been made. The nested stress re-selects inside
+every outer fold, which is what a refit in production would actually do, and
+under that treatment most of the ranking moves.
+
+So the reassuring reading of this paragraph does not survive. The PR-AUC
+robustness holds — the nested drop is 1.77 %, paired 95 % CI
+[−0.0213, −0.0063] — but the *explanation* stability does not: when the mules
+change, the model largely rewrites what it cites. That is a real limitation of
+citing feature importances as evidence at 64 positives, and it is recorded here
+rather than left as the higher number.
 
 ---
 

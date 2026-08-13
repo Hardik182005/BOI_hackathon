@@ -212,7 +212,7 @@ without an explanation.
 | No inferred semantics | every field is parsed from the workbook or derived by documented rule; nothing is guessed |
 | Availability completeness | every one of the 3,924 columns carries an `availability_class`; the firewall refuses an unclassified column |
 | Round-trip | `feature_dictionary.csv` and `.json` are generated from the same parse |
-| Tests | `tests/unit/test_dictionary.py` — parse, classification rules, `MG_*` resolution, sensitive-column marking |
+| Tests | **none.** An earlier draft cited a unit-test file (test&#95;dictionary.py) covering parse, classification rules, `MG_*` resolution and sensitive-column marking; that file was never written. The parse is exercised indirectly wherever the dictionary is consumed, and the firewall's refusal of an unclassified column is tested, but the classification rules themselves are unguarded. |
 
 Downstream consumers: the Feature Availability Firewall (§6), meta-feature
 construction (§11), pattern cards (§12), ProofGraph node labels (§17), the

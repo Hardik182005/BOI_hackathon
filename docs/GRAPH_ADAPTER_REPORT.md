@@ -194,7 +194,7 @@ The addendum names a set of techniques not to copy. None of them are here:
 | Test | Guards |
 |---|---|
 | `tests/unit/test_graph_adapter.py` | column aliasing, self-loop and non-positive-amount removal, fan-in/fan-out, pass-through by value, dwell computation, chain depth bound, cycle detection, neighbourhood truncation |
-| `tests/integration/test_graph_routes.py` | `UNAVAILABLE` is the default response and carries the refusal text; upload → status → account → neighbourhood round-trip |
+| *(no test)* | `UNAVAILABLE` is the default response and carries the refusal text; upload → status → account → neighbourhood round-trip — **claimed by an earlier draft, never written.** The adapter's logic is covered by the unit file above; the HTTP surface is not. |
 | release gate | asserts no graph feature appears in the champion's feature list |
 
 ---

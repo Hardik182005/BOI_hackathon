@@ -1,9 +1,11 @@
 # Missingness Signature
 
-**Status of the verdict: PENDING — the deciding ablation is still running.** Sections 1–8 below
-are complete and their numbers are reproducible now. Section 9 records the decision and will be
-filled in from `artifacts/metrics/missingness_ablation.json` when the run finishes. Nothing in
-sections 1–8 constitutes a decision to use these columns.
+**Status of the verdict: RESOLVED — KEEP, and the suspect-family check passed.** The deciding
+ablation is in section 9 (`artifacts/metrics/missingness_ablation.json`) and the confirmation arm
+that excludes the untraceable `FEES_AND_CHARGES` columns is in section 10
+(`artifacts/metrics/missingness_ablation_no_fees.json`, 2026-08-13). The gain survives the
+exclusion, so the KEEP is no longer provisional. It remains a decision about a **feature block for
+`histgb` on development folds** — it promotes nothing and changes no served model.
 
 Reproduce the evidence in sections 3–6 with:
 
@@ -342,7 +344,7 @@ survivors — and those are precisely the columns whose cohort fingerprint (sect
 traced to a cause. §67 requires that a model winning *only* because of a suspicious feature be
 rejected.
 
-So the KEEP above cannot stand on its own. A third arm is running:
+So the KEEP above cannot stand on its own. A third arm was run:
 
 ```
 .venv/Scripts/python.exe -m muleguard.cli.missingness_ablation \
@@ -353,19 +355,49 @@ So the KEEP above cannot stand on its own. A third arm is running:
 If the gain largely survives without the FEES columns, the block is carrying broad missingness
 structure and the suspect family is incidental to it. If the gain collapses, the win *was* the
 suspect feature and the honest outcome is REJECT regardless of what the headline number says.
-That arm decides it — section 11 records the outcome.
+Section 10 records the outcome.
 
-## 10. What is not concluded, whatever the arms say
+## 10. The confirmation arm: the gain survives the exclusion
 
-- The champion is **not** re-promoted on this evidence. The ablation used `histgb`, the current
-  nested leader, not the served champion's `xgboost`; a confirmation arm on `--family xgboost` is
-  required before any change to the served model is even considered, and promotion is a separate
-  decision made by the nested tournament.
+`artifacts/metrics/missingness_ablation_no_fees.json`, run 2026-08-13 on the same 15 outer folds
+with the same fixed hyperparameters, `--exclude-contains FEES_AND_CHARGES`.
+
+| arm | PR-AUC (mean of 3 repeats) | per-repeat |
+|---|---|---|
+| WITHOUT | 0.79068 ± 0.01179 | 0.77699, 0.80577, 0.78928 |
+| WITH, FEES excluded | **0.86330 ± 0.02307** | 0.83169, 0.87210, 0.88612 |
+
+**Mean paired gain +0.0611**, median +0.07101, improved in **13 of 15** folds.
+
+| test | p (two-sided) | verdict against §9.1 |
+|---|---|---|
+| exact sign test | **0.00739** | was 0.11847 — now significant |
+| Wilcoxon signed-rank | **0.01025** | was 0.03534 |
+| paired *t* (t = 3.1337) | **0.00733** | was 0.02495 |
+
+The three tests disagreed in §9.1 and agree here, which is the opposite of the direction a
+suspect-feature story predicts: removing the untraceable columns made the effect **larger and
+more consistent**, not smaller. `MX_FAMCNT__FEES_AND_CHARGES` and `MX_FAMRATIO__FEES_AND_CHARGES`
+were not carrying the result; with the budget fixed at 120, dropping them freed slots for
+indicators that paid more.
+
+That is the §67 condition satisfied, and it is worth being precise about what was and was not
+shown: the win does not *depend* on a feature whose cohort fingerprint could not be traced. It is
+not a demonstration that the fingerprint of section 6 is benign. Those columns remain unexplained;
+they are simply not load-bearing.
+
+## 11. What is not concluded, whatever the arms say
+
+- The champion is **not** re-promoted on this evidence. The ablation used `histgb`, which places
+  third in the finished nested tournament (catboost 0.80653, histgb 0.76735, xgboost 0.75393) —
+  not the served champion's `xgboost`, and not the nested leader either. A confirmation arm on
+  `--family xgboost` is required before any change to the served model is even considered, and
+  promotion is a separate decision made by the nested tournament.
 - Nothing here licenses a hand-written rule keyed to a missingness pattern.
 - The Atlas result in section 7 stands: this block is not evidence that the 11 missed mules become
   catchable.
 
-## 10. What this work does not license
+## 12. What this work does not license
 
 - It does not license adding the leading indicator, or any indicator, on the strength of section 4.
   Those AUCs are in-sample maxima over 358 candidates.

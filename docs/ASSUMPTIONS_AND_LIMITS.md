@@ -29,5 +29,6 @@ Every item is labelled: **[MEASURED]** re-verified from raw data by this pipelin
 
 ## Engineering environment
 
-17. **[ASSUMPTION]** Compute Mode A (16 GB CPU laptop): Optuna budgets capped (40/30/25 trials), repeated CV 5×5 for finalists, TabPFN/TabICL only behind a feasibility guard, AutoGluon skipped (no Python 3.13 support at build time) — each skip documented in the tournament report.
+17. **[ASSUMPTION]** Compute Mode A (16 GB CPU laptop): Optuna budgets capped (40/30/25 trials in the generation-1 tournament, 25 trials per inner fold in the nested run), TabPFN/TabICL only behind a feasibility guard, AutoGluon skipped (no Python 3.13 support at build time) — each skip documented in the tournament report.
+17b. **[FACT]** The shipped champion's CV protocol is **not** the 5×5 this assumption originally recorded. Two protocols are run and both are labelled wherever quoted: **nested** repeated stratified CV (outer 5-fold × 3 repeats, inner 4-fold, selection *and* tuning inside each fold) is the **primary**, unbiased estimate; **flat** 3×5 repeated stratified CV is the optimistic one that the generation-2 tournament used to promote `xgboost_top_120`. The 5×5 figure survives only in `configs/train.yaml`, which is read by the retired generation-1 `cli/tournament.py`. Compute budget, not preference, is why the repeat count is 3.
 18. All installs and artifacts on E: drive (user constraint); C: has ~37 GB free and is not used for new packages.

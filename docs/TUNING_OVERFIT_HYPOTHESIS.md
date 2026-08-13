@@ -1,8 +1,11 @@
 # Open question: is the inner-fold Optuna tuning net-harmful?
 
-**Status: HYPOTHESIS, not a finding.** The decisive number does not exist yet. This note records
-the observation and the evidence while it is fresh so that it is resolved deliberately in the
-nested-tournament write-up rather than quietly forgotten.
+**Status: RESOLVED — the hypothesis is rejected, and the observation is explained.**
+Resolved 2026-08-13 by `muleguard.cli.tuning_overfit` against
+`artifacts/metrics/tuning_overfit_test.json`; the resolution is in section
+["What the paired test found"](#what-the-paired-test-found) at the end. Everything
+above it is the note as it was written before the answer existed, kept unedited
+so the prediction can be read against the outcome.
 
 ## The observation
 
@@ -89,3 +92,69 @@ This note must not be used to select whichever configuration reports better. The
 an arm of an ablation designed to answer a different question, and promoting it on that basis would
 be exactly the selection-by-inspection this project has avoided elsewhere. Nothing is re-promoted
 on the strength of this note.
+
+---
+
+## What the paired test found
+
+Run: `.venv/Scripts/python.exe -m muleguard.cli.tuning_overfit` →
+`artifacts/metrics/tuning_overfit_test.json`. Nothing was retrained; the tuned
+arm's per-fold scores were recovered by joining `nested_oof.parquet` to
+`artifacts/splits/nested_cv_assignments.parquet` on `(repeat, row_index)` and
+filtering `role == "outer_valid"` — note the role value is `outer_valid`, not the
+`valid` this note guessed above. The join is guarded: the reconstruction is
+required to reproduce the tournament's published `histgb` mean to 1e-4 before any
+statistic is computed, so a mispairing aborts rather than reports.
+
+**The hypothesis is rejected.** Paired on all 15 outer folds, not tuning is worth
+**+0.00205 PR-AUC** (median +0.00601, sd of the paired difference 0.02594) — an
+order of magnitude smaller than the 0.02333 that prompted the note, and not
+separable from zero by any of the three pre-committed tests:
+
+| test | result |
+|---|---|
+| sign | 10 of 15 folds favour the untuned arm, p = 0.302 |
+| Wilcoxon signed-rank | p = 0.561 |
+| paired t | p = 0.764 |
+
+All three are reported, as promised, and all three agree.
+
+### Why the two means differed anyway
+
+The 0.02333 was real; it was just not measuring what the note assumed. The means
+in the table above are **pooled per repeat** — every fold's scores ranked against
+every other fold's — while the paired test is **per fold**. The two arms are
+almost identical within a fold and differ mainly in how well they survive pooling:
+
+| | mean of the 15 fold APs | pooled per repeat | cost of pooling |
+|---|---:|---:|---:|
+| tuned (Optuna in-fold, size chosen in-fold) | 0.80039 | 0.76735 | **-0.03304** |
+| untuned (fixed hyperparameters, fixed top-120) | 0.80244 | 0.79068 | **-0.01176** |
+
+Both arms lose accuracy when their folds are pooled, because a score of 0.4 in one
+fold is not the same evidence as a score of 0.4 in another. The tuned arm loses
+almost three times as much, which is what a configuration that changes
+hyperparameters *and* feature-set size from fold to fold would be expected to do:
+it buys fold-local fit with a common score scale. That is consistent with the
+mechanism, not proof of it — nothing here isolates the feature-size degree of
+freedom from the hyperparameter one.
+
+### What this changes
+
+**Not the champion, and not the protocol.** Two things it does settle:
+
+1. In-fold tuning is not the reason a nested number comes out below its flat
+   counterpart. That has to be stated carefully, because the finished tournament
+   shows the flat protocol is **not** uniformly optimistic: nested is lower for
+   `xgboost` (0.75393 against 0.76904, −0.015) and *higher* for `catboost`
+   (0.80653 against 0.69630, +0.110). Whatever is going on between the two
+   protocols, this test rules one candidate out — the tuning is not paying for
+   it. `docs/NESTED_CV_MODEL_TOURNAMENT.md` §3 has the per-family comparison.
+2. The pooled figure is the one that describes the product — deployment applies a
+   single frozen threshold to every account, so cross-fold score comparability is
+   a property being sold, not a statistical nicety. The tournament promoting on
+   the pooled metric is the correct choice, and now a measured one.
+
+The engineering response the note reserved — "prefer the simpler estimator on the
+grounds of stability" — is **not** taken: at +0.002 there is nothing to prefer it
+for.

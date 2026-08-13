@@ -105,7 +105,7 @@ against that bundle. The locked test has **not** been re-evaluated under
 
 | Metric | Value |
 |---|---|
-| PR-AUC — production scorer (winner, calibrated) | 0.8242 (95% CI 0.6536–0.9584) |
+| PR-AUC — then-production scorer, calibrated (`catboost_tuned_top60`, since retired) | 0.8242 (95% CI 0.6536–0.9584) |
 | PR-AUC — LightGBM agreement model (secondary) | 0.8608 (95% CI 0.7031–0.9819) |
 | ROC-AUC (secondary) | 0.9940 (95% CI 0.9877–0.9990) |
 | Brier score | 0.00258 |
