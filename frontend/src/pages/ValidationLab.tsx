@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api, fmtNum, fmtPct } from "../api";
-import { Empty, ErrorState, Loading, usePoll } from "../components";
+import { Empty, ErrorState, Loading, TierBadge, usePoll } from "../components";
 
 // The judge-facing hidden-validation workflow. Two deliberately separate
 // actions: RUN seals predictions and reports no metric at all, REVEAL asks for
@@ -304,6 +304,8 @@ function Step2({ s }: { s: any }) {
 
 function Step3({ s }: { s: any }) {
   const seal = s.seal ?? {};
+  const dist = s.distributions;
+  const tiers: any[] = dist?.review_tier ?? [];
   return (
     <div className="grid cols-2">
       <div>
@@ -319,6 +321,33 @@ function Step3({ s }: { s: any }) {
             <tr><td>Prediction SHA-256</td><td className="mono">{seal.prediction_sha256}</td></tr>
           </tbody>
         </table>
+        {dist && (
+          <>
+            <table className="kv" style={{ marginTop: 12 }}>
+              <tbody>
+                <tr><td>Risk score (median)</td><td>{fmtNum(dist.risk?.median)}</td></tr>
+                <tr><td>Risk score (p90 / max)</td>
+                    <td>{fmtNum(dist.risk?.p90)} / {fmtNum(dist.risk?.max)}</td></tr>
+                <tr><td>Out-of-distribution rate</td><td>{fmtPct(dist.ood?.rate, 2)}</td></tr>
+              </tbody>
+            </table>
+            {tiers.length > 0 && (
+              <table className="data" style={{ marginTop: 8 }}>
+                <thead><tr><th>Review tier</th><th>Rows</th><th>Share</th></tr></thead>
+                <tbody>
+                  {tiers.map((t) => (
+                    <tr key={t.tier}>
+                      <td><TierBadge tier={t.tier} /></td>
+                      <td>{t.n?.toLocaleString()}</td>
+                      <td>{fmtPct(t.share, 1)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            <div className="sealed-note" style={{ marginTop: 6 }}>{dist.note}</div>
+          </>
+        )}
       </div>
       <div>
         <div className="no-metric">
@@ -329,6 +358,18 @@ function Step3({ s }: { s: any }) {
         <ul style={{ fontSize: 12.5, color: "var(--muted)", marginTop: 10, paddingLeft: 18 }}>
           {(seal.notes ?? []).map((n: string, i: number) => <li key={i}>{n}</li>)}
         </ul>
+        {seal.seal_id && (
+          <div style={{ marginTop: 10 }}>
+            <a className="btn" download
+               href={`/v1/validation/seals/${seal.seal_id}/predictions`}>
+              Download sealed predictions (CSV)
+            </a>
+            <div className="sealed-note" style={{ marginTop: 6 }}>
+              The file is re-hashed against the manifest before it is sent, so
+              the copy you receive is the one the SHA-256 above covers.
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
