@@ -522,7 +522,55 @@ def test_a_holdout_source_forces_the_reference_protocol():
         assert protocol == "HOLDOUT_REFERENCE"
         assert allow is False, "no threshold may be searched against the holdout"
     assert cli._protocol_for(Path("oof_v2.parquet"), None) == ("FLAT", True)
-    assert cli._protocol_for(Path("nested_oof.parquet"), None)[0] == \
+
+
+def test_the_headline_run_is_the_shipped_family_not_the_alphabetical_first(monkeypatch):
+    """Within a protocol tier the shipped family decides, not string order.
+
+    `sorted()` alone nominated NESTED:catboost over NESTED:xgboost because "c"
+    precedes "x", which made the document's headline figure describe a model the
+    product does not serve.
+    """
+    from muleguard.cli import metric_battery as mb
+
+    monkeypatch.setattr(mb, "_champion_family", lambda: "xgboost")
+    runs = {"FLAT:xgboost_top_120": {}, "NESTED:catboost": {},
+            "NESTED:xgboost": {}, "HOLDOUT_REFERENCE:retired": {}}
+    assert mb._primary_key(runs) == "NESTED:xgboost"
+
+
+def test_the_headline_still_prefers_nested_over_flat_for_the_shipped_family(monkeypatch):
+    """Preferring the shipped family must not promote a flat run over a nested one."""
+    from muleguard.cli import metric_battery as mb
+
+    monkeypatch.setattr(mb, "_champion_family", lambda: "xgboost")
+    assert mb._primary_key({"FLAT:xgboost_top_120": {},
+                            "NESTED:catboost": {}}) == "NESTED:catboost"
+
+
+def test_a_missing_champion_record_falls_back_to_order(monkeypatch):
+    """No champion on disk is not a reason to return nothing."""
+    from muleguard.cli import metric_battery as mb
+
+    monkeypatch.setattr(mb, "_champion_family", lambda: None)
+    assert mb._primary_key({"NESTED:catboost": {}, "NESTED:xgboost": {}}) == "NESTED:catboost"
+
+
+def test_an_inferred_nested_label_follows_the_repeats_not_the_filename():
+    """The finished run overwrote the preliminary one at the same path.
+
+    Labelling by filename alone would file a completed 3-repeat nested run as
+    NESTED_PRELIMINARY, which `_interpretation` marks unusable for selection -
+    the primary protocol would silently disqualify itself.
+    """
+    from muleguard.cli import metric_battery as cli
+    nested = Path("nested_oof.parquet")
+    assert cli._protocol_for(nested, None)[0] == "NESTED_PRELIMINARY", \
+        "with nothing known about the store, the cautious label stands"
+    assert cli._protocol_for(nested, None, 1)[0] == "NESTED_PRELIMINARY"
+    assert cli._protocol_for(nested, None, cli.FULL_NESTED_REPEATS)[0] == "NESTED"
+    # An explicit flag still wins over anything inferred.
+    assert cli._protocol_for(nested, "NESTED_PRELIMINARY", 3)[0] == \
         "NESTED_PRELIMINARY"
 
 
