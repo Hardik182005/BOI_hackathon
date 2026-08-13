@@ -108,6 +108,19 @@ def _sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
+def _model_sha256() -> str | None:
+    """SHA-256 of the frozen bundle, or None if it is not on disk.
+
+    Recorded in every seal so a reader can prove which model file produced the
+    predictions rather than taking the version string on trust.
+    """
+    p = settings.MODELS_DIR / "final_bundle.joblib"
+    try:
+        return _sha256_file(p)
+    except OSError:
+        return None
+
+
 def frame_fingerprint(df: pl.DataFrame) -> str:
     """Content hash of a frame: shape, column names, and every cell.
 
@@ -134,6 +147,12 @@ class SealRecord:
     score_column: str
     target_column_detected: str | None
     target_withheld: bool
+    # The two facts an external validator has to be able to check without
+    # trusting us: which model file produced these scores, and whether the
+    # uploaded rows were ever fitted on. Both are written at seal time, before
+    # any label is read.
+    model_sha256: str | None = None
+    retraining_performed: bool = False
     state: str = STATE_SEALED
     revealed_utc: str | None = None
     metrics: dict[str, Any] | None = None
@@ -241,6 +260,8 @@ def seal_predictions(
         score_column="risk_score",
         target_column_detected=detected,
         target_withheld=detected is not None,
+        model_sha256=_model_sha256(),
+        retraining_performed=False,
         notes=[
             "predictions were produced from a frame with the target column removed",
             "no label was read before this manifest was written",
@@ -265,6 +286,102 @@ def verify_seal(rec: SealRecord) -> tuple[bool, str]:
                        f"(manifest {rec.prediction_sha256[:12]}, "
                        f"file {actual[:12]})")
     return True, "prediction file matches the sealed hash"
+
+
+def _operating_threshold() -> tuple[float, str]:
+    """The escalation threshold the deployed policy actually uses.
+
+    Any confusion-matrix metric is a statement about one cut point, so the cut
+    point has to be the one the bank would work at - not 0.5, which no policy
+    in this system uses. Falls back to 0.5 only when the bundle is unavailable,
+    and says which was used.
+    """
+    try:
+        from muleguard.models.scoring import load_bundle
+
+        thr = load_bundle()["policy_thresholds"]
+        return float(thr["standard_risk"]), "policy.standard_risk"
+    except Exception:  # noqa: BLE001 - a metric must not depend on the bundle
+        return 0.5, "fallback_0.5"
+
+
+def _threshold_metrics(y: np.ndarray, s: np.ndarray) -> dict[str, Any]:
+    """Confusion matrix and everything derived from it, at one stated cut."""
+    thr, source = _operating_threshold()
+    pred = (s >= thr).astype(int)
+    tp = int(((pred == 1) & (y == 1)).sum())
+    fp = int(((pred == 1) & (y == 0)).sum())
+    fn = int(((pred == 0) & (y == 1)).sum())
+    tn = int(((pred == 0) & (y == 0)).sum())
+    prec = tp / (tp + fp) if (tp + fp) else 0.0
+    rec = tp / (tp + fn) if (tp + fn) else 0.0
+    spec = tn / (tn + fp) if (tn + fp) else 0.0
+    f1 = (2 * prec * rec / (prec + rec)) if (prec + rec) else 0.0
+    f2 = (5 * prec * rec / (4 * prec + rec)) if (4 * prec + rec) else 0.0
+    mcc_den = float(np.sqrt(float(tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)))
+    mcc = ((tp * tn - fp * fn) / mcc_den) if mcc_den > 0 else 0.0
+    return {
+        "operating_threshold": thr,
+        "operating_threshold_source": source,
+        "confusion_matrix": {"tp": tp, "fp": fp, "fn": fn, "tn": tn},
+        "accuracy": float((tp + tn) / len(y)) if len(y) else 0.0,
+        "balanced_accuracy": float((rec + spec) / 2.0),
+        "precision": float(prec),
+        "recall": float(rec),
+        "specificity": float(spec),
+        "f1": float(f1),
+        "f2": float(f2),
+        "mcc": float(mcc),
+        "accuracy_note": (
+            "accuracy is reported for completeness only; at this prevalence a "
+            "model that flags nothing scores near 1.0 while catching no mules"
+        ),
+    }
+
+
+def _probability_metrics(y: np.ndarray, s: np.ndarray, n_bins: int = 10) -> dict[str, Any]:
+    """Brier score and expected calibration error over equal-width bins."""
+    brier = float(np.mean((s - y) ** 2))
+    edges = np.linspace(0.0, 1.0, n_bins + 1)
+    idx = np.clip(np.digitize(s, edges[1:-1], right=False), 0, n_bins - 1)
+    ece = 0.0
+    for b in range(n_bins):
+        m = idx == b
+        if not m.any():
+            continue
+        ece += (m.sum() / len(y)) * abs(float(s[m].mean()) - float(y[m].mean()))
+    return {"brier": brier, "ece": float(ece), "ece_bins": n_bins}
+
+
+def _generalization_gap(external_ap: float) -> dict[str, Any] | None:
+    """External AP minus the nested-CV AP mean of the deployed family.
+
+    A positive gap means the external set was kinder than cross-validation; a
+    large negative gap is the number that should stop a deployment. Returns
+    None rather than a guess when the nested-CV artifact is not on disk.
+    """
+    path = settings.METRICS_DIR / "nested_cv.json"
+    if not path.exists():
+        return None
+    try:
+        board = json.loads(path.read_text(encoding="utf-8")).get("leaderboard", [])
+        real = [e for e in board if e.get("model") != "dummy_prevalence"]
+        if not real:
+            return None
+        best = max(real, key=lambda e: float(e.get("pr_auc_mean", 0.0)))
+        ref = float(best["pr_auc_mean"])
+    except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+        return None
+    return {
+        "external_ap": float(external_ap),
+        "nested_cv_ap_mean": ref,
+        "nested_cv_model": best.get("model"),
+        "gap": float(external_ap - ref),
+        "interpretation": (
+            "external AP minus nested-CV AP mean; a large negative value means "
+            "the external set is harder than cross-validation suggested"
+        ),
+    }
 
 
 def reveal_metrics(seal_id: str, y_true: Sequence[float],
@@ -323,6 +440,11 @@ def reveal_metrics(seal_id: str, y_true: Sequence[float],
             "mcc_at_top_100": float(matthews_corrcoef(
                 y, np.isin(np.arange(len(y)), order[:min(100, len(y))]).astype(int))),
         })
+        metrics.update(_threshold_metrics(y, s))
+        metrics.update(_probability_metrics(y, s))
+        gap = _generalization_gap(metrics["pr_auc"])
+        if gap is not None:
+            metrics["generalization_gap"] = gap
 
     rec.state = STATE_REVEALED
     rec.revealed_utc = dt.datetime.now(dt.timezone.utc).isoformat()

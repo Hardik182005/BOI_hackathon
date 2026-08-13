@@ -179,6 +179,40 @@ def _prefer_v2(path):
     return v2 if v2.exists() else path
 
 
+def _annotate_locked_test(block: dict) -> dict:
+    """Say, in the payload itself, which scorer produced the locked-test figures.
+
+    ``locked_test_metrics.json`` is the July run of ``catboost_tuned_top60``,
+    which the Feature Availability Firewall later retired; the deployed bundle
+    is ``xgboost_top_120`` and scores lower on the same split. The repository
+    already knows this - ``holdout_metrics.json`` separates the champion from
+    the retired run and warns against reading the latter as current behaviour -
+    but the dashboard was reading the retired file with no such warning, so its
+    headline PR-AUC belonged to a model that is not served. The artifact is
+    still returned unchanged (its tier distribution and calibration blocks have
+    no v2 equivalent); what is added is the provenance needed to stop a reader
+    attributing the number to the deployed model.
+    """
+    path = settings.METRICS_DIR / "holdout_metrics.json"
+    if not path.exists():
+        return block
+    holdout = load_json(path) or {}
+    champion = holdout.get("current_champion") or {}
+    if not champion:
+        return block
+    same = str(champion.get("model") or "") in str(block.get("split") or "")
+    block["describes_deployed_model"] = bool(same)
+    if not same:
+        block["retired_warning"] = (holdout.get("retired_run") or {}).get("warning")
+        block["deployed_scorer_result"] = {
+            k: champion.get(k) for k in
+            ("model", "split", "source", "n", "n_positives", "prevalence",
+             "pr_auc", "roc_auc", "lift_over_prevalence", "mcc_at_top_100",
+             "at_budget")
+        }
+    return block
+
+
 def _validate_ref(ref: str) -> str:
     if not MASKED_REF.match(ref):
         raise HTTPException(422, "account_reference must be a masked id (alnum/_/-)")
@@ -366,6 +400,8 @@ def metrics_summary() -> dict:
     ]:
         if path.exists():
             out[name] = load_json(path)
+    if isinstance(out.get("locked_test"), dict):
+        out["locked_test"] = _annotate_locked_test(out["locked_test"])
     freq_path = _prefer_v2(settings.FEATURES_DIR / "selection_frequency.csv")
     if freq_path.exists():
         freq = pl.read_csv(freq_path).head(60)

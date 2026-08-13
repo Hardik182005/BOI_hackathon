@@ -17,10 +17,13 @@ Uploaded rows are never used to retrain, recalibrate or re-threshold the model.
 from __future__ import annotations
 
 import uuid
+from collections import Counter
+from pathlib import Path
 
 import numpy as np
 import polars as pl
 from fastapi import APIRouter, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 
 from muleguard import settings
 from muleguard.api import database as db
@@ -149,19 +152,50 @@ async def run_validation(file: UploadFile) -> dict:
     s2 = lab.step_2_hidden_validation_shield(train_X, upload_X, names, s1)
 
     scores: list[float] = []
+    tiers: Counter[str] = Counter()
+    oods: Counter[str] = Counter()
     try:
         for start in range(0, scoring_df.height, SCORE_CHUNK):
             chunk = scoring_df.slice(start, SCORE_CHUNK)
             for r in score_rows(chunk, bundle=bundle, with_explanations=False):
                 scores.append(float(r["calibrated_risk"]))
+                tiers[str(r["risk_tier"])] += 1
+                oods[str(r["ood_status"])] += 1
     except SchemaError as e:
         raise HTTPException(422, f"SCHEMA_ERROR: {e}")
 
+    # Seal against the frame *as uploaded*, not the stripped copy. The seal has
+    # to fingerprint the file the judge actually handed over, and it has to be
+    # able to say whether a label was present at all - passing the stripped
+    # frame made every seal report target_withheld=false, which reads as "no
+    # label was withheld" when the truth was the opposite. The scores were
+    # still produced from `scoring_df`; only the manifest changes.
     s3 = lab.step_3_predictions(
-        scoring_df, scores, model_version=bundle["version"],
+        df, scores, model_version=bundle["version"],
         schema=s1, shield=s2,
         reference=[f"ROW-{i + 1}" for i in range(scoring_df.height)],
     )
+
+    # Inference diagnostics that are legitimate with no label in the building:
+    # where the scores landed and how many rows the OOD lens considers unlike
+    # anything the model was fitted on. They are derived from the predictions
+    # that were just sealed, so they cost nothing extra and they are the only
+    # honest answer to "how did my file score?" when no target was supplied.
+    n = max(len(scores), 1)
+    s3["distributions"] = {
+        "risk": {
+            "min": min(scores) if scores else None,
+            "median": float(np.median(scores)) if scores else None,
+            "p90": float(np.quantile(scores, 0.9)) if scores else None,
+            "max": max(scores) if scores else None,
+            "mean": float(np.mean(scores)) if scores else None,
+        },
+        "review_tier": [{"tier": t, "n": c, "share": round(c / n, 4)}
+                        for t, c in tiers.most_common()],
+        "ood": {"rate": round(oods.get("OUT_OF_DISTRIBUTION", 0) / n, 4),
+                "counts": dict(oods)},
+        "note": "computed from the sealed predictions; no label was read",
+    }
 
     compat = s2["compatibility"]
     db.audit("VALIDATION_SEALED", "system", correlation_id=run_id,
@@ -222,7 +256,24 @@ async def reveal(seal_id: str, file: UploadFile | None = None,
             422, f"label file has {df.height} rows but {rec.n_rows} were sealed; "
                  "the rows must correspond one to one, in the original order")
 
-    y = df[col].cast(pl.Float64, strict=False).to_numpy()
+    # Reject a label column that is not a label rather than coercing it. A
+    # non-numeric column (YES/NO, TRUE/FALSE, a free-text verdict) casts to all
+    # nulls, and every metric downstream is then computed on zero rows and
+    # reported as "one class only" - which reads as a property of the judge's
+    # data when it is really a parsing failure on our side.
+    raw = df[col]
+    labels = raw.cast(pl.Float64, strict=False)
+    n_unparseable = int((labels.is_null() & raw.is_not_null()).sum())
+    if n_unparseable:
+        raise HTTPException(
+            422, f"label column {col!r} has {n_unparseable} value(s) that are not "
+                 "numeric; the target must be 0/1")
+    seen = {v for v in labels.drop_nulls().unique().to_list()}
+    if not seen <= {0.0, 1.0}:
+        raise HTTPException(
+            422, f"label column {col!r} contains values outside {{0, 1}} "
+                 f"({sorted(seen)[:5]}); the target must be binary")
+    y = labels.to_numpy()
     try:
         out = sealed.reveal_metrics(seal_id, y)
     except sealed.SealBroken as e:
@@ -238,6 +289,36 @@ async def reveal(seal_id: str, file: UploadFile | None = None,
 def list_seals() -> dict:
     seals = sealed.list_seals()
     return {"count": len(seals), "seals": seals}
+
+
+@router.get("/seals/{seal_id}/predictions")
+def download_predictions(seal_id: str) -> FileResponse:
+    """The sealed prediction file itself, byte for byte.
+
+    A judge who cannot take the predictions away cannot check them, so the
+    manifest on its own is not enough: the workflow ends at "prediction
+    download". The file is re-hashed before it is served and a mismatch is
+    refused rather than quietly served, so what leaves this endpoint is either
+    the artifact the seal names or nothing at all. It is streamed unmodified -
+    sanitising it here would change the bytes the sealed hash covers.
+    """
+    try:
+        rec = sealed.load_seal(seal_id)
+    except FileNotFoundError:
+        raise HTTPException(404, f"no sealed run {seal_id}")
+    except sealed.BadSealId as e:
+        raise HTTPException(422, str(e))
+    ok, why = sealed.verify_seal(rec)
+    if not ok:
+        db.audit("VALIDATION_SEAL_BROKEN", "system", detail={"seal_id": seal_id})
+        raise HTTPException(409, f"SEAL_BROKEN: {why}")
+    path = Path(rec.prediction_path)
+    if not path.exists():
+        raise HTTPException(404, "the sealed prediction file is no longer on disk")
+    db.audit("VALIDATION_PREDICTIONS_DOWNLOADED", "system",
+             detail={"seal_id": seal_id, "sha256": rec.prediction_sha256})
+    return FileResponse(path, media_type="text/csv",
+                        filename=f"{seal_id}_predictions.csv")
 
 
 @router.get("/seals/{seal_id}")
