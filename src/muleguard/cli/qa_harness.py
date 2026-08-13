@@ -419,7 +419,7 @@ def run_security() -> bool:
     checks = []
     r = subprocess.run([str(settings.REPO_ROOT / ".venv/Scripts/python.exe"),
                         "-m", "pytest", "tests/security", "--tb=no"],
-                       cwd=settings.REPO_ROOT, capture_output=True, text=True, timeout=600)
+                       cwd=settings.REPO_ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600)
     # pyproject's addopts already carries -q; adding another suppresses the
     # count line, which is the only part of this output worth recording.
     summary = [ln for ln in r.stdout.splitlines() if " passed" in ln or " failed" in ln]
@@ -495,11 +495,11 @@ def run_security() -> bool:
 def run_frontend() -> bool:
     checks = []
     r = subprocess.run("npm test --silent", cwd=settings.REPO_ROOT / "frontend",
-                       capture_output=True, text=True, timeout=600, shell=True)
+                       capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600, shell=True)
     tail = ((r.stdout or "") + (r.stderr or ""))[-150:].replace("\n", " ")
     checks.append(_result("vitest_suite", r.returncode == 0, tail))
     rb = subprocess.run("npm run build --silent", cwd=settings.REPO_ROOT / "frontend",
-                        capture_output=True, text=True, timeout=900, shell=True)
+                        capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=900, shell=True)
     checks.append(_result("production_build", rb.returncode == 0,
                           ((rb.stdout or "") + (rb.stderr or ""))[-120:].replace("\n", " ")))
     css = (settings.REPO_ROOT / "frontend/src/styles.css").read_text(encoding="utf-8")
@@ -507,15 +507,27 @@ def run_frontend() -> bool:
                           "--bg: #ffffff" in css and "--text: #111111" in css))
     checks.append(_result("no_dark_theme_no_gradients",
                           "gradient" not in css.lower() and "#0b1220" not in css))
+    # Shipped UI only. The test files are excluded because the tests that
+    # enforce this very rule have to name the forbidden words to assert they
+    # are absent - scanning them makes the guard fail on its own enforcement.
     src = "".join(p.read_text(encoding="utf-8")
-                  for p in (settings.REPO_ROOT / "frontend/src").rglob("*.tsx"))
+                  for p in (settings.REPO_ROOT / "frontend/src").rglob("*.tsx")
+                  if ".test." not in p.name and not p.name.startswith("__"))
     checks.append(_result("no_criminal_wording", "guilty" not in src.lower()
                           and "criminal" not in src.lower().replace("criminal intent", "")))
     checks.append(_result("loading_empty_error_states_present",
                           all(s in src for s in ["Loading", "ErrorState", "Empty"])))
-    live = httpx.get("http://localhost:5173", timeout=10)
-    checks.append(_result("dev_server_serves_html", live.status_code == 200
-                          and "root" in live.text))
+    # A dev server that is not running is a failed check, not a crashed suite.
+    # Letting the ConnectError escape discards the seven checks already made
+    # above, which is how a green build gets reported as "CRASH" and read as
+    # "unknown" instead of "vitest passed, nothing was serving :5173".
+    try:
+        live = httpx.get("http://localhost:5173", timeout=10)
+        ok, detail = (live.status_code == 200 and "root" in live.text,
+                      f"HTTP {live.status_code}")
+    except httpx.HTTPError as exc:
+        ok, detail = False, f"no dev server on :5173 ({type(exc).__name__})"
+    checks.append(_result("dev_server_serves_html", ok, detail))
     return _finish("frontend_test_results", checks)
 
 
@@ -523,7 +535,7 @@ def run_frontend() -> bool:
 def run_batch() -> bool:
     r = subprocess.run([str(settings.REPO_ROOT / ".venv/Scripts/python.exe"),
                         "-m", "pytest", "tests/integration/test_batch_upload.py", "-q", "--tb=no"],
-                       cwd=settings.REPO_ROOT, capture_output=True, text=True, timeout=1200)
+                       cwd=settings.REPO_ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=1200)
     checks = [_result("batch_upload_pytest_10_cases", r.returncode == 0,
                       (r.stdout.strip().splitlines() or [""])[-1])]
     feats = _sample_features(2)

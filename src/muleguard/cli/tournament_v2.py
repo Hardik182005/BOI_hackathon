@@ -656,6 +656,49 @@ RECALL_BONUS_WEIGHT = 0.10
 TIE_BAND = 0.01  # PR-AUC within this of the leader counts as "close"
 
 
+# A model that cannot answer an analyst inside this budget cannot be the
+# champion, however well it scores. The ceiling was already enforced in
+# challenger_review._decision; it lives here as well because the promotion is
+# decided here. Leaving it in one module only was a live hazard: this report
+# ran before TabPFN finished, so promotion_decision_v2.json never saw the
+# highest-PR-AUC model in the tournament, and re-running the report would have
+# promoted a model that costs 438 s per interactive score.
+INTERACTIVE_BUDGET_SECONDS = 5.0
+
+# Measured serving cost per family. Absent measurement is not evidence of
+# speed - it is recorded as unmeasured, and unmeasured families stay eligible,
+# because inventing a cost would be as dishonest as ignoring one.
+LATENCY_ARTIFACTS = {"tabpfn": settings.METRICS_DIR / "tabpfn_latency.json"}
+
+
+def _serving_cost_by_family() -> dict[str, dict[str, Any]]:
+    """Single-row scoring cost per model family, from measurement only."""
+    out: dict[str, dict[str, Any]] = {}
+    for family, path in LATENCY_ARTIFACTS.items():
+        if not path.exists():
+            continue
+        payload = load_json(path) or {}
+        single = ((payload.get("batches") or {}).get("1") or {}).get("seconds")
+        if single is None:
+            continue
+        out[family] = {"single_row_seconds": float(single),
+                       "measured": True,
+                       "source": str(path.relative_to(settings.REPO_ROOT))}
+    return out
+
+
+def _promotable(cost: dict[str, Any]) -> bool:
+    """Can this family answer one account inside the interactive budget?
+
+    An unmeasured family is promotable: the absence of a measurement is not
+    evidence of slowness, and refusing to promote what nobody timed would
+    quietly bench every model the latency harness has not reached yet.
+    """
+    seconds = cost.get("single_row_seconds")
+    return not (bool(cost.get("measured")) and seconds is not None
+                and seconds > INTERACTIVE_BUDGET_SECONDS)
+
+
 def _recall_at_k_by_model() -> dict[str, float]:
     """Mean Recall@TopK per model, read back from the persisted OOF store."""
     if not OOF_STORE.exists():
@@ -688,11 +731,15 @@ def generalization_score(pr_auc_mean: float, pr_auc_std: float,
 def run_report() -> pl.DataFrame:
     tj = load_json(TOURNAMENT_JSON)
     rk = _recall_at_k_by_model()
+    costs = _serving_cost_by_family()
     rows = []
     for m in tj["models"].values():
         if m.get("status", "OK") != "OK":
             continue
         r = float(rk.get(m["model"], 0.0))
+        cost = costs.get(m["family"], {})
+        seconds = cost.get("single_row_seconds")
+        eligible = _promotable(cost)
         rows.append({
             "model": m["model"],
             "family": m["family"],
@@ -707,14 +754,21 @@ def run_report() -> pl.DataFrame:
             "generalization_score": round(
                 generalization_score(m["pr_auc_mean"], m["pr_auc_std"], r), 5),
             "seconds": m["wall_seconds"],
+            "interactive_score_seconds": seconds,
+            "promotion_eligible": eligible,
         })
     df = pl.DataFrame(rows).sort("oof_pr_auc_mean", descending=True)
     df.write_csv(COMPARISON_CSV)
 
     # Tie-break decision, written out so the promotion is auditable.
     if len(df):
-        lead = df.row(0, named=True)
-        close = df.filter(
+        servable = df.filter(pl.col("promotion_eligible"))
+        if not len(servable):
+            raise RuntimeError("no candidate can be served inside the "
+                               f"{INTERACTIVE_BUDGET_SECONDS}s interactive budget")
+        benched = df.filter(~pl.col("promotion_eligible"))
+        lead = servable.row(0, named=True)
+        close = servable.filter(
             pl.col("oof_pr_auc_mean") >= lead["oof_pr_auc_mean"] - TIE_BAND)
         promoted = close.sort(
             ["generalization_score", "n_features"], descending=[True, False]
@@ -728,15 +782,33 @@ def run_report() -> pl.DataFrame:
                 f"within a {TIE_BAND} PR-AUC band of the leader; inside that "
                 "band the simpler and more stable model wins."
             ),
+            "eligibility_rule": (
+                "A candidate is promotable only if it can score one account "
+                f"inside {INTERACTIVE_BUDGET_SECONDS}s. Accuracy does not "
+                "override this: a score an analyst cannot get in time is not a "
+                "product. Families with no measured latency stay eligible - an "
+                "unmeasured cost is recorded as unknown, never assumed."),
             "raw_pr_auc_leader": lead["model"],
+            "raw_pr_auc_leader_including_unservable": df.row(0, named=True)["model"],
+            "excluded_for_serving_cost": [
+                {"model": row["model"],
+                 "oof_pr_auc_mean": row["oof_pr_auc_mean"],
+                 "interactive_score_seconds": row["interactive_score_seconds"],
+                 "note": ("scored higher than the promoted model and was not "
+                          "beaten on accuracy; it is benched on serving cost")
+                 if row["oof_pr_auc_mean"] > promoted["oof_pr_auc_mean"] else
+                 "excluded on serving cost"}
+                for row in benched.iter_rows(named=True)],
             "models_within_tie_band": close["model"].to_list(),
             "promoted": promoted["model"],
             "promoted_detail": promoted,
             "tie_break_applied": promoted["model"] != lead["model"],
         }, settings.METRICS_DIR / "promotion_decision_v2.json")
-        log.info("promotion: raw leader %s -> promoted %s (tie-break %s)",
+        log.info("promotion: raw leader %s -> promoted %s (tie-break %s); "
+                 "%d candidate(s) benched on serving cost",
                  lead["model"], promoted["model"],
-                 "APPLIED" if promoted["model"] != lead["model"] else "not needed")
+                 "APPLIED" if promoted["model"] != lead["model"] else "not needed",
+                 len(benched))
 
     log.info("wrote %s (%d models)", COMPARISON_CSV.name, len(df))
     return df
@@ -774,7 +846,15 @@ def main(argv: list[str] | None = None) -> None:
         run_bag(seeds=args.seeds, n_repeats=args.repeats)
     if args.stage in ("report", "all"):
         df = run_report()
-        print(df.head(20))
+        # Printed row by row rather than as a polars table: this console is
+        # cp1252 and the table's box-drawing characters raise UnicodeEncodeError
+        # there, which failed the stage *after* every artifact was written.
+        print(f"{'model':<26} {'PR-AUC':>8} {'std':>8} {'servable':>9}")
+        for row in df.head(20).iter_rows(named=True):
+            seconds = row["interactive_score_seconds"]
+            servable = "yes" if row["promotion_eligible"] else f"no ({seconds:.0f}s)"
+            print(f"{row['model']:<26} {row['oof_pr_auc_mean']:>8.5f} "
+                  f"{row['oof_pr_auc_std']:>8.5f} {servable:>9}")
 
 
 if __name__ == "__main__":

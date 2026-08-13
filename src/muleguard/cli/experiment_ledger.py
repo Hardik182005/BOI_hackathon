@@ -285,6 +285,32 @@ def _missingness_nofees(d: Any) -> list[Row]:
     return rows
 
 
+def _tuning_overfit(d: Any) -> list[Row]:
+    """One row, not two.
+
+    The two arms it pairs are already in the ledger under the artifacts that
+    produced them - the tuned arm in nested_cv.json, the untuned arm in
+    missingness_ablation.json. What is new here is the paired difference, so
+    that is what gets the row.
+    """
+    t = d.get("tests", {})
+    sign = t.get("sign_test", {})
+    return [{
+        "model": d.get("design", {}).get("family", ""),
+        "feature_set": "tuned in-fold vs fixed top_120",
+        "cv_scheme": CV_NESTED,
+        "primary_metric": "paired mean AP gain from NOT tuning (15 outer folds)",
+        "metric_value": d.get("mean_gain_from_not_tuning"),
+        "status": "REJECTED" if not d.get("effect_survives_pairing") else "DIAGNOSTIC",
+        "reason": f"resolves docs/TUNING_OVERFIT_HYPOTHESIS.md: sign "
+                  f"{sign.get('folds_favouring_untuned')}/{sign.get('n_folds')} "
+                  f"p {_fmt(sign.get('p_two_sided'))}, Wilcoxon p "
+                  f"{_fmt(t.get('wilcoxon_signed_rank', {}).get('p_two_sided'))}, "
+                  f"paired t p {_fmt(t.get('paired_t', {}).get('p_two_sided'))}; "
+                  "the pooled gap is a pooling effect, and nothing is re-promoted",
+    }]
+
+
 def _seed_variance(d: Any) -> list[Row]:
     return [{
         "model": d.get("model", ""), "feature_set": "champion set",
@@ -496,6 +522,34 @@ def _simple(model: str, metric: str, key: str, status: str, reason: str,
     return fn
 
 
+def _global_shap(d: Any) -> list[Row]:
+    top = (d.get("ranking") or [{}])[0]
+    return [{
+        "model": d.get("champion", ""), "feature_set": f"{d.get('n_features')} features",
+        "cv_scheme": CV_FLAT,
+        "primary_metric": f"top feature by mean |SHAP| ({top.get('feature', '?')})",
+        "metric_value": top.get("mean_abs_shap"),
+        "status": "DIAGNOSTIC",
+        "reason": "global attribution, refitted per fold to attribute "
+                  "out-of-fold; explains the model, never selects features",
+    }]
+
+
+def _mirror(origin: str, what: str) -> Callable[[Any], list[Row]]:
+    """A §57 spec-named copy of an experiment already in the ledger.
+
+    It is claimed so the completeness check passes, but it is never counted as a
+    second result - the number lives once, under the artifact that produced it.
+    """
+    def fn(_: Any) -> list[Row]:
+        return [{"model": "", "feature_set": "", "cv_scheme": CV_NONE,
+                 "primary_metric": "", "metric_value": None,
+                 "status": "REFERENCE_ONLY",
+                 "reason": f"spec-named mirror of {origin} ({what}); "
+                           "the result is recorded there, not twice"}]
+    return fn
+
+
 def _none(reason: str) -> Callable[[Any], list[Row]]:
     """A file that is not an experiment - claimed, with the reason recorded."""
     def fn(_: Any) -> list[Row]:
@@ -568,6 +622,20 @@ SOURCES: list[Source] = [
     Source(f"{M}/tabpfn_latency.json",
            _none("operational timing measurement, not a model comparison"),
            kind="NOT_AN_EXPERIMENT"),
+    Source(f"{M}/global_shap_importance.json", _global_shap),
+    Source(f"{M}/tuning_overfit_test.json", _tuning_overfit),
+    Source(f"{M}/nested_promotion_decision.json",
+           _simple("nested promotion check", "verdict", "verdict", "DIAGNOSTIC",
+                   "does the shipped champion survive the primary protocol - "
+                   "read-only, promotes nothing", CV_NESTED)),
+    # ---- section 57 spec-named mirrors, claimed but not double-counted -----
+    Source(f"{M}/final_nested_cv.json",
+           _mirror("artifacts/metrics/nested_cv.json", "nested tournament"),
+           kind="REFERENCE_ONLY"),
+    Source(f"{M}/final_calibration.json",
+           _mirror("artifacts/metrics/lens_stack_oof_v2.json",
+                   "calibration + conformal report"),
+           kind="REFERENCE_ONLY"),
     # ---- registered ahead of their runs (§15-23, 53, 54) ------------------
     Source(f"{M}/nested_ensemble.json",
            _simple("nested ensembles", "paired mean AP difference vs best single",

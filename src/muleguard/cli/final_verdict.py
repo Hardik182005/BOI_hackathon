@@ -164,6 +164,21 @@ class Evidence:
                 return key, run
         return None, None
 
+    def nested_family_run(self, family: str) -> tuple[str, dict[str, Any]] | tuple[None, None]:
+        """The full nested battery run for a family, e.g. 'xgboost'.
+
+        The nested store is keyed per *family*, not per shipped model name,
+        because the nested protocol picks the feature-set size inside each fold.
+        So `battery_run` - which matches the champion's full name - never finds
+        it, and the nested figure has to be looked up separately rather than
+        reported as absent.
+        """
+        battery = self.get("artifacts/metrics/metric_battery.json") or {}
+        for key, run in (battery.get("runs") or {}).items():
+            if key == f"NESTED:{family}":
+                return key, run
+        return None, None
+
     def champion_features(self) -> tuple[list[str] | None, str]:
         """Feature names the served bundle actually uses."""
         bundle_path = settings.MODELS_DIR / "final_bundle.joblib"
@@ -523,7 +538,56 @@ def section_d(ev: Evidence) -> str:
         return _pending("python -m muleguard.cli.tournament_v2")
     head = ("| model | protocol | features | PR-AUC mean | PR-AUC std | note |\n"
             "| --- | --- | --- | --- | --- | --- |\n")
-    return head + "\n".join("| " + " | ".join(r) + " |" for r in rows)
+    table = head + "\n".join("| " + " | ".join(r) + " |" for r in rows)
+    return table + _tournament_arbiter(ev)
+
+
+def _tournament_arbiter(ev: Evidence) -> str:
+    """The one sentence the table cannot say for itself.
+
+    A reader who scans the table sees two protocols disagreeing and has no way
+    to know which one the project treats as binding, or whether anyone looked.
+    The arbiter artifact answers both, so it is quoted here rather than left to
+    be inferred from row order - and it is quoted whichever way it went.
+    """
+    d = ev.get("artifacts/metrics/nested_promotion_decision.json") or {}
+    verdict = d.get("verdict")
+    if not verdict:
+        return ""
+    paired = d.get("paired_check") or {}
+    ci = paired.get("paired_delta_ci95") or []
+    shipped = (d.get("deployed") or {}).get("model")
+    if verdict == "CHAMPION_CONFIRMED":
+        return (f"\n\n**Arbiter (CHAMPION_CONFIRMED):** the primary nested protocol "
+                f"selects the same family the flat protocol did, so `{shipped}` is "
+                f"the champion under both.")
+    return (
+        f"\n\n**Arbiter ({verdict}):** under the primary nested protocol the promotion "
+        f"rule selects `{d.get('nested_promoted')}`, not the shipped `{shipped}`. "
+        f"Scored on identical rows the gap is {_fmt(paired.get('paired_delta_mean'))} "
+        f"PR-AUC, 95% CI [{_fmt(ci[0]) if ci else '?'}, "
+        f"{_fmt(ci[1]) if len(ci) > 1 else '?'}], "
+        f"{paired.get('repeats_favouring_promoted')} repeats favouring the challenger. "
+        f"The swap was **not** taken. {d.get('not_done_automatically')}"
+        f"{_deployed_rank(d)}")
+
+
+def _deployed_rank(d: dict[str, Any]) -> str:
+    """Where the shipped family actually places, counted rather than assumed.
+
+    Being beaten by the leader and being second are different findings, and the
+    first does not imply the second.
+    """
+    board = sorted((r for r in d.get("leaderboard", []) if r.get("nested_pr_auc_mean")),
+                   key=lambda r: -r["nested_pr_auc_mean"])
+    family = (d.get("deployed") or {}).get("family")
+    for i, row in enumerate(board, start=1):
+        if row.get("model") == family:
+            ordinal = {1: "first", 2: "second", 3: "third", 4: "fourth",
+                       5: "fifth", 6: "sixth", 7: "seventh"}.get(i, f"{i}th")
+            return (f" Section E therefore describes an artefact that places {ordinal} "
+                    f"of {len(board)} under the protocol this project calls primary.")
+    return ""
 
 
 def section_e(ev: Evidence) -> list[tuple[str, str]]:
@@ -542,22 +606,34 @@ def section_e(ev: Evidence) -> list[tuple[str, str]]:
     # two tiers are in F and in the threshold table.
     tier = next((t for t in run.get("at_frozen_thresholds", [])
                  if t.get("tier") == "URGENT_REVIEW"), {})
-    note = "" if protocol == "NESTED" else \
-        f"  [operating point and probability quality measured under the {protocol} " \
-        "protocol; nested is primary and is still running]"
+    family = (ev.champion or "").split("_top_")[0]
+    nested_key, nested_run = ev.nested_family_run(family)
+    # The nested store is per family and re-chooses the feature-set size in every
+    # fold, so its thresholds describe a moving target rather than the shipped
+    # bundle. The operating point therefore stays with the run that measured the
+    # shipped model, and the nested AP is reported on its own row below.
+    note = "" if protocol == "NESTED" else (
+        f"  [operating point and probability quality measured under the {protocol} "
+        f"protocol, which is the run that scored this exact bundle; the primary "
+        f"nested figure for family '{family}' is the Nested-CV row below]")
 
     prelim_key, prelim = ev.preliminary_nested()
     if protocol == "NESTED":
         nested_ap = _fmt(ranking.get("pr_auc", {}).get("mean"))
+    elif nested_run is not None:
+        nr = (nested_run.get("ranking") or {}).get("pr_auc", {})
+        nested_ap = (f"{_fmt(nr.get('mean'))} +/- {_fmt(nr.get('std'))} for family "
+                     f"'{family}' over {nr.get('n_repeats')} repeats ({nested_key}) "
+                     "- the nested protocol selects its own feature-set size per "
+                     "fold, so this is the family's figure, not this bundle's")
     else:
         nested_ap = _pending("python -m muleguard.cli.nested_cv --repeats 3 --inner 4, "
                              "then metric_battery --protocol NESTED")
         if prelim:
-            nested_ap += (f". A preliminary nested run ({prelim_key}, 1 repeat, "
-                          f"2 families) measured "
-                          f"{_fmt((prelim.get('ranking') or {}).get('pr_auc', {}).get('mean'))} "
-                          "- lower than the flat figure, as nested protocols usually are, "
-                          "and superseded by the run in progress")
+            pr = (prelim.get("ranking") or {}).get("pr_auc", {})
+            nested_ap += (f". A preliminary nested run ({prelim_key}, "
+                          f"{pr.get('n_repeats')} repeat) measured {_fmt(pr.get('mean'))} "
+                          "- underpowered, and not a substitute for the full run")
     return [
         ("Model", f"{ev.champion} (battery run {key}){note}"),
         ("Feature set", f"{detail.get('feature_set', '?')} of view "
@@ -615,25 +691,71 @@ def section_g(ev: Evidence) -> list[tuple[str, str]]:
     stress = ev.get("artifacts/metrics/stability_stress_v2.json") or {}
     if not seed and not stress:
         return [("Everything", _pending("python -m muleguard.cli.robustness_v2"))]
-    return [
+    return _nested_stability(ev) + [
         ("Seed stability", f"PR-AUC {_fmt(seed.get('pr_auc_mean'))} +/- "
                            f"{_fmt(seed.get('pr_auc_std'))} over {seed.get('n_seeds')} seeds, "
                            f"spread {_fmt(seed.get('spread'), 4)}. Any model comparison "
                            "smaller than this spread on unpaired folds is noise."),
-        ("Positive-removal stability",
+        ("Positive-removal stability (FLAT)",
          f"{_fmt(stress.get('positive_removal_pr_auc_mean'))} +/- "
          f"{_fmt(stress.get('positive_removal_pr_auc_std'))} over "
          f"{stress.get('rounds')} rounds dropping "
          f"{stress.get('positives_removed_per_round_mean')} positives each; relative drop "
-         f"{_fmt(stress.get('positive_removal_pr_auc_relative_drop'), 4)}"),
-        ("Feature stability",
+         f"{_fmt(stress.get('positive_removal_pr_auc_relative_drop'), 4)}. Worst round "
+         f"{_fmt(stress.get('positive_removal_pr_auc_min'), 4)}"),
+        ("Feature stability (FLAT)",
          f"rank correlation {_fmt(stress.get('feature_rank_stability'), 4)}, "
-         f"top-20 overlap {_fmt(stress.get('feature_top20_overlap'), 4)}"),
-        ("Rank stability",
+         f"top-20 overlap {_fmt(stress.get('feature_top20_overlap'), 4)} - see the "
+         f"nested figure above, which is the one to quote"),
+        ("Rank stability (FLAT)",
          f"{_fmt(stress.get('prediction_rank_stability'), 4)} Spearman over all "
          "development rows - low because ~99% of rows are negatives whose calibrated "
          "scores are near-tied; the analyst-facing number is the top-budget overlap"),
     ]
+
+
+def _nested_stability(ev: Evidence) -> list[tuple[str, str]]:
+    """The same stress under the primary protocol, reported first.
+
+    The four rows below it come from `stability_stress_v2.json`, which is a FLAT
+    artifact. Quoting only those repeats section E's old mistake in a quieter
+    place: the primary protocol has its own answer and the reader is not told
+    which one they are reading. The two disagree most on feature stability, and
+    the disagreement is the finding - the flat run selects features once over
+    pooled development data, so removing positives cannot move a selection that
+    has already happened.
+    """
+    d = ev.get("artifacts/metrics/nested_positive_removal.json")
+    if not d:
+        return []
+    paired = d.get("paired_degradation") or {}
+    ci = paired.get("ci95_of_mean") or []
+    flat = ev.get("artifacts/metrics/stability_stress_v2.json") or {}
+    feat_nested = d.get("feature_rank_correlation_mean")
+    feat_flat = flat.get("feature_rank_stability")
+    rows = [
+        ("Positive-removal stability (NESTED, primary)",
+         f"{_fmt(d.get('stressed_fold_ap_mean'))} against a "
+         f"{_fmt(d.get('reference_fold_ap_mean'))} reference, relative drop "
+         f"{_fmt((d.get('grade_inputs') or {}).get('positive_removal_pr_auc_relative_drop'), 4)}. "
+         f"Paired over {paired.get('n_folds')} outer folds the loss is "
+         f"{_fmt(paired.get('mean_paired_diff'))}, 95% CI "
+         f"[{_fmt(ci[0]) if ci else '?'}, {_fmt(ci[1]) if len(ci) > 1 else '?'}], "
+         f"worse in {paired.get('n_folds_worse')} of {paired.get('n_folds')} "
+         f"(sign p {_fmt(paired.get('sign_test_p_two_sided'), 5)}). The drop is small "
+         f"and real, not small and deniable."),
+    ]
+    if isinstance(feat_nested, float) and isinstance(feat_flat, float):
+        rows.append((
+            "Feature stability (NESTED vs FLAT)",
+            f"rank correlation {_fmt(feat_nested, 4)} nested against "
+            f"{_fmt(feat_flat, 4)} flat. The gap is structural, not noise: the flat "
+            f"run fits feature selection once over pooled development data, so "
+            f"dropping training positives cannot disturb a choice already made, "
+            f"while the nested run re-selects inside every outer fold and the choice "
+            f"moves. Read {_fmt(feat_nested, 4)} as the honest figure - when the mules "
+            f"this model learned from change, so does most of what it cites."))
+    return rows
 
 
 def section_h(ev: Evidence) -> list[tuple[str, str]]:
@@ -763,11 +885,37 @@ def _risks(ev: Evidence, blockers: list[dict[str, Any]],
                    f"{_fmt(stress['positive_removal_pr_auc_min'], 4)} PR-AUC from a "
                    f"{_fmt(stress.get('reference_pr_auc'), 4)} reference: the model's "
                    "ranking depends on which mules it was shown.")
-    key, _ = ev.battery_run()
+    key, flat_run = ev.battery_run()
     if key and not key.startswith("NESTED:"):
-        out.append("The headline metrics still come from the flat repeated-CV protocol. "
-                   "Nested CV is the primary protocol in this programme and it usually "
-                   "reports lower, so the headline should be expected to fall.")
+        family = (ev.champion or "").split("_top_")[0]
+        _, nested_run = ev.nested_family_run(family)
+        # Once the nested run exists this stops being a warning about a number
+        # nobody has and becomes a statement of the gap, in the direction it
+        # actually went - which for some families was upward.
+        if nested_run is not None:
+            flat_ap = ((flat_run or {}).get("ranking") or {}).get("pr_auc", {}).get("mean")
+            nest_ap = (nested_run.get("ranking") or {}).get("pr_auc", {}).get("mean")
+            if isinstance(flat_ap, float) and isinstance(nest_ap, float):
+                arb = ev.get("artifacts/metrics/nested_promotion_decision.json") or {}
+                challenge = ""
+                if arb.get("verdict") == "CHAMPION_CHALLENGED":
+                    paired = arb.get("paired_check") or {}
+                    challenge = (
+                        f" On the same rows `{arb.get('nested_promoted')}` beats it by "
+                        f"{_fmt(paired.get('paired_delta_mean'))} PR-AUC with a 95% "
+                        f"interval excluding zero, and the champion was left in place "
+                        f"rather than swapped.")
+                out.append(
+                    f"The headline metrics come from the flat protocol, which is not "
+                    f"the primary one. Under nested CV the shipped family scores "
+                    f"{_fmt(nest_ap)} against the flat {_fmt(flat_ap)} "
+                    f"({nest_ap - flat_ap:+.5f}).{challenge} Read the headline as what "
+                    "the shipped artefact does, not as the best estimate available.")
+        else:
+            out.append("The headline metrics still come from the flat repeated-CV "
+                       "protocol, and no nested figure exists yet for the shipped "
+                       "family. Until it does, the headline is unchecked by the "
+                       "primary protocol.")
     out.append("Generation-1 numbers (PR-AUC 0.824 and above) came from a model that could "
                "see quarantined columns. They remain in the repository as retired evidence "
                "and must never be quoted as current behaviour.")
@@ -817,7 +965,7 @@ def build(ev: Evidence) -> dict[str, Any]:
         "J. System": _block(section_j(ev)),
         "K. Tests": _block(section_k(ev)),
     }
-    return {
+    payload = {
         "generated_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "champion": ev.champion,
         "champion_promoted_utc": ev.promoted_at.isoformat() if ev.promoted_at else None,
@@ -834,9 +982,14 @@ def build(ev: Evidence) -> dict[str, Any]:
         "sections": sections,
         "top_risks": _risks(ev, blockers, criteria),
     }
+    # Carried in the machine-readable form too: a consumer that reads only the
+    # verdict string gets the word without the range it covers, which is the
+    # reading this note exists to prevent.
+    payload["verdict_scope"] = _verdict_scope(payload, ev)
+    return payload
 
 
-def render(payload: dict[str, Any]) -> str:
+def render(payload: dict[str, Any], ev: Evidence) -> str:
     lines = [
         "# MuleGuard - Trinetra: final validation response (section 65)",
         "",
@@ -853,6 +1006,7 @@ def render(payload: dict[str, Any]) -> str:
         lines += [f"# {title}", "", body, ""]
 
     lines += ["# L. Final Verdict", "", "```text", payload["verdict"], "```", ""]
+    lines += [payload.get("verdict_scope") or _verdict_scope(payload, ev), ""]
     if payload["verdict"] == PENDING_EVIDENCE:
         lines += [
             "This is deliberately not one of the three strings section 65 permits. "
@@ -878,6 +1032,40 @@ def render(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _verdict_scope(payload: dict[str, Any], ev: Evidence) -> str:
+    """What the word actually ranges over.
+
+    Every criterion in section 64 asks whether a piece of work was done and done
+    cleanly - the workbook hashed, leakage tested, stability measured, calibration
+    checked. Not one of them asks whether the shipped model is the best model
+    available. So a PASS here certifies a complete and clean validation programme,
+    and a reader is entitled to know that it does not certify the champion as the
+    strongest candidate - particularly in this run, where section D records that
+    it is not. Saying so next to the verdict costs one paragraph; leaving it to be
+    inferred invites the stronger reading, which is the wrong one."""
+    if payload["verdict"] == FAIL:
+        return ("The programme did not clear its own gates. The blocker table below "
+                "names which, and no headline in this repository should be read as "
+                "settled until they are cleared.")
+    if payload["verdict"] == PENDING_EVIDENCE:
+        return ("Scope: the evidence is incomplete, so nothing is certified either "
+                "way yet.")
+    scope = (
+        "**Scope of this verdict.** Every section 64 criterion asks whether a piece "
+        "of validation work was done and done cleanly; none asks whether the shipped "
+        "model is the best one available. This verdict therefore certifies the "
+        "validation programme, not the optimality of the champion.")
+    arb = ev.get("artifacts/metrics/nested_promotion_decision.json") or {}
+    if arb.get("verdict") == "CHAMPION_CHALLENGED":
+        scope += (
+            f" Section D records that under the primary nested protocol "
+            f"`{arb.get('nested_promoted')}` is selected over the shipped model and "
+            f"the swap was declined; risk 5 below restates it. A reader who takes "
+            f"this line as 'the best model was chosen' has read more into it than it "
+            f"says.")
+    return scope
+
+
 def main(argv: list[str] | None = None) -> int:
     configure()
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -889,9 +1077,9 @@ def main(argv: list[str] | None = None) -> int:
     payload = build(ev)
     save_json(payload, OUT_JSON)
     OUT_DOC.parent.mkdir(parents=True, exist_ok=True)
-    OUT_DOC.write_text(render(payload), encoding="utf-8")
+    OUT_DOC.write_text(render(payload, ev), encoding="utf-8")
     if args.echo:
-        print(render(payload))
+        print(render(payload, ev))
 
     blocked = [b["text"] for b in payload["release_blockers"] if b["status"] == BLOCKED]
     open_items = [b["text"] for b in payload["release_blockers"] if b["status"] not in (CLEAR, BLOCKED)]

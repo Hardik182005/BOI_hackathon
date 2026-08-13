@@ -328,6 +328,13 @@ def stage_seedbag(ctx: dict[str, Any], args) -> dict[str, Any]:
                  and cmp_prob["n_tests_below_0.05"] >= 2)
         tied = (cmp_prob["ci95_of_mean"][0] <= 0 <= cmp_prob["ci95_of_mean"][1])
         stability_only = (not adopt) and tied and std_bag < std_single
+        # A family with no stochastic component fits the identical model five
+        # times, so the arm cannot move and NO_CHANGE would be read as evidence
+        # that seed averaging was tried and did not help. It was not tried:
+        # there was nothing to average. histgb is the case here - sklearn's
+        # HistGradientBoosting draws no random subsample, so random_state does
+        # not reach the fit.
+        deterministic = float(np.mean(pstd)) == 0.0 and float(np.mean(rstd)) == 0.0
         out["families"][fam] = {
             "fold_ap_single_mean": round(float(np.mean(single)), 5),
             "fold_ap_bag_mean": round(float(np.mean(pmean)), 5),
@@ -339,14 +346,25 @@ def stage_seedbag(ctx: dict[str, Any], args) -> dict[str, Any]:
             "per_fold_per_seed_ap": per_seed,
             "paired_prob_mean_vs_single": cmp_prob,
             "paired_rank_mean_vs_single": cmp_rank,
-            "decision": ("ADOPT" if adopt else
+            "deterministic_under_reseeding": deterministic,
+            "decision": ("NOT_APPLICABLE" if deterministic else
+                         "ADOPT" if adopt else
                          "ADOPT_FOR_STABILITY_ONLY" if stability_only else "NO_CHANGE"),
         }
+        if deterministic:
+            out["families"][fam]["why_not_applicable"] = (
+                f"every seed produced byte-identical predictions "
+                f"(across-seed probability sd 0.0 on all {len(ctx['folds'])} folds), "
+                f"so the five fits are one fit. This is a property of the estimator, "
+                f"not a result: read it as 'seed averaging does not apply to "
+                f"{fam}', never as 'seed averaging was tried and did not help'.")
     out["rule"] = {
         "ADOPT": "mean paired gain > 0 AND at least 2 of the 3 paired tests p < 0.05",
         "ADOPT_FOR_STABILITY_ONLY": "not ADOPT, the 95% CI contains 0 (tied), and "
                                     "the across-fold AP spread decreases",
         "NO_CHANGE": "otherwise - keep the single-seed model, which is 5x cheaper",
+        "NOT_APPLICABLE": "the family is deterministic under reseeding, so the "
+                          "comparison has no content - checked before the others",
     }
     return out
 

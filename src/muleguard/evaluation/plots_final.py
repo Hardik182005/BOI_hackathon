@@ -457,19 +457,55 @@ def plot_feature_subset_ablation() -> str:
 # --------------------------------------------------------------------------
 # 15-16: stress
 # --------------------------------------------------------------------------
+def _plot_positive_removal_nested(d: dict) -> str:
+    """The nested arm stores one paired row per outer fold, not a flat series of
+    removal rounds. Laying the fold means along a single x axis as if they were
+    rounds would imply an ordering they do not have, and would throw away the
+    pairing - which is the only reason the arm is worth running at all, given
+    that a fold-level AP built on ~13 positives is far too coarse to read
+    unpaired. Each fold is therefore drawn as its own before/after pair."""
+    folds = d.get("per_fold") or []
+    if not folds:
+        raise Skip("nested positive-removal artifact carries no per-fold rows")
+    design, paired = d.get("design", {}), d.get("paired_degradation", {})
+    order = sorted(range(len(folds)), key=lambda i: folds[i]["reference_ap"])
+    ref = [folds[i]["reference_ap"] for i in order]
+    stressed = [folds[i]["stressed_ap_mean"] for i in order]
+    err = [folds[i].get("stressed_ap_std") or 0.0 for i in order]
+    x = list(range(1, len(folds) + 1))
+
+    fig, ax = plt.subplots(figsize=(6.4, 3.8))
+    for xi, a, b in zip(x, ref, stressed):
+        ax.plot([xi, xi], [a, b], color=MUTED, lw=0.9, zorder=1)
+    ax.plot(x, ref, "o", color=MUTED, ms=5, zorder=2, label="all positives")
+    ax.errorbar(x, stressed, yerr=err, fmt="o", color=ACCENT, ms=5, capsize=3,
+                lw=1, zorder=3,
+                label=f"{design.get('removal_fraction', '?')} of training positives removed")
+    ax.set_xlabel("outer fold, ordered by unstressed AP")
+    ax.set_ylabel("average precision")
+    ax.set_xticks(x)
+    ax.legend(frameon=False, fontsize=8)
+
+    ci = paired.get("ci95_of_mean") or [None, None]
+    delta = paired.get("mean_paired_diff")
+    detail = (f"mean paired {delta:+.5f} AP, 95% CI [{ci[0]:.5f}, {ci[1]:.5f}]"
+              if delta is not None and None not in ci else "paired summary unavailable")
+    _titled(ax,
+            f"Positive-removal stability  ·  {design.get('rounds_per_fold', '?')} rounds per "
+            f"fold, {len(folds)} paired outer folds",
+            f"nested outer folds  ·  {detail}",
+            design.get("family", _champion()))
+    return _save(fig, "final_positive_removal.png")
+
+
 def plot_positive_removal() -> str:
     nested = ROOT / "artifacts/metrics/nested_positive_removal.json"
     if nested.exists():
-        d = load_json(nested)
-        vals = d.get("ap_per_round") or d.get("per_round") or []
-        vals = [v.get("ap") if isinstance(v, dict) else v for v in vals]
-        ref = d.get("reference_ap") or d.get("baseline_ap")
-        split = "nested outer folds"
-    else:
-        d = load_json(_need("artifacts/metrics/stability_stress_v2.json"))
-        vals = d.get("positive_removal_pr_auc_per_round") or []
-        ref = d.get("reference_pr_auc")
-        split = "dev OOF, flat CV (FLAT FALLBACK - nested arm not run yet)"
+        return _plot_positive_removal_nested(load_json(nested))
+    d = load_json(_need("artifacts/metrics/stability_stress_v2.json"))
+    vals = d.get("positive_removal_pr_auc_per_round") or []
+    ref = d.get("reference_pr_auc")
+    split = "dev OOF, flat CV (FLAT FALLBACK - nested arm not run yet)"
     if not vals:
         # The flat artifact stores summary statistics rather than the rounds;
         # draw what it does store instead of inventing a per-round series.

@@ -24,6 +24,7 @@ import yaml
 
 from muleguard import settings
 from muleguard.data import ingest, leakage, profile as prof_mod
+from muleguard.features import frame as frame_mod
 from muleguard.logging import get_logger
 from muleguard.utils import save_json, timer
 
@@ -218,7 +219,29 @@ def main(skip_validate: bool = False, force_convert: bool = False) -> None:
     quarantine = leakage.build_quarantine(audit, df, index_candidates)
     with open(settings.CONFIG_DIR / "leakage_quarantine.yaml", "w", encoding="utf-8") as fh:
         yaml.safe_dump(quarantine, fh, sort_keys=False, allow_unicode=True)
-    save_json(quarantine, settings.FEATURES_DIR / "quarantined_features.json")
+
+    # quarantined_features.json belongs to the availability firewall, not to this
+    # measured pass. Measurement finds a column only once it correlates with the
+    # target; the firewall excludes a column because Description.xlsx says it
+    # records the resolution of the alert being predicted, which is true whether
+    # or not this sample makes it visible. Writing the measured list here
+    # silently cut the manifest from 13 columns to 4 - dropping the entire
+    # POST_RESOLUTION_LEAKAGE set - on every full validation run.
+    with timer("quarantine_manifest", timings):
+        policy = frame_mod.refresh_quarantine_manifest()
+    policy_features = {e["feature"] for e in policy["quarantine"]}
+    measured_features = {e["feature"] for e in quarantine["quarantine"]}
+    # The policy is expected to be the wider net. If measurement ever finds a
+    # leak the policy does not name, that is a hole in the policy and the run
+    # must stop rather than quietly keep the narrower of the two.
+    unpoliced = sorted(measured_features - policy_features)
+    if unpoliced:
+        raise SystemExit(
+            f"LEAKAGE POLICY GAP: measurement quarantines {unpoliced} but "
+            f"configs/feature_availability.yaml does not. Add them to the policy "
+            f"before this run can continue.")
+    log.info("quarantine manifest: %d policy columns (%d also found by measurement)",
+             len(policy_features), len(measured_features))
 
     _write_markdown_reports(
         df, prof, prof_summary, audit, leak_summary, quarantine, fingerprint, index_candidates

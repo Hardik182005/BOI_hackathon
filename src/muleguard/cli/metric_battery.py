@@ -67,6 +67,11 @@ HOLDOUT_MARKERS = ("holdout", "locked_test")
 
 PROTOCOLS = ("FLAT", "NESTED", "NESTED_PRELIMINARY", "HOLDOUT_REFERENCE")
 
+#: Repeats a nested store must carry before an inferred label calls it finished
+#: rather than preliminary. Three is the protocol §52 requires; anything less is
+#: a single realisation of the fold assignment and is treated as underpowered.
+FULL_NESTED_REPEATS = 3
+
 
 def _sha256(path: Path) -> str:
     """Content hash of a predictions store, streamed so a large parquet is fine."""
@@ -364,8 +369,18 @@ def _holdout_admissibility(observed_pr_auc: float | None,
     }
 
 
-def _protocol_for(source: Path, requested: str | None) -> tuple[str, bool]:
-    """Resolve the protocol label and whether a threshold search is permitted."""
+def _protocol_for(source: Path, requested: str | None,
+                  n_repeats: int | None = None) -> tuple[str, bool]:
+    """Resolve the protocol label and whether a threshold search is permitted.
+
+    The "PRELIMINARY" in ``NESTED_PRELIMINARY`` is a statement about power, not
+    about the file name: the first nested store held one repeat of two families
+    and was written to the same path the finished run later overwrote. So when
+    the label is inferred rather than given, it is inferred from the number of
+    repeats actually in the store - otherwise a completed nested run keeps being
+    filed as preliminary, and ``_interpretation`` would then mark the primary
+    protocol unusable for selection.
+    """
     name = source.name.lower()
     if any(m in name for m in HOLDOUT_MARKERS):
         if requested and requested != "HOLDOUT_REFERENCE":
@@ -374,7 +389,12 @@ def _protocol_for(source: Path, requested: str | None) -> tuple[str, bool]:
         return "HOLDOUT_REFERENCE", False
     if requested:
         return requested, True
-    return ("NESTED_PRELIMINARY" if "nested" in name else "FLAT"), True
+    if "nested" not in name:
+        return "FLAT", True
+    if n_repeats is None:                      # asked before the store was read
+        return "NESTED_PRELIMINARY", True
+    return ("NESTED" if n_repeats >= FULL_NESTED_REPEATS
+            else "NESTED_PRELIMINARY"), True
 
 
 def main() -> None:
@@ -407,7 +427,6 @@ def main() -> None:
 
     lens = load_json(LENS_JSON) if LENS_JSON.exists() else {}
     frozen = dict(lens.get("policy_thresholds", {}))
-    protocol, allow_search = _protocol_for(source, args.protocol)
 
     df = pl.read_parquet(source)
     shipped_cal = None
@@ -420,6 +439,9 @@ def main() -> None:
         model = args.model or "final_bundle_lightgbm"
         ri, y, S, shipped_cal = _load_wide(df)
     n, n_pos = len(y), int(y.sum())
+    # Resolved here, not before the read: an inferred nested label depends on how
+    # many repeats the store actually holds.
+    protocol, allow_search = _protocol_for(source, args.protocol, S.shape[0])
     log.info("source=%s model=%s protocol=%s rows=%d positives=%d repeats=%d",
              source.name, model, protocol, n, n_pos, S.shape[0])
 
@@ -502,9 +524,13 @@ def main() -> None:
         "primary_run_key": _primary_key(runs),
         "run_keys": sorted(runs),
         "reading_order": [
-            "NESTED is the primary honest estimate for this project (§9).",
+            "NESTED is the primary honest estimate for this project (section 9).",
             "FLAT is a historical development figure whose feature selection "
-            "pooled information across all development folds; it reads high.",
+            "pooled information across all development folds. It read high for "
+            "the shipped family (0.76904 flat against 0.75393 nested), but it is "
+            "not uniformly optimistic - the same comparison runs the other way "
+            "for catboost, so treat FLAT as a differently-conditioned estimate "
+            "rather than as the same estimate plus a bias.",
             "HOLDOUT_REFERENCE is reportable only as a labelled historical "
             "reference and was not used to select or tune anything.",
         ],
@@ -521,12 +547,38 @@ def _primary_key(runs: dict[str, Any]) -> str | None:
     outrank a flat one - an under-powered nested estimate is not more honest
     than a well-powered optimistic one, it is just differently wrong, and saying
     which is which is the point of storing both.
+
+    Within a tier the shipped family wins, and that tie-break is load-bearing
+    rather than cosmetic. Sorting alone returned ``NESTED:catboost`` over
+    ``NESTED:xgboost`` because "c" precedes "x", which quietly nominated a model
+    the product does not serve as the headline figure for the product. The
+    headline describes the artefact that scores accounts; a better number from a
+    family that was not shipped belongs in the challenge, not the headline.
     """
+    family = _champion_family()
     for prefix in ("NESTED:", "FLAT:", "NESTED_PRELIMINARY:", "HOLDOUT_REFERENCE:"):
-        for k in sorted(runs):
-            if k.startswith(prefix):
-                return k
+        tier = [k for k in sorted(runs) if k.startswith(prefix)]
+        if not tier:
+            continue
+        if family:
+            for k in tier:
+                rest = k.split(":", 1)[1]
+                if rest == family or rest.startswith(f"{family}_"):
+                    return k
+        return tier[0]
     return None
+
+
+def _champion_family() -> str | None:
+    """The served model's family, or None if the record is absent."""
+    path = settings.METRICS_DIR / "holdout_metrics.json"
+    if not path.exists():
+        return None
+    try:
+        name = (load_json(path).get("current_champion") or {}).get("model") or ""
+    except Exception:                                        # pragma: no cover
+        return None
+    return name.split("_top")[0] or None
 
 
 def _interpretation(protocol: str) -> dict[str, Any]:

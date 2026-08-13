@@ -10,11 +10,15 @@ from __future__ import annotations
 
 import datetime as dt
 import shutil
+from pathlib import Path
 
 import polars as pl
 
 from muleguard import settings
+from muleguard.logging import get_logger
 from muleguard.utils import git_info, load_json, save_json
+
+log = get_logger("cli.qa_final_summary")
 
 TESTING = settings.ARTIFACTS_DIR / "testing"
 
@@ -42,12 +46,42 @@ FINAL_ALIASES = [
 ]
 
 
+def _reconciler_owned() -> set[Path]:
+    """Spec-named files that `reconcile_artifacts` builds and therefore owns.
+
+    Asking the reconciler rather than hard-coding the list means a requirement
+    that gains a builder later is protected here without anyone remembering to
+    come back and add it.
+    """
+    from muleguard.cli.reconcile_artifacts import REQUIREMENTS
+
+    return {settings.REPO_ROOT / r.spec for r in REQUIREMENTS if r.build is not None}
+
+
 def materialise_final_aliases() -> list[str]:
-    made = []
+    """Copy generation-1 outputs to their spec names - except where a later
+    generation already owns the name.
+
+    `final_selected_features.json` is the case that made this necessary. The
+    reconciler derives it from the post-firewall v2 selection and stamps its
+    provenance; this function then copied the retired pre-firewall
+    `selected_features.json` over the top of it. Both ran in the same validation
+    script, this one second, so the spec-named artifact ended every full run
+    describing a feature set the shipped model does not use - and it looked
+    stable, because it was rewritten to the same wrong content every time.
+    A blind copy cannot tell it is clobbering something newer, so it asks first.
+    """
+    owned, made, skipped = _reconciler_owned(), [], []
     for src, dst in FINAL_ALIASES:
+        if dst in owned:
+            skipped.append(dst.name)
+            continue
         if src.exists():
             shutil.copyfile(src, dst)
             made.append(dst.name)
+    if skipped:
+        log.info("left %d reconciler-owned artifacts untouched: %s",
+                 len(skipped), ", ".join(sorted(skipped)))
     return made
 
 
