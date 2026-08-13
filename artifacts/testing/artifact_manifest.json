@@ -1,0 +1,333 @@
+{
+  "generated_utc": "2026-08-13T02:28:10+00:00",
+  "spec_sections": [
+    "57",
+    "58"
+  ],
+  "counts": {
+    "DERIVED": 17,
+    "PENDING": 2,
+    "PRESENT": 7
+  },
+  "artifacts": [
+    {
+      "spec": "artifacts/testing/environment.json",
+      "sources": [
+        "artifacts/environment_snapshot.json"
+      ],
+      "note": "",
+      "pending_run": "",
+      "status": "DERIVED",
+      "detail": {},
+      "sha256": "5fa7cc5944dc37632c4d1508b64528aafeb1ead132a06c260830978d2216b881",
+      "bytes": 1743
+    },
+    {
+      "spec": "artifacts/testing/data_integrity.json",
+      "sources": [
+        "artifacts/testing/data_integrity_results.json"
+      ],
+      "note": "",
+      "pending_run": "",
+      "status": "DERIVED",
+      "detail": {},
+      "sha256": "8a569a77ba5154625b862369abdfbfeb396e0c807444c3c13c466950c6c96cda",
+      "bytes": 2258
+    },
+    {
+      "spec": "artifacts/testing/description_integrity.json",
+      "sources": [
+        "artifacts/features/feature_dictionary.json"
+      ],
+      "note": "",
+      "pending_run": "",
+      "status": "DERIVED",
+      "detail": {},
+      "sha256": "95c44552eb6d59c5a594e98b94efe0dc61ba09b0a42afc2e3043d36036b495ec",
+      "bytes": 4855
+    },
+    {
+      "spec": "artifacts/testing/leakage_results.json",
+      "sources": [
+        "artifacts/testing/leakage_test_results.json"
+      ],
+      "note": "",
+      "pending_run": "",
+      "status": "DERIVED",
+      "detail": {},
+      "sha256": "6544ff69629f4ddfd641e7bf49f4b4da71497ca42aa53b3c134fecb27cca148b",
+      "bytes": 1252
+    },
+    {
+      "spec": "artifacts/testing/nested_cv_results.json",
+      "sources": [
+        "artifacts/metrics/nested_cv.json"
+      ],
+      "note": "",
+      "pending_run": "muleguard.cli.nested_cv --repeats 3 --inner 4",
+      "status": "DERIVED",
+      "detail": {},
+      "sha256": "3eec0099d61bbcbdc14ddd633df0037ba43a8cb9ecbc5bd223c6ce1150fe639d",
+      "bytes": 5435
+    },
+    {
+      "spec": "artifacts/testing/positive_removal_results.json",
+      "sources": [
+        "artifacts/metrics/nested_positive_removal.json",
+        "artifacts/metrics/stability_stress_v2.json"
+      ],
+      "note": "",
+      "pending_run": "muleguard.cli.nested_ses --stages posremoval",
+      "status": "DERIVED",
+      "detail": {
+        "protocol": "FLAT_FALLBACK"
+      },
+      "sha256": "ec6400de6d3fffabf745685b4e716e027965d1f4cf84a1f7da273ba0eb16a357",
+      "bytes": 3101
+    },
+    {
+      "spec": "artifacts/testing/adversarial_validation.json",
+      "sources": [
+        "artifacts/metrics/nested_shift_shield.json"
+      ],
+      "note": "",
+      "pending_run": "muleguard.cli.nested_ses --stages shift",
+      "status": "PENDING"
+    },
+    {
+      "spec": "artifacts/testing/calibration_results.json",
+      "sources": [
+        "artifacts/metrics/lens_stack_oof_v2.json"
+      ],
+      "note": "",
+      "pending_run": "",
+      "status": "DERIVED",
+      "detail": {},
+      "sha256": "b087f3952176fbc26340b42af15a1724d927ab6ca9ef1e846cb600674494324d",
+      "bytes": 27843
+    },
+    {
+      "spec": "artifacts/testing/threshold_results.json",
+      "sources": [
+        "artifacts/metrics/lens_stack_oof_v2.json"
+      ],
+      "note": "",
+      "pending_run": "",
+      "status": "DERIVED",
+      "detail": {},
+      "sha256": "19180a714ae0b7754a8f1d81179f28563007fb33f2eb1945a821de7d2492aafe",
+      "bytes": 17891
+    },
+    {
+      "spec": "artifacts/testing/backend_results.json",
+      "sources": [
+        "artifacts/testing/backend_test_results.json"
+      ],
+      "note": "",
+      "pending_run": "",
+      "status": "DERIVED",
+      "detail": {},
+      "sha256": "8f13d26a3aa9df227f7e6b8a3953a5d71a00f3f13feefd2ce4f8addf54a2a0fb",
+      "bytes": 2311
+    },
+    {
+      "spec": "artifacts/testing/ui_metric_consistency.json",
+      "sources": [
+        "artifacts/testing/api_frontend_consistency.json"
+      ],
+      "note": "",
+      "pending_run": "",
+      "status": "DERIVED",
+      "detail": {},
+      "sha256": "a854c1d9db9bd29006a7c680fcba74bf09b6cbe598dc269c06c646a5a47d0ea0",
+      "bytes": 1963
+    },
+    {
+      "spec": "artifacts/testing/offline_results.json",
+      "sources": [],
+      "note": "written by scripts/test_offline.sh",
+      "pending_run": "bash scripts/test_offline.sh",
+      "status": "PENDING"
+    },
+    {
+      "spec": "artifacts/testing/security_results.json",
+      "sources": [],
+      "note": "written directly by the security suite",
+      "pending_run": "",
+      "status": "PRESENT",
+      "sha256": "b2de5366de7c3f27d69e9739ea6fab79478d310e6929ad5efb8bc585c96042ab",
+      "bytes": 1124
+    },
+    {
+      "spec": "artifacts/metrics/model_comparison.csv",
+      "sources": [],
+      "note": "generation-1 tournament table; model_comparison_v2.csv is the post-firewall one and the ledger is the full record",
+      "pending_run": "",
+      "status": "PRESENT",
+      "sha256": "979257e713a1a994408d46cc2afe590e84475c050645952806349c2db1f148e9",
+      "bytes": 799
+    },
+    {
+      "spec": "artifacts/metrics/final_nested_cv.json",
+      "sources": [
+        "artifacts/metrics/nested_cv.json"
+      ],
+      "note": "",
+      "pending_run": "muleguard.cli.nested_cv --repeats 3 --inner 4",
+      "status": "DERIVED",
+      "detail": {},
+      "sha256": "3eec0099d61bbcbdc14ddd633df0037ba43a8cb9ecbc5bd223c6ce1150fe639d",
+      "bytes": 5435
+    },
+    {
+      "spec": "artifacts/metrics/final_budget_metrics.csv",
+      "sources": [
+        "artifacts/metrics/capacity_curve.json"
+      ],
+      "note": "",
+      "pending_run": "",
+      "status": "DERIVED",
+      "detail": {
+        "rows": 3
+      },
+      "sha256": "4e595160f57916fa11c998f07b3e38af75c6aa3c3d4f36540b5d8b13e0687f4b",
+      "bytes": 365
+    },
+    {
+      "spec": "artifacts/metrics/final_calibration.json",
+      "sources": [
+        "artifacts/metrics/lens_stack_oof_v2.json"
+      ],
+      "note": "",
+      "pending_run": "",
+      "status": "DERIVED",
+      "detail": {},
+      "sha256": "b087f3952176fbc26340b42af15a1724d927ab6ca9ef1e846cb600674494324d",
+      "bytes": 27843
+    },
+    {
+      "spec": "artifacts/metrics/feature_subset_ablation.csv",
+      "sources": [
+        "artifacts/metrics/nested_feature_family_arms.json",
+        "artifacts/metrics/family_dropout_v2.json"
+      ],
+      "note": "",
+      "pending_run": "muleguard.cli.nested_ses --stages families",
+      "status": "DERIVED",
+      "detail": {
+        "rows": 13,
+        "protocol": "FLAT_FALLBACK"
+      },
+      "sha256": "8b0a23a9602e9bf8193dd54d71560742a62be131dfc575b598d599bc8989bfcc",
+      "bytes": 775
+    },
+    {
+      "spec": "artifacts/metrics/alert_context_ablation.csv",
+      "sources": [
+        "artifacts/metrics/alert_context_ablation_v2.json"
+      ],
+      "note": "",
+      "pending_run": "",
+      "status": "DERIVED",
+      "detail": {
+        "rows": 2,
+        "verdict": "ALERT_CONTEXT contributes a modest, plausible gain and is retained"
+      },
+      "sha256": "1238c13f2c4ad81941b0429268fb5468b0cd67e8b6f023d9c274f5f2afa92308",
+      "bytes": 122
+    },
+    {
+      "spec": "artifacts/metrics/leakage_ablation.csv",
+      "sources": [],
+      "note": "written by the leakage ablation run",
+      "pending_run": "",
+      "status": "PRESENT",
+      "sha256": "49544f016576f75e2a0a165b589ee1f835daa4f4e9b2d4b596b0063ddb3b641c",
+      "bytes": 256
+    },
+    {
+      "spec": "artifacts/predictions/all_outer_oof_predictions.parquet",
+      "sources": [
+        "artifacts/predictions/nested_oof.parquet"
+      ],
+      "note": "",
+      "pending_run": "muleguard.cli.nested_cv --repeats 3 --inner 4",
+      "status": "DERIVED",
+      "detail": {
+        "copied_from": "artifacts/predictions/nested_oof.parquet",
+        "sha256": "eae0988c9a317d3b155c0cd367bff1c9caf9c6cc3eab2637cbbc283824468488"
+      },
+      "sha256": "eae0988c9a317d3b155c0cd367bff1c9caf9c6cc3eab2637cbbc283824468488",
+      "bytes": 107464
+    },
+    {
+      "spec": "artifacts/predictions/final_model_oof_predictions.parquet",
+      "sources": [
+        "artifacts/predictions/oof_v2.parquet"
+      ],
+      "note": "champion dev OOF; re-copied whenever the champion changes",
+      "pending_run": "",
+      "status": "DERIVED",
+      "detail": {
+        "copied_from": "artifacts/predictions/oof_v2.parquet",
+        "sha256": "69c73c8fa03ad8327a27a335a824b925a34a872b2812649d3e5547842fbd0499"
+      },
+      "sha256": "69c73c8fa03ad8327a27a335a824b925a34a872b2812649d3e5547842fbd0499",
+      "bytes": 2732978
+    },
+    {
+      "spec": "artifacts/features/feature_dictionary.json",
+      "sources": [],
+      "note": "",
+      "pending_run": "",
+      "status": "PRESENT",
+      "sha256": "2940fda0ca5c6110ffcc1e5d4fa2de075b22bebe6a1e729349eac69647d34d43",
+      "bytes": 2530510
+    },
+    {
+      "spec": "artifacts/features/selected_features.json",
+      "sources": [],
+      "note": "",
+      "pending_run": "",
+      "status": "PRESENT",
+      "sha256": "b968522ea544ddb706d923242ad5535e254d1ce4d172b5e8705596f83ca5799a",
+      "bytes": 8182
+    },
+    {
+      "spec": "artifacts/features/selection_frequency.csv",
+      "sources": [],
+      "note": "",
+      "pending_run": "",
+      "status": "PRESENT",
+      "sha256": "7127fea89a2c81c4304417ea8e73139fde5bd3d51563302421167be1a9f167df",
+      "bytes": 48322
+    },
+    {
+      "spec": "artifacts/features/quarantined_features.json",
+      "sources": [],
+      "note": "",
+      "pending_run": "",
+      "status": "PRESENT",
+      "sha256": "50211ca78fffe26c75e3c03dc57cf1b7715c2a888c8af70932754b61e73759fd",
+      "bytes": 4056
+    }
+  ],
+  "report_pointers_written": [
+    "docs/DESCRIPTION_VALIDATION_REPORT.md",
+    "docs/FEATURE_AVAILABILITY_FIREWALL.md",
+    "docs/FINAL_LEAKAGE_FORENSICS.md",
+    "docs/NESTED_CV_MODEL_TOURNAMENT.md",
+    "docs/HIDDEN_VALIDATION_READINESS.md",
+    "docs/POSITIVE_REMOVAL_STABILITY.md",
+    "docs/ADVERSARIAL_VALIDATION_REPORT.md",
+    "docs/CALIBRATION_AND_THRESHOLDS.md",
+    "docs/FALSE_POSITIVE_VALIDATION.md",
+    "docs/VALIDATION_LAB_TEST_REPORT.md",
+    "docs/SEALED_VALIDATION_PROTOCOL.md",
+    "docs/UI_METRIC_CONSISTENCY.md",
+    "docs/OFFLINE_RUNTIME_TEST.md",
+    "docs/SECURITY_TEST_REPORT.md",
+    "docs/FINAL_MODEL_CARD.md"
+  ],
+  "index": "docs/ARTIFACT_AND_REPORT_INDEX.md"
+}

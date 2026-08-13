@@ -1,0 +1,619 @@
+{
+  "frozen_policy": {
+    "critical_risk": 0.9338487190474695,
+    "urgent_risk": 0.09773832436704985,
+    "standard_risk": 0.013182620557866929,
+    "anomaly_escalation_pct": 99.0,
+    "policy_version": "1.0"
+  },
+  "threshold_candidates": [
+    {
+      "rule": "max_f1",
+      "detail": "threshold at the top-K that maximises F1 on dev OOF",
+      "status": "ADVISORY_REQUIRES_HUMAN_APPROVAL",
+      "applied": false,
+      "threshold": 0.2901325802046365,
+      "alerts": 55,
+      "tp": 47,
+      "fp": 8,
+      "fn": 17,
+      "tn": 7192,
+      "accuracy": 0.9965583700440529,
+      "balanced_accuracy": 0.8666319444444445,
+      "precision": 0.8545454545454545,
+      "recall": 0.734375,
+      "specificity": 0.9988888888888889,
+      "f1": 0.7899159663865547,
+      "f2": 0.7556270096463023,
+      "mcc": 0.7904923574342633,
+      "npv": 0.9976418365931474,
+      "false_positive_rate": 0.0011111111111111111,
+      "false_negative_rate": 0.265625,
+      "fp_per_1000_legitimate": 1.1111111111111112,
+      "number_needed_to_review_per_mule": 1.1702127659574468
+    },
+    {
+      "rule": "max_f2",
+      "detail": "threshold at the top-K that maximises F2 (recall weighted 4x)",
+      "status": "ADVISORY_REQUIRES_HUMAN_APPROVAL",
+      "applied": false,
+      "threshold": 0.10747006794995238,
+      "alerts": 93,
+      "tp": 53,
+      "fp": 40,
+      "fn": 11,
+      "tn": 7160,
+      "accuracy": 0.9929790748898678,
+      "balanced_accuracy": 0.9112847222222222,
+      "precision": 0.5698924731182796,
+      "recall": 0.828125,
+      "specificity": 0.9944444444444445,
+      "f1": 0.6751592356687899,
+      "f2": 0.7593123209169055,
+      "mcc": 0.6837502098693915,
+      "npv": 0.9984660437874774,
+      "false_positive_rate": 0.005555555555555556,
+      "false_negative_rate": 0.171875,
+      "fp_per_1000_legitimate": 5.555555555555555,
+      "number_needed_to_review_per_mule": 1.7547169811320755
+    },
+    {
+      "rule": "target_precision_0.5",
+      "detail": "largest budget whose precision still meets the target",
+      "status": "ADVISORY_REQUIRES_HUMAN_APPROVAL",
+      "applied": false,
+      "threshold": 0.09102077372600006,
+      "alerts": 106,
+      "tp": 53,
+      "fp": 53,
+      "fn": 11,
+      "tn": 7147,
+      "accuracy": 0.9911894273127754,
+      "balanced_accuracy": 0.9103819444444444,
+      "precision": 0.5,
+      "recall": 0.828125,
+      "specificity": 0.9926388888888888,
+      "f1": 0.6235294117647059,
+      "f2": 0.7320441988950276,
+      "mcc": 0.6396253919418008,
+      "npv": 0.9984632578932663,
+      "false_positive_rate": 0.007361111111111111,
+      "false_negative_rate": 0.171875,
+      "fp_per_1000_legitimate": 7.361111111111111,
+      "number_needed_to_review_per_mule": 2.0
+    },
+    {
+      "rule": "target_recall_0.9",
+      "detail": "smallest budget that reaches the recall target",
+      "status": "ADVISORY_REQUIRES_HUMAN_APPROVAL",
+      "applied": false,
+      "threshold": 0.013182620557866929,
+      "alerts": 334,
+      "tp": 58,
+      "fp": 276,
+      "fn": 6,
+      "tn": 6924,
+      "accuracy": 0.9611784140969163,
+      "balanced_accuracy": 0.9339583333333333,
+      "precision": 0.17365269461077845,
+      "recall": 0.90625,
+      "specificity": 0.9616666666666667,
+      "f1": 0.29145728643216084,
+      "f2": 0.4915254237288135,
+      "mcc": 0.3872526628221276,
+      "npv": 0.9991341991341991,
+      "false_positive_rate": 0.03833333333333333,
+      "false_negative_rate": 0.09375,
+      "fp_per_1000_legitimate": 38.333333333333336,
+      "number_needed_to_review_per_mule": 5.758620689655173
+    },
+    {
+      "rule": "fixed_alert_budget_25",
+      "detail": "fixed analyst capacity per scoring batch",
+      "status": "ADVISORY_REQUIRES_HUMAN_APPROVAL",
+      "applied": false,
+      "threshold": 0.9338487190474695,
+      "alerts": 25,
+      "tp": 25,
+      "fp": 0,
+      "fn": 39,
+      "tn": 7200,
+      "accuracy": 0.9946310572687225,
+      "balanced_accuracy": 0.6953125,
+      "precision": 1.0,
+      "recall": 0.390625,
+      "specificity": 1.0,
+      "f1": 0.5617977528089888,
+      "f2": 0.44483985765124556,
+      "mcc": 0.6233141374003425,
+      "npv": 0.9946125155408205,
+      "false_positive_rate": 0.0,
+      "false_negative_rate": 0.609375,
+      "fp_per_1000_legitimate": 0.0,
+      "number_needed_to_review_per_mule": 1.0
+    },
+    {
+      "rule": "fixed_alert_budget_100",
+      "detail": "fixed analyst capacity per scoring batch",
+      "status": "ADVISORY_REQUIRES_HUMAN_APPROVAL",
+      "applied": false,
+      "threshold": 0.09773832436704985,
+      "alerts": 100,
+      "tp": 53,
+      "fp": 47,
+      "fn": 11,
+      "tn": 7153,
+      "accuracy": 0.9920154185022027,
+      "balanced_accuracy": 0.910798611111111,
+      "precision": 0.53,
+      "recall": 0.828125,
+      "specificity": 0.9934722222222222,
+      "f1": 0.6463414634146342,
+      "f2": 0.7443820224719102,
+      "mcc": 0.6589271599891376,
+      "npv": 0.998464544946957,
+      "false_positive_rate": 0.006527777777777778,
+      "false_negative_rate": 0.171875,
+      "fp_per_1000_legitimate": 6.527777777777778,
+      "number_needed_to_review_per_mule": 1.8867924528301887
+    },
+    {
+      "rule": "fixed_fpr_0.001",
+      "detail": "largest budget with at most 7 false alerts (0.001 of 7200 legitimate accounts)",
+      "status": "ADVISORY_REQUIRES_HUMAN_APPROVAL",
+      "applied": false,
+      "threshold": 0.30384467339569193,
+      "alerts": 53,
+      "tp": 46,
+      "fp": 7,
+      "fn": 18,
+      "tn": 7193,
+      "accuracy": 0.9965583700440529,
+      "balanced_accuracy": 0.8588888888888888,
+      "precision": 0.8679245283018868,
+      "recall": 0.71875,
+      "specificity": 0.9990277777777777,
+      "f1": 0.7863247863247864,
+      "f2": 0.7443365695792881,
+      "mcc": 0.7881530511830954,
+      "npv": 0.9975038136180835,
+      "false_positive_rate": 0.0009722222222222222,
+      "false_negative_rate": 0.28125,
+      "fp_per_1000_legitimate": 0.9722222222222222,
+      "number_needed_to_review_per_mule": 1.1521739130434783
+    },
+    {
+      "rule": "fixed_fpr_0.005",
+      "detail": "largest budget with at most 36 false alerts (0.005 of 7200 legitimate accounts)",
+      "status": "ADVISORY_REQUIRES_HUMAN_APPROVAL",
+      "applied": false,
+      "threshold": 0.12127057666861062,
+      "alerts": 87,
+      "tp": 51,
+      "fp": 36,
+      "fn": 13,
+      "tn": 7164,
+      "accuracy": 0.9932544052863436,
+      "balanced_accuracy": 0.8959375,
+      "precision": 0.5862068965517241,
+      "recall": 0.796875,
+      "specificity": 0.995,
+      "f1": 0.6754966887417218,
+      "f2": 0.7434402332361516,
+      "mcc": 0.6802707034187939,
+      "npv": 0.9981886582137384,
+      "false_positive_rate": 0.005,
+      "false_negative_rate": 0.203125,
+      "fp_per_1000_legitimate": 5.0,
+      "number_needed_to_review_per_mule": 1.7058823529411764
+    },
+    {
+      "rule": "fixed_fpr_0.01",
+      "detail": "largest budget with at most 72 false alerts (0.01 of 7200 legitimate accounts)",
+      "status": "ADVISORY_REQUIRES_HUMAN_APPROVAL",
+      "applied": false,
+      "threshold": 0.06848685995415076,
+      "alerts": 126,
+      "tp": 54,
+      "fp": 72,
+      "fn": 10,
+      "tn": 7128,
+      "accuracy": 0.9887114537444934,
+      "balanced_accuracy": 0.916875,
+      "precision": 0.42857142857142855,
+      "recall": 0.84375,
+      "specificity": 0.99,
+      "f1": 0.5684210526315789,
+      "f2": 0.706806282722513,
+      "mcc": 0.5967858781014551,
+      "npv": 0.9985990473521995,
+      "false_positive_rate": 0.01,
+      "false_negative_rate": 0.15625,
+      "fp_per_1000_legitimate": 10.0,
+      "number_needed_to_review_per_mule": 2.3333333333333335
+    }
+  ],
+  "at_frozen_thresholds": [
+    {
+      "tier": "CRITICAL_REVIEW",
+      "threshold_key": "critical_risk",
+      "policy_version": "1.0",
+      "frozen": true,
+      "modified_by_this_run": false,
+      "threshold": 0.9338487190474695,
+      "alerts": 25,
+      "tp": 25,
+      "fp": 0,
+      "fn": 39,
+      "tn": 7200,
+      "accuracy": 0.9946310572687225,
+      "balanced_accuracy": 0.6953125,
+      "precision": 1.0,
+      "recall": 0.390625,
+      "specificity": 1.0,
+      "f1": 0.5617977528089888,
+      "f2": 0.44483985765124556,
+      "mcc": 0.6233141374003425,
+      "npv": 0.9946125155408205,
+      "false_positive_rate": 0.0,
+      "false_negative_rate": 0.609375,
+      "fp_per_1000_legitimate": 0.0,
+      "number_needed_to_review_per_mule": 1.0
+    },
+    {
+      "tier": "URGENT_REVIEW",
+      "threshold_key": "urgent_risk",
+      "policy_version": "1.0",
+      "frozen": true,
+      "modified_by_this_run": false,
+      "threshold": 0.09773832436704985,
+      "alerts": 100,
+      "tp": 53,
+      "fp": 47,
+      "fn": 11,
+      "tn": 7153,
+      "accuracy": 0.9920154185022027,
+      "balanced_accuracy": 0.910798611111111,
+      "precision": 0.53,
+      "recall": 0.828125,
+      "specificity": 0.9934722222222222,
+      "f1": 0.6463414634146342,
+      "f2": 0.7443820224719102,
+      "mcc": 0.6589271599891376,
+      "npv": 0.998464544946957,
+      "false_positive_rate": 0.006527777777777778,
+      "false_negative_rate": 0.171875,
+      "fp_per_1000_legitimate": 6.527777777777778,
+      "number_needed_to_review_per_mule": 1.8867924528301887
+    },
+    {
+      "tier": "STANDARD_REVIEW",
+      "threshold_key": "standard_risk",
+      "policy_version": "1.0",
+      "frozen": true,
+      "modified_by_this_run": false,
+      "threshold": 0.013182620557866929,
+      "alerts": 334,
+      "tp": 58,
+      "fp": 276,
+      "fn": 6,
+      "tn": 6924,
+      "accuracy": 0.9611784140969163,
+      "balanced_accuracy": 0.9339583333333333,
+      "precision": 0.17365269461077845,
+      "recall": 0.90625,
+      "specificity": 0.9616666666666667,
+      "f1": 0.29145728643216084,
+      "f2": 0.4915254237288135,
+      "mcc": 0.3872526628221276,
+      "npv": 0.9991341991341991,
+      "false_positive_rate": 0.03833333333333333,
+      "false_negative_rate": 0.09375,
+      "fp_per_1000_legitimate": 38.333333333333336,
+      "number_needed_to_review_per_mule": 5.758620689655173
+    }
+  ],
+  "analyst_budgets": {
+    "grid": [
+      {
+        "budget": 10,
+        "basis": "absolute"
+      },
+      {
+        "budget": 18,
+        "basis": "absolute"
+      },
+      {
+        "budget": 25,
+        "basis": "absolute"
+      },
+      {
+        "budget": 50,
+        "basis": "absolute"
+      },
+      {
+        "budget": 73,
+        "basis": "top_1pct"
+      },
+      {
+        "budget": 100,
+        "basis": "absolute"
+      },
+      {
+        "budget": 145,
+        "basis": "top_2pct"
+      }
+    ],
+    "points": {
+      "10": {
+        "budget": 10,
+        "true_positives_mean": 10.0,
+        "true_positives_per_repeat": [
+          10,
+          10,
+          10
+        ],
+        "false_positives_mean": 0.0,
+        "recall": {
+          "mean": 0.15625,
+          "std": 0.0,
+          "min": 0.15625,
+          "max": 0.15625,
+          "per_repeat": [
+            0.15625,
+            0.15625,
+            0.15625
+          ],
+          "n_repeats": 3
+        },
+        "precision": {
+          "mean": 1.0,
+          "std": 0.0,
+          "min": 1.0,
+          "max": 1.0,
+          "per_repeat": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "n_repeats": 3
+        },
+        "recall_ceiling_at_this_budget": 0.15625,
+        "number_needed_to_review_per_mule": 1.0,
+        "fp_per_1000_legitimate": 0.0
+      },
+      "18": {
+        "budget": 18,
+        "true_positives_mean": 18.0,
+        "true_positives_per_repeat": [
+          18,
+          18,
+          18
+        ],
+        "false_positives_mean": 0.0,
+        "recall": {
+          "mean": 0.28125,
+          "std": 0.0,
+          "min": 0.28125,
+          "max": 0.28125,
+          "per_repeat": [
+            0.28125,
+            0.28125,
+            0.28125
+          ],
+          "n_repeats": 3
+        },
+        "precision": {
+          "mean": 1.0,
+          "std": 0.0,
+          "min": 1.0,
+          "max": 1.0,
+          "per_repeat": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "n_repeats": 3
+        },
+        "recall_ceiling_at_this_budget": 0.28125,
+        "number_needed_to_review_per_mule": 1.0,
+        "fp_per_1000_legitimate": 0.0
+      },
+      "25": {
+        "budget": 25,
+        "true_positives_mean": 25.0,
+        "true_positives_per_repeat": [
+          25,
+          25,
+          25
+        ],
+        "false_positives_mean": 0.0,
+        "recall": {
+          "mean": 0.390625,
+          "std": 0.0,
+          "min": 0.390625,
+          "max": 0.390625,
+          "per_repeat": [
+            0.390625,
+            0.390625,
+            0.390625
+          ],
+          "n_repeats": 3
+        },
+        "precision": {
+          "mean": 1.0,
+          "std": 0.0,
+          "min": 1.0,
+          "max": 1.0,
+          "per_repeat": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "n_repeats": 3
+        },
+        "recall_ceiling_at_this_budget": 0.390625,
+        "number_needed_to_review_per_mule": 1.0,
+        "fp_per_1000_legitimate": 0.0
+      },
+      "50": {
+        "budget": 50,
+        "true_positives_mean": 41.333333333333336,
+        "true_positives_per_repeat": [
+          41,
+          44,
+          39
+        ],
+        "false_positives_mean": 8.666666666666664,
+        "recall": {
+          "mean": 0.6458333333333334,
+          "std": 0.03210632293213009,
+          "min": 0.609375,
+          "max": 0.6875,
+          "per_repeat": [
+            0.640625,
+            0.6875,
+            0.609375
+          ],
+          "n_repeats": 3
+        },
+        "precision": {
+          "mean": 0.8266666666666667,
+          "std": 0.04109609335312651,
+          "min": 0.78,
+          "max": 0.88,
+          "per_repeat": [
+            0.82,
+            0.88,
+            0.78
+          ],
+          "n_repeats": 3
+        },
+        "recall_ceiling_at_this_budget": 0.78125,
+        "number_needed_to_review_per_mule": 1.2096774193548387,
+        "fp_per_1000_legitimate": 1.2037037037037033
+      },
+      "73": {
+        "budget": 73,
+        "true_positives_mean": 47.0,
+        "true_positives_per_repeat": [
+          45,
+          51,
+          45
+        ],
+        "false_positives_mean": 26.0,
+        "recall": {
+          "mean": 0.734375,
+          "std": 0.04419417382415922,
+          "min": 0.703125,
+          "max": 0.796875,
+          "per_repeat": [
+            0.703125,
+            0.796875,
+            0.703125
+          ],
+          "n_repeats": 3
+        },
+        "precision": {
+          "mean": 0.6438356164383562,
+          "std": 0.03874557705131767,
+          "min": 0.6164383561643836,
+          "max": 0.6986301369863014,
+          "per_repeat": [
+            0.616438,
+            0.69863,
+            0.616438
+          ],
+          "n_repeats": 3
+        },
+        "recall_ceiling_at_this_budget": 1.0,
+        "number_needed_to_review_per_mule": 1.553191489361702,
+        "fp_per_1000_legitimate": 3.611111111111111
+      },
+      "100": {
+        "budget": 100,
+        "true_positives_mean": 50.0,
+        "true_positives_per_repeat": [
+          48,
+          51,
+          51
+        ],
+        "false_positives_mean": 50.0,
+        "recall": {
+          "mean": 0.78125,
+          "std": 0.02209708691207961,
+          "min": 0.75,
+          "max": 0.796875,
+          "per_repeat": [
+            0.75,
+            0.796875,
+            0.796875
+          ],
+          "n_repeats": 3
+        },
+        "precision": {
+          "mean": 0.5,
+          "std": 0.014142135623730963,
+          "min": 0.48,
+          "max": 0.51,
+          "per_repeat": [
+            0.48,
+            0.51,
+            0.51
+          ],
+          "n_repeats": 3
+        },
+        "recall_ceiling_at_this_budget": 1.0,
+        "number_needed_to_review_per_mule": 2.0,
+        "fp_per_1000_legitimate": 6.944444444444445
+      },
+      "145": {
+        "budget": 145,
+        "true_positives_mean": 52.0,
+        "true_positives_per_repeat": [
+          50,
+          51,
+          55
+        ],
+        "false_positives_mean": 93.0,
+        "recall": {
+          "mean": 0.8125,
+          "std": 0.03375385780420761,
+          "min": 0.78125,
+          "max": 0.859375,
+          "per_repeat": [
+            0.78125,
+            0.796875,
+            0.859375
+          ],
+          "n_repeats": 3
+        },
+        "precision": {
+          "mean": 0.3586206896551724,
+          "std": 0.014898254479098516,
+          "min": 0.3448275862068966,
+          "max": 0.3793103448275862,
+          "per_repeat": [
+            0.344828,
+            0.351724,
+            0.37931
+          ],
+          "n_repeats": 3
+        },
+        "recall_ceiling_at_this_budget": 1.0,
+        "number_needed_to_review_per_mule": 2.7884615384615383,
+        "fp_per_1000_legitimate": 12.916666666666666
+      }
+    }
+  },
+  "measured_on": "FLAT",
+  "__provenance__": {
+    "spec_section": "57",
+    "derived_from": [
+      "artifacts/metrics/lens_stack_oof_v2.json",
+      "artifacts/metrics/metric_battery.json"
+    ],
+    "regenerated_utc": "2026-08-13T02:28:10+00:00",
+    "note": "The frozen policy is the shipped one; the candidate table is what it was chosen from."
+  }
+}

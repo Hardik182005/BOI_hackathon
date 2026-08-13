@@ -1,0 +1,14 @@
+arm,metric,std_of_paired_diff,sign_test_p,wilcoxon_p,paired_t_p,verdict,protocol
+drop:TOTAL_ALL_RAILS,0.68344,,,,,relative_drop=0.1215,FLAT
+drop:UPI,0.71167,,,,,relative_drop=0.0852,FLAT
+drop:NON_CASH_CHQ,0.72559,,,,,relative_drop=0.0673,FLAT
+drop:BALANCE,0.73354,,,,,relative_drop=0.0571,FLAT
+drop:LOAN,0.73747,,,,,relative_drop=0.0521,FLAT
+drop:ENGINEERED_META,0.73979,,,,,relative_drop=0.0491,FLAT
+drop:ELEC_XFER,0.73981,,,,,relative_drop=0.0491,FLAT
+drop:MOBILE_BANKING,0.74661,,,,,relative_drop=0.0403,FLAT
+drop:CASH,0.74984,,,,,relative_drop=0.0362,FLAT
+drop:NET_BANKING,0.76258,,,,,relative_drop=0.0198,FLAT
+drop:GST,0.76569,,,,,relative_drop=0.0158,FLAT
+drop:ATM,0.76802,,,,,relative_drop=0.0128,FLAT
+drop:UPI_XFER,0.78728,,,,,relative_drop=-0.012,FLAT

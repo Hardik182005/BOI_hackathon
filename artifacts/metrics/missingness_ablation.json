@@ -1,0 +1,180 @@
+{
+  "generated_utc": "2026-08-12T16:32:53.904016+00:00",
+  "question": "Does the missingness signature improve the model?",
+  "design": {
+    "protocol": "NESTED, paired on byte-identical outer folds",
+    "family": "histgb",
+    "hyperparameters": "FIXED across both arms - not tuned per arm",
+    "feature_set_size": 120,
+    "n_repeats": 3,
+    "n_outer_folds": 15,
+    "seed": 42,
+    "signature_fitted": "inside each outer fold, on training rows only",
+    "max_flags": 200
+  },
+  "without": {
+    "arm": "WITHOUT",
+    "pr_auc_mean": 0.7906796307907591,
+    "pr_auc_std": 0.011789153260689479,
+    "pr_auc_per_repeat": [
+      0.77699,
+      0.80577,
+      0.78928
+    ],
+    "roc_auc_mean": 0.954533420138889,
+    "fold_ap": [
+      0.8609,
+      0.98859,
+      0.89502,
+      0.51885,
+      0.68806,
+      0.66342,
+      0.84081,
+      0.82028,
+      0.78004,
+      0.97907,
+      0.77547,
+      0.84269,
+      0.8467,
+      0.71326,
+      0.82347
+    ]
+  },
+  "with": {
+    "arm": "WITH",
+    "pr_auc_mean": 0.8482720377863213,
+    "pr_auc_std": 0.019208961190639973,
+    "pr_auc_per_repeat": [
+      0.82241,
+      0.854,
+      0.8684
+    ],
+    "roc_auc_mean": 0.983033130787037,
+    "fold_ap": [
+      0.90133,
+      1.0,
+      0.77264,
+      0.61849,
+      0.81521,
+      0.73308,
+      0.90585,
+      0.82057,
+      0.89241,
+      0.96528,
+      0.76726,
+      0.9256,
+      0.92723,
+      0.91325,
+      0.82025
+    ]
+  },
+  "paired": {
+    "mean_gain": 0.04945,
+    "median_gain": 0.06504,
+    "std_of_paired_diff": 0.0737,
+    "per_fold_gain": [
+      0.04043,
+      0.01141,
+      -0.12238,
+      0.09964,
+      0.12715,
+      0.06966,
+      0.06504,
+      0.00029,
+      0.11237,
+      -0.01379,
+      -0.00821,
+      0.08291,
+      0.08053,
+      0.19999,
+      -0.00322
+    ],
+    "n_folds_improved": 11,
+    "n_folds": 15,
+    "sign_test_p_two_sided": 0.11847,
+    "note": "Paired on identical folds, so the relevant yardstick is the spread of the paired difference, not the 0.0905 unpaired seed-noise floor."
+  },
+  "indicator_stability": {
+    "missingness_cols_selected_per_fold": [
+      18,
+      19,
+      20,
+      18,
+      17,
+      11,
+      17,
+      17,
+      13,
+      16,
+      17,
+      19,
+      15,
+      18,
+      18
+    ],
+    "mean_selected_per_fold": 16.87,
+    "n_distinct_selected": 31,
+    "survived_all_folds": [
+      "MX_FAMCNT__AADHAAR_PAYMENT_BRIDGE",
+      "MX_FAMCNT__LOAN",
+      "MX_FAMRATIO__LOAN",
+      "MX_NULL__F3240",
+      "MX_NULL__F3348"
+    ],
+    "survived_80pct_folds": [
+      "MX_FAMCNT__AADHAAR_PAYMENT_BRIDGE",
+      "MX_FAMCNT__ELEC_XFER",
+      "MX_FAMCNT__FEES_AND_CHARGES",
+      "MX_FAMCNT__LOAN",
+      "MX_FAMCNT__NET_BANKING",
+      "MX_FAMRATIO__AADHAAR_PAYMENT_BRIDGE",
+      "MX_FAMRATIO__FEES_AND_CHARGES",
+      "MX_FAMRATIO__LOAN",
+      "MX_NULL__F3240",
+      "MX_NULL__F3348",
+      "MX_NULL__F3395"
+    ],
+    "selection_frequency": {
+      "MX_FAMCNT__AADHAAR_PAYMENT_BRIDGE": 1.0,
+      "MX_FAMCNT__LOAN": 1.0,
+      "MX_FAMRATIO__LOAN": 1.0,
+      "MX_NULL__F3240": 1.0,
+      "MX_NULL__F3348": 1.0,
+      "MX_FAMCNT__FEES_AND_CHARGES": 0.9333,
+      "MX_FAMRATIO__AADHAAR_PAYMENT_BRIDGE": 0.9333,
+      "MX_NULL__F3395": 0.9333,
+      "MX_FAMCNT__ELEC_XFER": 0.8,
+      "MX_FAMCNT__NET_BANKING": 0.8,
+      "MX_FAMRATIO__FEES_AND_CHARGES": 0.8,
+      "MX_FAMCNT__GST": 0.7333,
+      "MX_SHORTGAP__GST__L14D_missing_L31D_present": 0.7333,
+      "MX_FAMCNT__ATM": 0.6667,
+      "MX_FAMCNT__MOBILE_BANKING": 0.5333,
+      "MX_FAMRATIO__ATM": 0.5333,
+      "MX_FAMRATIO__NET_BANKING": 0.5333,
+      "MX_FAMRATIO__ELEC_XFER": 0.4667,
+      "MX_FAMRATIO__GST": 0.4667,
+      "MX_FAMCNT__UPI": 0.3333,
+      "MX_FAMRATIO__MOBILE_BANKING": 0.3333,
+      "MX_FAMCNT__UPI_XFER": 0.2,
+      "MX_FAMRATIO__STANDING_INSTRUCTION": 0.2,
+      "MX_SHORTGAP__GST__L7D_missing_L31D_present": 0.2,
+      "MX_FAMCNT__STANDING_INSTRUCTION": 0.1333,
+      "MX_FAMRATIO__CASH": 0.1333,
+      "MX_FAMRATIO__UPI": 0.1333,
+      "MX_FAMRATIO__UPI_XFER": 0.1333,
+      "MX_FAMCNT__BALANCE": 0.0667,
+      "MX_FAMCNT__CASH": 0.0667,
+      "MX_FAMCNT__POS_MERCHANT": 0.0667
+    }
+  },
+  "decision": {
+    "keep": true,
+    "conditions": {
+      "mean_gain_positive": true,
+      "improved_in_at_least_70pct_of_folds": true,
+      "at_least_3_indicators_stable_in_80pct_of_folds": true
+    },
+    "rule": "All three conditions are required. A positive mean with unstable indicators is rejected as noise."
+  }
+}

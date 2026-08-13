@@ -1,0 +1,53 @@
+{
+  "captured_utc": "2026-07-10T18:37:46.141142+00:00",
+  "git": {
+    "branch": "main",
+    "commit_sha": "1f222e1708cea177236e275bee408bcd51a40f26",
+    "is_dirty": "no"
+  },
+  "python": "3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)]",
+  "python_executable": "E:\\BOI\\BOI_hackathon\\.venv\\Scripts\\python.exe",
+  "platform": "Windows-11-10.0.22631-SP0",
+  "processor": "Intel64 Family 6 Model 140 Stepping 1, GenuineIntel",
+  "cpu_count_logical": 8,
+  "cpu_count_physical": 4,
+  "ram_total_gb": 16.93,
+  "ram_available_gb": 2.66,
+  "disk_free_gb": 1675.55,
+  "cuda_available": false,
+  "gpu_names": [],
+  "compute_mode": "cpu_16gb",
+  "seed": 42,
+  "packages": {
+    "numpy": "2.4.6",
+    "pandas": "3.0.3",
+    "polars": "1.42.1",
+    "pyarrow": "25.0.0",
+    "fastexcel": "0.20.2",
+    "openpyxl": "3.1.5",
+    "scikit-learn": "1.9.0",
+    "lightgbm": "4.6.0",
+    "xgboost": "3.3.0",
+    "catboost": "1.2.10",
+    "optuna": "4.9.0",
+    "shap": "0.52.0",
+    "scipy": "1.18.0",
+    "matplotlib": "3.11.0",
+    "pydantic": "2.13.4",
+    "fastapi": "0.139.0",
+    "uvicorn": "0.51.0",
+    "httpx": "0.28.1",
+    "jinja2": "3.1.6",
+    "joblib": "1.5.3",
+    "pytest": "9.1.1",
+    "pyyaml": "6.0.3",
+    "psutil": "7.2.2"
+  },
+  "__provenance__": {
+    "spec_section": "57",
+    "spec_name_of": "artifacts/environment_snapshot.json",
+    "source_sha256": "c81e6d23e98cd8fb83aa266708d25e7906f8f8ef904f881c28095a16c149d14e",
+    "regenerated_utc": "2026-08-13T02:28:10+00:00",
+    "note": "Content is the source file's, unmodified. This file exists because the final-validation prompt names it; the source is the working copy the pipeline writes."
+  }
+}

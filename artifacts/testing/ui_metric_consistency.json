@@ -1,0 +1,69 @@
+{
+  "generated_utc": "2026-07-10T23:02:24.937245+00:00",
+  "backend": "http://127.0.0.1:8001",
+  "n_checks": 6,
+  "n_passed": 6,
+  "all_passed": true,
+  "checks": [
+    {
+      "check": "metrics_has_locked_test_pr_auc",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "model_manifest_matches_artifact",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "case_CASE-18A744455E_queue_equals_detail",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "case_CASE-45C8DE5165_queue_equals_detail",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "case_CASE-DF00B7CDAC_queue_equals_detail",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "ui_binds_backend_fields_only",
+      "passed": true,
+      "detail": "frontend api.ts performs no arithmetic on scores; verified by code review + vitest no-fake-data test"
+    }
+  ],
+  "sampled_cases": [
+    {
+      "case_id": "CASE-18A744455E",
+      "consistent": true,
+      "risk": 0.9999999716033127,
+      "tier": "CRITICAL_REVIEW",
+      "model_version": "1.0.0"
+    },
+    {
+      "case_id": "CASE-45C8DE5165",
+      "consistent": true,
+      "risk": 0.960187583909551,
+      "tier": "URGENT_REVIEW",
+      "model_version": "1.0.0"
+    },
+    {
+      "case_id": "CASE-DF00B7CDAC",
+      "consistent": true,
+      "risk": 5.60569752649096e-08,
+      "tier": "STANDARD_REVIEW",
+      "model_version": "1.0.0"
+    }
+  ],
+  "__provenance__": {
+    "spec_section": "57",
+    "spec_name_of": "artifacts/testing/api_frontend_consistency.json",
+    "source_sha256": "cceea680d0ca6c8571595a9e2c8e772cf9edbbd729a3872d1a68b95bb9b6d73e",
+    "regenerated_utc": "2026-08-13T02:28:10+00:00",
+    "note": "Content is the source file's, unmodified. This file exists because the final-validation prompt names it; the source is the working copy the pipeline writes."
+  }
+}
