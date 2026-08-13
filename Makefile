@@ -121,3 +121,35 @@ export-submission:
 
 release-gate:
 	$(PY) -m muleguard.cli.release_gate
+
+# Section 56. The sixteen required figures, from saved predictions only. A plot
+# whose evidence does not exist yet is reported as skipped, never faked.
+plots-final:
+	$(PY) -m muleguard.evaluation.plots_final
+
+# Global mean |SHAP| for the importance figure. Refits each fold to attribute
+# out-of-fold, so it costs a few minutes; not part of the demo path.
+global-shap:
+	$(PY) -m muleguard.cli.global_shap
+
+# Sections 57-58. Regenerates every spec-named artifact from its real source and
+# rewrites docs/ARTIFACT_AND_REPORT_INDEX.md. Safe to run any time.
+reconcile-artifacts:
+	$(PY) -m muleguard.cli.reconcile_artifacts
+
+# Section 60. Fails when an artifact under artifacts/metrics/ has no ledger
+# entry - that is the "no forgotten experiments" rule, enforced not remembered.
+experiment-ledger:
+	$(PY) -m muleguard.cli.experiment_ledger
+
+# Section 65. Assembles the A-L final response from artifacts. Exit 0 only when
+# every blocker is clear and every criterion met; 2 while evidence is open.
+final-verdict:
+	$(PY) -m muleguard.cli.final_verdict
+
+# Section 59. Default mode never retrains - that is the judge demo path.
+final-validation:
+	bash scripts/final_validation.sh
+
+final-validation-retrain:
+	bash scripts/final_validation.sh --full-retrain
