@@ -253,23 +253,117 @@ A positive mean with unstable indicators is **rejected as noise**. The third con
 `updates1` asks for and the one most likely to fail: it requires the *same* missingness columns to
 keep surviving the selector across folds, not merely that some missingness column helps somewhere.
 
-## 9. Verdict
+## 9. Primary result
 
-*To be completed from `artifacts/metrics/missingness_ablation.json`.*
+`--family histgb --repeats 3 --n-feat 120 --max-flags 200`, 15 outer folds, ~51 training positives
+and ~13 validation positives per fold. `artifacts/metrics/missingness_ablation.json`.
 
-The run in flight is `--family histgb --repeats 3 --n-feat 120 --max-flags 200`. `histgb` is used
-because it is the current nested leader; the served champion's family (`xgboost`) is available via
-`--family xgboost` as a confirmation arm.
+| arm | PR-AUC (mean of 3 repeats) | per-repeat |
+|---|---|---|
+| WITHOUT | 0.79068 ± 0.01179 | 0.77699, 0.80577, 0.78928 |
+| WITH | **0.84827 ± 0.01921** | 0.82241, 0.85400, 0.86840 |
 
-Whatever the outcome, the following hold and are not contingent on it:
+**Mean paired gain +0.04945**, median +0.06504, improved in **11 of 15** folds.
 
-- The probe numbers in sections 3–6 are descriptive and were never used to select a column.
-- If the verdict is REJECT, the module stays in the repository, unused, with this document as the
-  record of why — a measured negative result is a finding, and deleting it would invite someone to
-  repeat the work.
-- If the verdict is KEEP, the champion is not thereby re-promoted. Promotion is a separate decision
-  requiring the full nested tournament, and a KEEP here only means the block earned the right to be
-  offered to it.
+All three pre-registered conditions passed, so the rule returns **KEEP**. But the rule is not the
+whole story, and two things in this output need explaining rather than reporting.
+
+### 9.1 The three significance tests disagree
+
+| test | p (two-sided) | uses magnitude? |
+|---|---|---|
+| exact sign test | **0.11847** | no |
+| Wilcoxon signed-rank | 0.03534 | ranks only |
+| paired t | **0.02495** (t = 2.5106) | yes |
+
+95 % CI on the paired gain: **[0.00721, 0.09170]**.
+
+Per §67 this conflict is investigated rather than resolved in favour of the better number. The
+cause is visible in the per-fold gains:
+
+```
++0.040  +0.011  -0.122  +0.100  +0.127
++0.070  +0.065  +0.000  +0.112  -0.014
+-0.008  +0.083  +0.081  +0.200  -0.003
+```
+
+Three of the four losing folds lose by **−0.003, −0.008 and −0.014** — differences of no practical
+size at all — while the winning folds include +0.200, +0.127 and +0.112. The sign test scores a
+−0.003 fold as a full loss, which is why it is the most conservative of the three and why it
+fails to clear 0.05.
+
+**The honest reading is that the effect is real but the evidence is moderate, not strong.** The
+lower bound of the interval is +0.007, which is close enough to zero that a small true effect
+cannot be excluded. Reporting only the paired t (p = 0.025) would overstate this; reporting only
+the sign test (p = 0.118) would understate it. Both are recorded in the artifact.
+
+### 9.2 One fold loses badly, and it is the one that used the most new columns
+
+Fold r0 f2 falls from 0.89502 to 0.77264, a loss of 0.122 — larger than any single gain except
+r2 f3. That fold also selected **20** missingness columns, the highest of any fold (range 11–20).
+Across the 15 folds the correlation between "missingness columns selected" and "gain" is **−0.301**,
+which with n = 15 is far from significant and is reported as an observation, not a result.
+
+The mechanism it suggests is nonetheless the one the design anticipated: the feature budget is
+fixed at 120, so every missingness column admitted **displaces** a base column. When the selector
+admits many of them into a fold where they do not pay, the fold loses twice — it gains little and
+gives up features that were working. This is the intended cost of a fixed budget and the reason
+the budget was fixed.
+
+Fold-level spread is large in both arms — WITHOUT ranges from 0.519 to 0.989 across folds — which
+is what average precision on ~13 positives looks like. No fold-level number here should be read
+as meaningful on its own.
+
+### 9.3 Indicator stability
+
+31 distinct missingness columns were selected at least once; 11–20 per fold.
+
+**Survived every one of the 15 folds (5):**
+`MX_FAMCNT__AADHAAR_PAYMENT_BRIDGE`, `MX_FAMCNT__LOAN`, `MX_FAMRATIO__LOAN`, `MX_NULL__F3240`,
+`MX_NULL__F3348`.
+
+**Survived at least 80 % of folds (11):** the five above plus
+`MX_FAMCNT__ELEC_XFER`, `MX_FAMCNT__FEES_AND_CHARGES`, `MX_FAMCNT__NET_BANKING`,
+`MX_FAMRATIO__AADHAAR_PAYMENT_BRIDGE`, `MX_FAMRATIO__FEES_AND_CHARGES`, `MX_NULL__F3395`.
+
+This is the condition `updates1` cares most about and it passes convincingly — the requirement was
+3 stable indicators and there are 11. The survivors are not scattered noise: they concentrate on
+whole-block absence for specific payment rails (Aadhaar payment bridge, electronic transfer, net
+banking, loan), which is a coherent story rather than an arbitrary set. It is consistent with mule
+accounts being narrow-purpose accounts that never touch most of a normal customer's rails.
+
+That coherence is suggestive, not confirmatory. It is exactly the kind of post-hoc narrative that
+sounds convincing about any stable feature set, and it is recorded as an observation.
+
+### 9.4 The result is provisional pending a suspect-family check
+
+`MX_FAMCNT__FEES_AND_CHARGES` and `MX_FAMRATIO__FEES_AND_CHARGES` are both among the 80 %
+survivors — and those are precisely the columns whose cohort fingerprint (section 6) could not be
+traced to a cause. §67 requires that a model winning *only* because of a suspicious feature be
+rejected.
+
+So the KEEP above cannot stand on its own. A third arm is running:
+
+```
+.venv/Scripts/python.exe -m muleguard.cli.missingness_ablation \
+  --family histgb --repeats 3 --exclude-contains FEES_AND_CHARGES \
+  --out missingness_ablation_no_fees.json
+```
+
+If the gain largely survives without the FEES columns, the block is carrying broad missingness
+structure and the suspect family is incidental to it. If the gain collapses, the win *was* the
+suspect feature and the honest outcome is REJECT regardless of what the headline number says.
+That arm decides it — section 11 records the outcome.
+
+## 10. What is not concluded, whatever the arms say
+
+- The champion is **not** re-promoted on this evidence. The ablation used `histgb`, the current
+  nested leader, not the served champion's `xgboost`; a confirmation arm on `--family xgboost` is
+  required before any change to the served model is even considered, and promotion is a separate
+  decision made by the nested tournament.
+- Nothing here licenses a hand-written rule keyed to a missingness pattern.
+- The Atlas result in section 7 stands: this block is not evidence that the 11 missed mules become
+  catchable.
 
 ## 10. What this work does not license
 
