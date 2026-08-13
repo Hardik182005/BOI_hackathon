@@ -154,6 +154,109 @@ def test_titles_carry_split_model_and_data_version():
     assert "xgboost_top_120" in subtitle
 
 
+# ---------------------------------------------------------------------------
+# §63/§64/§65 final verdict
+# ---------------------------------------------------------------------------
+def test_verdict_stays_pending_while_evidence_is_missing(tmp_path, monkeypatch):
+    """An empty repository must not be able to produce a PASS."""
+    from muleguard.cli import final_verdict as fv
+
+    monkeypatch.setattr(fv, "ROOT", tmp_path)
+    monkeypatch.setattr(fv.Evidence, "champion_features",
+                        lambda self: (None, "no bundle in this fixture"))
+    payload = fv.build(fv.Evidence())
+
+    assert payload["verdict"] == fv.PENDING_EVIDENCE
+    assert payload["verdict_is_one_of_the_three_permitted"] is False
+    assert all(c["status"] == fv.NOT_MET for c in payload["pass_criteria"])
+
+
+def test_a_quarantined_feature_in_the_bundle_forces_fail(tmp_path, monkeypatch):
+    from muleguard.cli import final_verdict as fv
+
+    monkeypatch.setattr(fv, "ROOT", tmp_path)
+    monkeypatch.setattr(fv.Evidence, "champion_features",
+                        lambda self: (["F1", "F3924"], "fixture bundle"))
+    payload = fv.build(fv.Evidence())
+
+    assert payload["verdict"] == fv.FAIL
+    blocked = [b for b in payload["release_blockers"] if b["status"] == fv.BLOCKED]
+    assert any("F3924" in b["detail"] for b in blocked)
+
+
+def test_evidence_recorded_before_the_champion_is_stale(tmp_path, monkeypatch):
+    """A suite that passed against the previous champion has not judged this one."""
+    from muleguard.cli import final_verdict as fv
+
+    monkeypatch.setattr(fv, "ROOT", tmp_path)
+    (tmp_path / "artifacts/testing").mkdir(parents=True)
+    (tmp_path / "artifacts/testing/backend_results.json").write_text(json.dumps(
+        {"generated_utc": "2026-07-10T23:01:32+00:00", "n_checks": 15,
+         "n_passed": 15, "all_passed": True}), encoding="utf-8")
+    ev = fv.Evidence()
+    ev.champion = "xgboost_top_120"
+    ev.promoted_at = fv._parse_ts("2026-08-12T07:39:08+00:00")
+
+    status, detail, _ = fv._suite(ev, "artifacts/testing/backend_results.json")
+
+    assert status == fv.STALE
+    assert "re-run" in detail
+    # and the same artifact stops being stale once it postdates the promotion
+    ev.promoted_at = fv._parse_ts("2026-07-01T00:00:00+00:00")
+    assert fv._suite(ev, "artifacts/testing/backend_results.json")[0] == fv.CLEAR
+
+
+def test_pass_needs_both_clear_blockers_and_met_criteria(tmp_path, monkeypatch):
+    from muleguard.cli import final_verdict as fv
+
+    monkeypatch.setattr(fv, "ROOT", tmp_path)
+    clear = fv.Item("all good", lambda ev: (fv.CLEAR, "fixture", []))
+    unmet = fv.Item("not yet", lambda ev: (fv.UNVERIFIED, "fixture", []))
+
+    monkeypatch.setattr(fv, "BLOCKERS", [clear])
+    monkeypatch.setattr(fv, "CRITERIA", [("ML", clear)])
+    assert fv.build(fv.Evidence())["verdict"] == fv.PASS
+
+    monkeypatch.setattr(fv, "CRITERIA", [("ML", unmet)])
+    assert fv.build(fv.Evidence())["verdict"] == fv.PENDING_EVIDENCE
+
+
+def test_every_section_63_blocker_line_is_checked():
+    """The blocker list is the spec's, verbatim - not a subset somebody trimmed."""
+    from muleguard.cli import final_verdict as fv
+
+    spec = [
+        "F3924 enters model features",
+        "F3898/F3899 enter accepted model",
+        "F3912/F3913/F3914/F3915 enter accepted model",
+        "F2230 remains suspicious and is still included",
+        "F3916-18 are used without availability evidence",
+        "train-validation overlap",
+        "preprocessing fitted on validation",
+        "feature selection fitted on validation",
+        "test labels used for tuning",
+        "external validation triggers retraining",
+        "fake metrics",
+        "hardcoded dashboard metrics",
+        "prediction row order changes",
+        "model artifact cannot reproduce saved predictions",
+        "UI/backend score mismatch",
+        "Ollama changes scoring",
+        "core requires internet",
+        "core requires MCP",
+        "core requires Claude in Chrome",
+        "P0 defect",
+        "unapproved P1 defect",
+    ]
+    assert [b.text for b in fv.BLOCKERS] == spec
+
+
+def test_a_pending_field_always_names_the_run_that_would_fill_it():
+    from muleguard.cli import final_verdict as fv
+
+    assert fv._pending("make thing").startswith("PENDING - produced by:")
+
+
 def test_the_plot_set_covers_every_figure_section_56_names():
     required = {
         "precision-recall curve", "ROC curve", "calibration curve",
