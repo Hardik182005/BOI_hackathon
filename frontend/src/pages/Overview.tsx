@@ -1,5 +1,6 @@
 import { api, fmtCi, fmtNum, fmtPct, lockedHeadline } from "../api";
 import { Empty, ErrorState, HumanReviewNotice, Loading, RetiredArtifactNotice, TierBadge, usePoll } from "../components";
+import TryPanel from "../TryPanel";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 const TIER_ORDER = ["CRITICAL_REVIEW", "URGENT_REVIEW", "STANDARD_REVIEW", "OOD_REVIEW", "MONITOR"];
@@ -42,6 +43,7 @@ export default function Overview() {
       </p>
       <HumanReviewNotice />
       <RetiredArtifactNotice head={head} />
+      <TryPanel cases={caseList} />
       <div className="grid cols-4">
         <div className="card">
           <h3>Accounts scored (locked test)</h3>

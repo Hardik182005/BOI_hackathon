@@ -19,7 +19,7 @@ const pages = [
   { to: "/features", label: "Feature Intelligence", el: <FeatureIntelligence /> },
   { to: "/drift", label: "Drift & Monitoring", el: <DriftMonitoring /> },
   { to: "/model-card", label: "Model Card", el: <ModelCard /> },
-  { to: "/validation", label: "Validation Lab", el: <ValidationLab /> },
+  { to: "/validation", label: "Test Model / Validation Lab", el: <ValidationLab /> },
   { to: "/value", label: "Business Value", el: <BusinessValue /> },
   { to: "/capacity", label: "Analyst Capacity", el: <CapacityOptimizer /> },
   { to: "/graph", label: "Graph Lab", el: <GraphLab /> },
