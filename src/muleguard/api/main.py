@@ -31,7 +31,7 @@ import uuid
 from typing import Any
 
 import polars as pl
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -69,6 +69,19 @@ app.include_router(proofgraph_router)
 app.include_router(validation_router)
 app.include_router(graph_router)
 app.include_router(capacity_router)
+
+
+@app.post("/v1/validate/upload", tags=["validation"])
+async def validate_upload_alias(file: UploadFile):
+    """Spec-named alias for ``POST /v1/validation/run``.
+
+    The canonical route is the one under the validation router; this exists so
+    an organiser following the written interface hits a working endpoint
+    instead of a 404. Same handler, same seal - no duplicated logic.
+    """
+    from muleguard.api.routes_validation import run_validation
+
+    return await run_validation(file)
 
 _narrator: OllamaNarrator | None = None
 _rate: dict[str, list[float]] = {}

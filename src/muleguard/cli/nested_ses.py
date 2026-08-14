@@ -741,7 +741,13 @@ def stage_families(ctx: dict[str, Any], args) -> dict[str, Any]:
     arms: dict[str, dict[str, Any]] = {}
     ap_by_arm: dict[str, list[float]] = {}
     for arm, pool in pools.items():
-        for size in (args.n_feat,) if arm != "full_clean" else (args.n_feat, 60, 30):
+        # Section 21.1 asks for the subset curve either side of the shipped
+        # size, not only below it: 200 answers "did we cut too deep?" and 100
+        # sits close enough to 120 that a real difference there would mean the
+        # chosen size is sitting on a knife edge.
+        sizes = ((args.n_feat, 200, 100, 60, 30) if arm == "full_clean"
+                 else (args.n_feat,))
+        for size in sizes:
             key = arm if size == args.n_feat else f"{arm}_top{size}"
             aps, sizes = [], []
             for f in ctx["folds"]:

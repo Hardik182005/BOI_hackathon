@@ -178,6 +178,8 @@ class TransactionGraph:
             self.out[f].append((t, a, ts))
             self.inn[t].append((f, a, ts))
         self.accounts = set(self.out) | set(self.inn)
+        self._comp_cache: dict[str, int] | None = None
+        self._scc_cache: dict[str, int] | None = None
 
     # ---- per-account structure -------------------------------------------
 
@@ -226,6 +228,226 @@ class TransactionGraph:
             return None
         gaps.sort()
         return round(gaps[len(gaps) // 2], 2)
+
+    # ---- global structure -------------------------------------------------
+
+    def _components(self) -> dict[str, int]:
+        """Weakly connected component id per account (undirected reachability).
+
+        Cached because it is a whole-graph pass and the UI asks per account.
+        Component membership matters because a mule ring is a connected
+        cluster: an account whose component holds forty others is a different
+        object from an isolated pair, even when their local metrics match.
+        """
+        if self._comp_cache is not None:
+            return self._comp_cache
+        undirected: dict[str, set[str]] = defaultdict(set)
+        for a, nbrs in self.out.items():
+            for b, _, _ in nbrs:
+                undirected[a].add(b)
+                undirected[b].add(a)
+        seen: dict[str, int] = {}
+        cid = 0
+        for start in self.accounts:
+            if start in seen:
+                continue
+            stack = [start]
+            seen[start] = cid
+            while stack:
+                cur = stack.pop()
+                for nxt in undirected.get(cur, ()):
+                    if nxt not in seen:
+                        seen[nxt] = cid
+                        stack.append(nxt)
+            cid += 1
+        self._comp_cache = seen
+        return seen
+
+    def _scc(self) -> dict[str, int]:
+        """Strongly connected component id per account (Tarjan, iterative).
+
+        An SCC of size greater than one means value can return to where it
+        started - the structural definition of layering. Iterative rather than
+        recursive so a deep chain in an uploaded file whose size we do not
+        control cannot exhaust the stack.
+        """
+        if self._scc_cache is not None:
+            return self._scc_cache
+
+        index: dict[str, int] = {}
+        low: dict[str, int] = {}
+        on_stack: dict[str, bool] = {}
+        stack: list[str] = []
+        result: dict[str, int] = {}
+        counter = 0
+        comp = 0
+
+        for root in self.accounts:
+            if root in index:
+                continue
+            work: list[list[Any]] = [[root, 0]]
+            while work:
+                node, pi = work[-1]
+                if pi == 0:
+                    index[node] = low[node] = counter
+                    counter += 1
+                    stack.append(node)
+                    on_stack[node] = True
+                recursed = False
+                succs = self.out.get(node, [])
+                for i in range(pi, len(succs)):
+                    nxt = succs[i][0]
+                    if nxt not in index:
+                        work[-1][1] = i + 1
+                        work.append([nxt, 0])
+                        recursed = True
+                        break
+                    if on_stack.get(nxt):
+                        low[node] = min(low[node], index[nxt])
+                if recursed:
+                    continue
+                if low[node] == index[node]:
+                    while True:
+                        w = stack.pop()
+                        on_stack[w] = False
+                        result[w] = comp
+                        if w == node:
+                            break
+                    comp += 1
+                work.pop()
+                if work:
+                    parent = work[-1][0]
+                    low[parent] = min(low[parent], low[node])
+
+        self._scc_cache = result
+        return result
+
+    def component_metrics(self, account: str) -> dict[str, Any]:
+        """Where this account sits in the wider graph."""
+        comps = self._components()
+        sccs = self._scc()
+        cid = comps.get(account)
+        sid = sccs.get(account)
+        comp_size = sum(1 for v in comps.values() if v == cid) if cid is not None else 0
+        scc_size = sum(1 for v in sccs.values() if v == sid) if sid is not None else 0
+        return {
+            "component_id": cid,
+            "component_size": comp_size,
+            "scc_id": sid,
+            "scc_size": scc_size,
+            "in_multi_account_scc": scc_size > 1,
+            "interpretation": (
+                "an SCC larger than one account means value can return to its "
+                "origin through this account - the structural signature of "
+                "layering" if scc_size > 1 else
+                "this account is not part of any cycle in the uploaded edges"),
+        }
+
+    # ---- proxy detectors ---------------------------------------------------
+
+    def smurfing_proxy(self, account: str, *, small_ratio: float = 0.25,
+                       min_senders: int = 5) -> dict[str, Any]:
+        """Many small credits in, consolidated into materially larger debits.
+
+        A proxy, and named one: without a reporting threshold we cannot claim
+        structuring. What is measurable is the shape - a spread of small
+        inbound amounts from several distinct parties, aggregated outward.
+        """
+        ins, outs = self.inn.get(account, []), self.out.get(account, [])
+        in_amounts = [a for _, a, _ in ins]
+        out_amounts = [a for _, a, _ in outs]
+        senders = len({c for c, _, _ in ins})
+        if not in_amounts or not out_amounts:
+            return {"detected": False,
+                    "reason": "needs both inbound and outbound edges"}
+
+        med_in = sorted(in_amounts)[len(in_amounts) // 2]
+        max_out = max(out_amounts)
+        ratio = med_in / max_out if max_out else 1.0
+        return {
+            "detected": bool(senders >= min_senders and ratio <= small_ratio),
+            "distinct_senders": senders,
+            "median_inbound_amount": round(med_in, 2),
+            "largest_outbound_amount": round(max_out, 2),
+            "inbound_to_outbound_ratio": round(ratio, 4),
+            "thresholds": {"min_senders": min_senders, "small_ratio": small_ratio},
+            "caveat": (
+                "structural proxy only - no regulatory reporting threshold is "
+                "encoded, so this is not a structuring determination"),
+        }
+
+    def shell_distributor_proxy(self, account: str, *, min_recipients: int = 10,
+                                max_senders: int = 2) -> dict[str, Any]:
+        """Few sources in, many destinations out: a distribution point."""
+        senders = len({c for c, _, _ in self.inn.get(account, [])})
+        recipients = len({c for c, _, _ in self.out.get(account, [])})
+        val_in = sum(a for _, a, _ in self.inn.get(account, []))
+        val_out = sum(a for _, a, _ in self.out.get(account, []))
+        return {
+            "detected": bool(recipients >= min_recipients
+                             and 0 < senders <= max_senders),
+            "distinct_senders": senders,
+            "distinct_recipients": recipients,
+            "value_in": round(val_in, 2),
+            "value_out": round(val_out, 2),
+            "retained_share": (round(1 - min(val_out, val_in) / val_in, 4)
+                               if val_in > 0 else None),
+            "thresholds": {"min_recipients": min_recipients,
+                           "max_senders": max_senders},
+            "caveat": (
+                "a legitimate payroll or settlement account has this shape; "
+                "the pattern is a question for a reviewer, not a finding"),
+        }
+
+    def velocity_anomaly(self, account: str, *, window_hours: float = 24.0,
+                         burst_multiple: float = 3.0) -> dict[str, Any]:
+        """Is this account's busiest window far above its own typical rate?
+
+        Compared against the account's own baseline rather than a global one:
+        a corporate account moving money hourly is normal for that account and
+        any absolute threshold would flag it forever.
+        """
+        stamps = sorted(ts for _, _, ts in
+                        self.inn.get(account, []) + self.out.get(account, [])
+                        if ts is not None)
+        if len(stamps) < 4:
+            return {"detected": False,
+                    "reason": "fewer than four timestamped edges - no baseline"}
+
+        span_h = (stamps[-1] - stamps[0]).total_seconds() / 3600.0
+        if span_h <= 0:
+            return {"detected": False, "reason": "all edges share one timestamp"}
+        if span_h < window_hours:
+            # Every edge already falls inside a single window, so there is no
+            # quieter period to compare the busiest one against. Reporting a
+            # ratio here would be arithmetic without meaning.
+            return {"detected": False,
+                    "reason": (f"all activity spans {span_h:.1f}h, shorter than "
+                               f"the {window_hours:.0f}h window - no baseline "
+                               "period exists to compare against"),
+                    "observed_span_hours": round(span_h, 2),
+                    "n_edges": len(stamps)}
+        # Edges per window across the observed span; the span covers at least
+        # one full window, so this is a genuine average rather than a fraction.
+        baseline = len(stamps) / (span_h / window_hours)
+
+        best = 0
+        j = 0
+        for i in range(len(stamps)):
+            while (stamps[i] - stamps[j]).total_seconds() / 3600.0 > window_hours:
+                j += 1
+            best = max(best, i - j + 1)
+
+        multiple = best / baseline if baseline > 0 else 0.0
+        return {
+            "detected": bool(multiple >= burst_multiple),
+            "busiest_window_edges": best,
+            "window_hours": window_hours,
+            "baseline_edges_per_window": round(baseline, 3),
+            "burst_multiple": round(multiple, 3),
+            "threshold_multiple": burst_multiple,
+            "caveat": "compared against this account's own rate, not a global one",
+        }
 
     # ---- patterns ---------------------------------------------------------
 

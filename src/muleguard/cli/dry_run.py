@@ -188,6 +188,79 @@ def _variants(df: pl.DataFrame) -> dict[str, pl.DataFrame]:
         "resolution_fields_present": resolution,
         "category_changes": categories,
         "missing_optional_fields": missing,
+        # Headers spelled as workbook variable names rather than F-numbers.
+        # This must be *scored*, not refused: the data is correct and only the
+        # spelling differs, so a refusal here would be a self-inflicted failure.
+        "variable_name_headers": _variable_name_headers(df),
+    }
+
+
+def _variable_name_headers(df: pl.DataFrame) -> pl.DataFrame:
+    """Rename what can be renamed to the workbook's human-readable names.
+
+    Only names that resolve back unambiguously are used, so the variant tests
+    header resolution rather than testing whether the file survives being made
+    genuinely ambiguous.
+    """
+    from muleguard.validation.column_mapping import build_alias_index, resolve_columns
+
+    _, varnames = build_alias_index()
+    rename: dict[str, str] = {}
+    for col in df.columns:
+        vn = varnames.get(col)
+        if not vn or vn.lower() == "nan" or vn in df.columns:
+            continue
+        # Round-trip: keep it only if the variable name maps back to this exact
+        # feature. Anything ambiguous is left as its F-number.
+        back = resolve_columns([vn])["mapping"].get(vn)
+        if back == col and vn not in rename.values():
+            rename[col] = vn
+    return df.rename(rename) if rename else df
+
+
+def _raw_variants(df: pl.DataFrame) -> dict[str, dict[str, Any]]:
+    """Malformations that cannot be expressed as a valid DataFrame.
+
+    These are the two files that must be **refused**. A corrupt workbook and a
+    file with two columns of the same name are not cosmetic differences - one
+    cannot be parsed at all and the other has no single correct interpretation.
+    Scoring either would mean producing confident numbers from data we did not
+    actually read, so a clean 4xx is the passing outcome here, not a failure.
+    """
+    csv_head = df.head(50)
+
+    # A workbook truncated mid-stream: correct magic bytes, unreadable body.
+    good = MOCK_XLSX.read_bytes()
+    corrupted = good[: len(good) // 3]
+
+    # Two columns with the same name. Written as raw CSV text because polars
+    # will not construct such a frame - which is the point.
+    cols = list(csv_head.columns[:20])
+    dup_header = ",".join(cols + [cols[0]])
+    lines = [dup_header]
+    for row in csv_head.select(cols).iter_rows():
+        vals = [("" if v is None else str(v)) for v in row]
+        lines.append(",".join(vals + [vals[0]]))
+    duplicate_csv = "\n".join(lines).encode("utf-8")
+
+    return {
+        "corrupted_xlsx": {
+            "payload": corrupted,
+            "filename": "corrupted.xlsx",
+            "content_type": ("application/vnd.openxmlformats-officedocument"
+                             ".spreadsheetml.sheet"),
+            "must_be_refused": True,
+            "why": ("a truncated workbook cannot be parsed; scoring it would "
+                    "mean inventing rows"),
+        },
+        "duplicate_columns": {
+            "payload": duplicate_csv,
+            "filename": "duplicate_columns.csv",
+            "content_type": "text/csv",
+            "must_be_refused": True,
+            "why": ("a repeated column name has no single correct reading, so "
+                    "silently keeping one of the two would be a guess"),
+        },
     }
 
 
@@ -276,6 +349,45 @@ def _check_variant(name: str, df: pl.DataFrame, fp_before: str) -> dict[str, Any
         "schema": {k: steps.get(1, {}).get(k) for k in
                    ("n_columns", "n_present", "n_missing_required",
                     "n_unexpected_columns", "schema_completeness")},
+    }
+
+
+def _check_raw_variant(name: str, spec: dict[str, Any],
+                       fp_before: str) -> dict[str, Any]:
+    """Run one malformed payload, where being refused is the passing outcome.
+
+    Judged on three things: the Lab said no, it said no *cleanly* (a 4xx with a
+    reason, not a 500 or a stack trace), and it did not score anything anyway.
+    A crash is not a refusal - it is the same failure wearing a different code.
+    """
+    r = httpx.post(f"{BASE}/v1/validation/run", timeout=TIMEOUT,
+                   files={"file": (spec["filename"], spec["payload"],
+                                   spec["content_type"])})
+    ctype = r.headers.get("content-type", "")
+    body = r.json() if ctype.startswith("application/json") else {"text": r.text[:400]}
+    status = r.status_code
+
+    checks = {
+        "refused": status >= 400,
+        "refused_cleanly": 400 <= status < 500,
+        "did_not_score": not body.get("seal_id"),
+        "gave_a_reason": bool(body.get("detail") or body.get("summary")
+                              or body.get("text")),
+        "model_unchanged": _bundle_fingerprint() == fp_before,
+    }
+    return {
+        "variant": name,
+        "http_status": status,
+        "expectation": "REFUSAL",
+        "why_refusal_is_correct": spec["why"],
+        "seal_id": body.get("seal_id"),
+        "prediction_sha256": None,
+        "compatibility_score": body.get("compatibility_score"),
+        "compatibility_band": body.get("compatibility_band"),
+        "checks": checks,
+        "verdict": "PASS" if all(checks.values()) else "FAIL",
+        "failed_checks": [k for k, v in checks.items() if not v],
+        "summary": body.get("detail") or body.get("summary") or body.get("text"),
     }
 
 
@@ -377,9 +489,17 @@ def run() -> dict[str, Any]:
     results = []
     for name, df in _variants(base_df).items():
         r = _check_variant(name, df, fp_before)
+        r["expectation"] = "SCORED"
         results.append(r)
         log.info("variant %-28s %s (compat %s)", name, r["verdict"],
                  r.get("compatibility_score"))
+
+    # Malformed payloads, judged on being refused rather than on being scored.
+    for name, spec in _raw_variants(base_df).items():
+        r = _check_raw_variant(name, spec, fp_before)
+        results.append(r)
+        log.info("variant %-28s %s (refusal expected, got %s)", name,
+                 r["verdict"], r["http_status"])
 
     baseline = next(r for r in results if r["variant"] == "baseline")
     reveal = _reveal(baseline["seal_id"]) if baseline.get("seal_id") else {

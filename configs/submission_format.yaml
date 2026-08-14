@@ -1,0 +1,60 @@
+# Competition submission export format.
+#
+# The organiser's required output shape is not knowable in advance, so it is
+# configuration rather than code: change this file, re-run
+# ``muleguard.cli.export_predictions``, and the export changes shape without
+# touching the model or any scoring logic.
+#
+# Nothing here can alter a score. The export layer reads frozen predictions
+# and reshapes them; it never fits, recalibrates or re-thresholds.
+submission_format_version: "1.0"
+
+minimal:
+  # The competition file: one identifier column and one prediction column.
+  id_column: row_id
+  # How the id is produced when the upload carries no usable identifier.
+  # positional -> 1..N in the order the rows were uploaded (order is preserved).
+  id_source: positional
+  # If the upload has one of these columns, it is used as the id instead.
+  id_column_candidates: [row_id, RowID, ROW_ID, reference, Reference, id, ID]
+
+  prediction_column: F3924
+  # probability -> calibrated risk in [0,1]; binary -> 0/1 at the tier cutoff.
+  prediction_type: probability
+  # Used only when prediction_type == binary. "policy" takes the frozen
+  # standard-review cutoff from the policy snapshot; a float overrides it.
+  binary_threshold: policy
+  probability_decimals: 6
+
+analyst:
+  # The richer file for human reviewers. Never submitted to the organiser.
+  columns:
+    - row_id
+    - calibrated_risk
+    - binary_prediction
+    - risk_tier
+    - review_status
+    - model_agreement
+    - uncertainty
+    - conformal_status
+    - ood_status
+    - top_reason_1
+    - top_reason_2
+    - top_reason_3
+    - model_version
+  # Reason strings are rendered from the frozen SHAP reason codes; they are
+  # descriptive only and carry no accusatory language (see llm/validator.py).
+  reason_count: 3
+
+validation:
+  # Checks run against every export before it is written. A failure raises;
+  # a silently malformed submission is worse than no submission.
+  require_row_count_match: true      # one output row per input row, exactly
+  require_row_order_preserved: true  # positional ids must be strictly 1..N
+  forbid_extra_columns: true         # minimal export carries nothing else
+  forbid_null_predictions: true
+  require_probability_range: true    # 0.0 <= p <= 1.0
+  # No quarantined/leaking feature may ever appear in an export.
+  forbid_leakage_columns: true
+  # The target column is legal ONLY as the minimal prediction column name.
+  forbid_target_column_as_input_echo: true

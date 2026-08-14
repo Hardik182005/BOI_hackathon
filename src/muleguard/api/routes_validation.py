@@ -32,6 +32,12 @@ from muleguard.features.frame import attach_meta, meta_feature_names
 from muleguard.logging import get_logger
 from muleguard.models.scoring import SchemaError, load_bundle, score_rows
 from muleguard.validation import lab, sealed
+from muleguard.action.submission import (
+    ExportValidationError,
+    SubmissionFormat,
+    write_exports,
+)
+from muleguard.validation.column_mapping import apply_column_mapping
 
 log = get_logger("api.validation")
 
@@ -124,6 +130,16 @@ async def run_validation(file: UploadFile) -> dict:
     required = list(bundle["feature_list_selected"])
     run_id = f"VAL-{uuid.uuid4().hex[:10].upper()}"
 
+    # Headers may arrive as human-readable variable names rather than F-numbers.
+    # Resolve them first, so a file whose data is correct is not failed for
+    # spelling its columns differently. Only exact normalised matches rename;
+    # the full plan is returned so the analyst sees every rename.
+    df, column_plan = apply_column_mapping(df)
+    if column_plan["n_renamed"]:
+        db.audit("VALIDATION_COLUMNS_RESOLVED", "system", correlation_id=run_id,
+                 detail={"renamed": column_plan["n_renamed"],
+                         "ambiguous": len(column_plan["ambiguous"])})
+
     # The target is removed before anything is scored. `y_held` stays in this
     # function's local scope and is deliberately never returned, logged or
     # persisted here - the reveal endpoint asks for labels again.
@@ -145,6 +161,7 @@ async def run_validation(file: UploadFile) -> dict:
                  detail={"missing": s1["n_missing_required"]})
         return {"run_id": run_id, "overall": lab.STEP_FAIL, "steps": [s1],
                 "stopped_at_step": 1, "summary": s1["status_detail"],
+                "column_resolution": column_plan,
                 "protocol": lab.PROTOCOL_STATEMENT}
 
     train_X, names, cat_maps = _training_matrix(bundle)
@@ -217,6 +234,7 @@ async def run_validation(file: UploadFile) -> dict:
         "target_column_detected": target_name,
         "compatibility_score": compat["score"],
         "compatibility_band": compat["band"],
+        "column_resolution": column_plan,
         "protocol": lab.PROTOCOL_STATEMENT,
         "next_action": (
             "Reveal Validation Metrics" if y_held is not None else
@@ -332,3 +350,70 @@ def get_seal(seal_id: str) -> dict:
     ok, why = sealed.verify_seal(rec)
     return {"seal": rec.to_dict(),
             "verification": {"verified": ok, "detail": why}}
+
+
+# --------------------------------------------------------------------------
+# Competition export
+# --------------------------------------------------------------------------
+
+
+@router.get("/seals/{seal_id}/submission")
+def download_submission(seal_id: str, format: str = "minimal") -> FileResponse:
+    """Reshape a sealed run into the organiser's submission file.
+
+    Built from the sealed prediction CSV rather than by rescoring, so the file
+    handed to the organiser is provably the same set of numbers that were
+    hashed before any label was read. ``format`` is ``minimal`` (the two-column
+    competition file) or ``analyst``.
+    """
+    if format not in {"minimal", "analyst"}:
+        raise HTTPException(422, "format must be 'minimal' or 'analyst'")
+    try:
+        rec = sealed.load_seal(seal_id)
+    except FileNotFoundError:
+        raise HTTPException(404, f"no sealed run {seal_id}")
+    except sealed.BadSealId as e:
+        raise HTTPException(422, str(e))
+
+    ok, why = sealed.verify_seal(rec)
+    if not ok:
+        db.audit("VALIDATION_SEAL_BROKEN", "system", detail={"seal_id": seal_id})
+        raise HTTPException(409, f"SEAL_BROKEN: {why}")
+
+    path = Path(rec.prediction_path)
+    if not path.exists():
+        raise HTTPException(404, "the sealed prediction file is no longer on disk")
+
+    preds = pl.read_csv(path)
+    fmt = SubmissionFormat()
+    scores = [float(s) for s in preds[rec.score_column].to_list()]
+    out_dir = settings.ARTIFACTS_DIR / "submissions" / seal_id
+    try:
+        manifest = write_exports(
+            out_dir, scores=scores,
+            records=(None if format == "minimal" else
+                     [{"calibrated_risk": s} for s in scores]),
+            row_ids=list(range(1, len(scores) + 1)), id_source="positional",
+            fmt=fmt, policy_threshold=_policy_standard_threshold(),
+            model_version=rec.model_version)
+    except ExportValidationError as e:
+        raise HTTPException(422, f"EXPORT_INVALID: {e}")
+
+    db.audit("SUBMISSION_EXPORTED", "system",
+             detail={"seal_id": seal_id, "format": format,
+                     "sha256": manifest["minimal_sha256"]})
+    target = Path(manifest["minimal_path"] if format == "minimal"
+                  else manifest["analyst_path"])
+    return FileResponse(target, media_type="text/csv",
+                        filename=f"{seal_id}_{format}.csv")
+
+
+def _policy_standard_threshold() -> float | None:
+    """The frozen standard-review cutoff, or None if the snapshot is absent."""
+    try:
+        snap = settings.REGISTRY_DIR / "policy_snapshot.json"
+        import json
+
+        return float(json.loads(snap.read_text(encoding="utf-8"))["standard_risk"])
+    except Exception:  # noqa: BLE001 - absent snapshot must not break scoring
+        return None

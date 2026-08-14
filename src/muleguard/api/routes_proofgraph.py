@@ -19,6 +19,7 @@ from fastapi import APIRouter, HTTPException
 
 from muleguard.api import database as db
 from muleguard.explain import proofgraph as pg
+from muleguard.explain.pattern_cards import match_patterns
 from muleguard.logging import get_logger
 from muleguard.models.scoring import load_bundle
 
@@ -124,12 +125,23 @@ def _build(case_id: str, with_twin: bool) -> dict:
                             registry=registry),
                     }
 
+    # Semantic pattern cards. Matched from the account's own meta-feature
+    # values against the DIRECT-grade typologies in the availability matrix -
+    # they annotate the graph and never contributed to the score. Reason rows
+    # are the only place the stored payload keeps values, so that is what they
+    # are matched against.
+    row_values = {r["feature"]: r.get("value") for r in reasons
+                  if r.get("value") is not None}
+    patterns = match_patterns(row_values)
+
     graph = pg.build_proofgraph(
         account_reference=case["account_reference"],
         score=score,
         reasons=reasons,
         registry=registry,
         twin=twin_payload,
+        patterns=patterns,
+        counterfactuals=score.get("counterfactual_twin") or None,
     )
     pg.assert_evidence_traceable(graph)
     pg.assert_language_safe(graph)

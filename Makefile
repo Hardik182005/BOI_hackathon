@@ -174,3 +174,40 @@ final-validation:
 
 final-validation-retrain:
 	bash scripts/final_validation.sh --full-retrain
+
+# --- experiments and artifacts that had no target ---------------------------
+# Everything below was runnable only by typing the module path, which is how a
+# step gets skipped on a rebuild. The read-only ones are safe to run any time;
+# the two ablations refit inside their own folds and cost minutes, so they are
+# not wired into any aggregate target.
+
+# Inference over the frozen bundle: rebuilds the DEV calibrated-risk reference
+# that risk_percentile ranks against. Run after any bundle change.
+build-risk-reference:
+	$(PY) -m muleguard.cli.build_risk_reference
+
+# Section 55. The single 27-column accuracy table, rebuilt from the saved
+# out-of-fold predictions rather than copied from an older summary.
+final-accuracy-table:
+	$(PY) -m muleguard.cli.final_accuracy_table
+
+# What the Description.xlsx parser understood and what it did not, plus the
+# meta-feature ablation view projected out of the paired nested run.
+description-parse-report:
+	$(PY) -m muleguard.cli.description_parse_report
+
+# Adds the data/firewall/CV provenance fields to the model registry. Reads
+# frozen artifacts only; writes null with a reason where a value is not
+# recoverable.
+enrich-registry:
+	$(PY) -m muleguard.cli.enrich_registry
+
+# Section 12. Does resampling beat class weighting at 0.89% prevalence? Refits
+# every arm on the 15 nested outer folds - minutes, not seconds.
+smote-ablation:
+	$(PY) -m muleguard.cli.smote_ablation
+
+# Section 31. Do the sensitive attributes buy the model anything? Same 15
+# folds; also writes the group slice audit at the top-100 budget.
+fairness-ablation:
+	$(PY) -m muleguard.cli.fairness_ablation

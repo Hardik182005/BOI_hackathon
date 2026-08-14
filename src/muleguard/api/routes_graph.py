@@ -109,6 +109,14 @@ def account_graph(account: str) -> dict[str, Any]:
         "status": "OK",
         "metrics": _GRAPH.account_metrics(account),
         "patterns": _GRAPH.patterns(account),
+        # Where the account sits in the wider graph, and the three structural
+        # proxies. Each carries its own caveat; none of them touches the score.
+        "structure": _GRAPH.component_metrics(account),
+        "proxies": {
+            "smurfing": _GRAPH.smurfing_proxy(account),
+            "shell_distributor": _GRAPH.shell_distributor_proxy(account),
+            "velocity": _GRAPH.velocity_anomaly(account),
+        },
         "thresholds": adapter.GRAPH_THRESHOLDS,
         "contract": adapter.CONTRACT,
     }

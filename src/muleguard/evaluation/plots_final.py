@@ -425,10 +425,15 @@ def plot_feature_subset_ablation() -> str:
     nested = ROOT / "artifacts/metrics/nested_feature_family_arms.json"
     if nested.exists():
         d = load_json(nested)
-        arms = d.get("arms") or []
-        names = [a.get("arm", "?") for a in arms]
-        vals = [a.get("mean_gain", 0.0) for a in arms]
-        errs = [a.get("std_of_paired_diff", 0.0) for a in arms]
+        # The plotted quantity is the *paired* difference, so it comes from the
+        # comparison block rather than from `arms`: `arms` holds each arm's own
+        # mean AP, which is not a difference and carries no paired spread.
+        # full_clean is omitted because its difference against itself is zero by
+        # construction, not by measurement.
+        paired = d.get("paired_vs_full_clean") or {}
+        names = list(paired)
+        vals = [paired[n].get("mean_paired_diff", 0.0) for n in names]
+        errs = [paired[n].get("std_of_paired_diff", 0.0) for n in names]
         split, xlabel = "nested outer folds, paired", "mean paired AP difference vs the full clean set"
         colours = [OK if v > 0 else MUTED for v in vals]
     else:
