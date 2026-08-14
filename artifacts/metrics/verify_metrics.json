@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-08-14T08:49:10.332331+00:00",
+  "generated_utc": "2026-08-14T09:01:45.338195+00:00",
   "scope": "read-only verification of the shipped accuracy claims; no model was retrained and the locked test set was not read",
   "n_checks": 10,
   "n_passed": 10,
