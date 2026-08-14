@@ -10,8 +10,11 @@
 > *Sees the mule. Spares the look-alike. Never certifies the unseen.*
 
 [![Release Gate](https://img.shields.io/badge/Release%20Gate-PASS%2014%2F14-brightgreen?style=for-the-badge)](docs/FINAL_RELEASE_GATE.md)
+[![Metric Verification](https://img.shields.io/badge/Metric%20Verification-10%2F10%20PASS-brightgreen?style=for-the-badge)](artifacts/metrics/verify_metrics.json)
 [![QA Checks](https://img.shields.io/badge/QA%20Checks-89%2F89%20PASS-brightgreen?style=for-the-badge)](docs/FINAL_RELEASE_TEST_REPORT.md)
-[![Tests](https://img.shields.io/badge/Tests-96%20passed%20%C2%B7%200%20failed-brightgreen?style=for-the-badge)](artifacts/testing/)
+[![Organiser Dry Run](https://img.shields.io/badge/Organiser%20Dry%20Run-11%2F11%20variants-brightgreen?style=for-the-badge)](docs/ORGANISER_DRY_RUN.md)
+[![Tests](https://img.shields.io/badge/Tests-526%20passed%20%C2%B7%200%20failed-brightgreen?style=for-the-badge)](artifacts/testing/)
+[![Frontend](https://img.shields.io/badge/Frontend-35%20vitest%20%C2%B7%204%20resolutions-brightgreen?style=for-the-badge)](frontend/src/resolutions.test.tsx)
 
 [![PR-AUC Locked Test](https://img.shields.io/badge/PR--AUC%20(locked%20test)-0.726-blue?style=flat-square)](artifacts/metrics/holdout_metrics.json)
 [![PR-AUC Dev OOF](https://img.shields.io/badge/PR--AUC%20(dev%20OOF%203%C3%975)-0.769%20%C2%B1%200.027-blue?style=flat-square)](artifacts/metrics/metric_battery.json)
@@ -21,6 +24,12 @@
 [![Brier](https://img.shields.io/badge/Brier%20(dev%20OOF)-0.0031-9cf?style=flat-square)](artifacts/metrics/final_calibration.json)
 [![ECE](https://img.shields.io/badge/ECE%20(dev%20OOF%2C%2010%20uniform%20bins)-0.0015-9cf?style=flat-square)](artifacts/metrics/final_calibration.json)
 [![Throughput](https://img.shields.io/badge/Inference-688%20rows%2Fs%20%C2%B7%20re--measure%20pending-9cf?style=flat-square)](docs/FINAL_PERFORMANCE_REPORT.md)
+
+[![Fairness](https://img.shields.io/badge/Fairness%20ablation-KEEP__EXCLUSION%20%C2%B7%208%20arms-8A2BE2?style=flat-square)](docs/FAIRNESS_VALIDATION.md)
+[![Gender cost](https://img.shields.io/badge/Cost%20of%20excluding%20gender-%E2%88%920.0001%20AP-8A2BE2?style=flat-square)](docs/FAIRNESS_VALIDATION.md)
+[![Resampling](https://img.shields.io/badge/Resampling%20ablation-KEEP__BASELINE%20%C2%B7%207%20arms-8A2BE2?style=flat-square)](artifacts/metrics/smote_ablation.json)
+[![Open finding](https://img.shields.io/badge/Open%20finding-top--200%20beats%20top--120%20(%2B0.024)-orange?style=flat-square)](docs/FEATURE_SUBSET_SIZE_FINDING.md)
+[![Champion challenged](https://img.shields.io/badge/Nested%20CV-CHAMPION__CHALLENGED%20(published)-orange?style=flat-square)](docs/NESTED_CV_MODEL_TOURNAMENT.md)
 
 [![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat-square&logo=python&logoColor=white)](pyproject.toml)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)](src/muleguard/api/main.py)
@@ -127,6 +136,71 @@ Quarantined with measured evidence: **`F3924`** (target) · **`F3912`** (|corr| 
 
 ---
 
+## 🔬 Pre-registered experiments — decisions we tested instead of asserting
+
+Three design positions in this repository used to be defended with reasoning
+alone. Each is now an experiment with a **decision rule fixed before the run**,
+scored on the **same 15 nested outer folds** (3 repeats × 5 folds, 4 inner), with
+all three paired tests reported because they can disagree — and a disagreement is
+information, not something to pick from.
+
+| Question | Arms | Verdict | Evidence |
+|---|:--:|---|---|
+| Does admitting a protected attribute improve detection? | 8 | **`KEEP_EXCLUSION`** | [`FAIRNESS_VALIDATION.md`](docs/FAIRNESS_VALIDATION.md) |
+| Does resampling beat class weights on 81 positives? | 7 | **`KEEP_BASELINE`** | [`smote_ablation.json`](artifacts/metrics/smote_ablation.json) |
+| Is 120 the right feature count? | 11 | **open finding — 200 wins** | [`FEATURE_SUBSET_SIZE_FINDING.md`](docs/FEATURE_SUBSET_SIZE_FINDING.md) |
+
+### ⚖️ Fairness — what the exclusion actually costs
+
+`F3892 GENDER` is excluded by policy. The obvious challenge is *"you excluded it
+on principle — what did it cost you?"*, and until this run we could not answer.
+
+**It costs −0.00011 PR-AUC.** That is the `sensitive_excluded` control: sign test
+p = 1.000, and the selected feature pool differs from baseline in **1 of 15
+folds**. The selector barely wanted these columns to begin with — occupation was
+never ranked in any fold, area ranked once at position 514, age reached the top
+120 exactly once.
+
+And the central number: **forcing gender in makes the model *worse*, −0.00481.**
+
+| Arm | Paired diff | sign p | up/down/tied |
+|---|---:|---:|:--:|
+| `sensitive_excluded` | −0.00011 | 1.000 | 0/1/14 |
+| `age_forced` | **+0.00150** | 0.424 | 9/5/1 |
+| `all_four_forced` | −0.00122 | 1.000 | 8/7/0 |
+| `occupation_forced` | −0.00449 | 0.118 | 4/11/0 |
+| `gender_forced` | **−0.00481** | 0.118 | 4/11/0 |
+| `geography_forced` | −0.00503 | **0.035** | 3/12/0 |
+| `sensitive_forced` | −0.00553 | 0.302 | 5/10/0 |
+
+Two rows are deliberately awkward and are flagged rather than buried.
+`age_forced` is the only positive mean — and its sign test is p = 0.42 with a CI
+spanning zero four times over, so we do not claim it. `geography_forced` has a
+**significant** sign test at 0.035 — with a **negative** mean, making it evidence
+*against* geography, not for it. Every arm also publishes its **MDE80**
+(0.0003–0.010), so "no effect detected" cannot be misread as "no effect".
+
+### 🧪 Resampling — the argument we had been making without evidence
+
+Verdict **`KEEP_BASELINE`**, but the honest reading is not "SMOTE is bad": every
+SMOTE ratio came out *slightly positive* (+0.005 to +0.012 AP) and simply failed
+the pre-registered sign test. The control decides it — plain random duplication
+buys +0.005 on its own, so synthesising points beyond re-weighting is worth about
+**+0.007 against a ±0.10 fold spread**. Undersampling is the one unambiguous
+result: **−0.134, p = 0.0001**.
+
+Two disclosures. `smote_0.10` *does* reject on Wilcoxon (p = 0.010) while failing
+the sign test (p = 0.12); the sign test was named before the run, so it stands
+rather than being swapped for the test that reads better. And this ablation scored
+**ranking only** — the calibration argument our own docs give for rejecting SMOTE
+was **not** measured here, so we do not claim it as a finding.
+
+Until 2026-08-14 `docs/COMPETITOR_GAP_MATRIX.md` said *"we tested resampling and
+rejected it"* when no such test had been run. It was an assertion. Now it is a
+result, and the sentence was corrected rather than quietly left standing.
+
+---
+
 ## 🏗️ Architecture — three lenses + an action layer
 
 ```
@@ -230,8 +304,27 @@ Every stage is **resumable** (Optuna SQLite study, per-model OOF replacement) an
 
 ## 🧪 Testing commands
 
+### Checking the metrics and the accuracy — one command
+
+```bash
+bash scripts/verify_metrics.sh
+```
+
+No backend, no retraining, no locked-test access; a few minutes. It does not
+print stored numbers — it **recomputes** them from the saved out-of-fold
+predictions and fails if an artifact disagrees with the model it claims to
+describe. Ten checks: bundle signature, champion identity across three sources,
+PR-AUC re-derived from predictions, the leakage firewall, that no reported
+metric touched a locked-test row, threshold ordering, calibration, the
+27-column comparison table, that every design decision has an experiment behind
+it, and that any experiment which **beat** the shipped configuration is written
+up rather than left in a file nobody opens. Details land in
+[`artifacts/metrics/verify_metrics.json`](artifacts/metrics/verify_metrics.json)
+and [`artifacts/metrics/final_accuracy_table.csv`](artifacts/metrics/final_accuracy_table.csv).
+
 | Command | What it runs |
 |---|---|
+| `bash scripts/verify_metrics.sh` | **Metric & accuracy verification** — the 10 checks above + the 27-column table + the experiment ledger + unit/integration/security tests. Read-only |
 | `./scripts/release_test.sh` (or `make release-test`) | **The canonical full release suite** — all pytest + vitest + 10 live QA suites + ML release gate + report regeneration; non-zero exit on any failure |
 | `./scripts/test_all.sh` · `make test` | 93 backend pytest tests + 3 frontend vitest tests |
 | `./scripts/test_ml.sh` · `make test-ml` | unit + model leakage-guard tests + data/leakage QA harness |
@@ -272,11 +365,54 @@ docker compose up --build
 
 Hard guarantees: `F3924` in a request → **422** · missing selected feature → **422 SCHEMA_ERROR** (never silent zero-fill) · identical input → identical output · append-only audit events (SQLite triggers block UPDATE/DELETE).
 
+### 🏪 Merchant legitimacy safeguard — and the guarantee it nearly broke
+
+A legitimate high-volume merchant looks like a mule on raw throughput. The
+safeguard runs in one of two modes, read from `configs/thresholds.yaml`:
+
+- **MODE A `CONFIDENCE_ONLY` (shipped default)** — records a merchant verdict on
+  every scored record and **changes no score and no tier**. Verified inert by
+  construction: in this mode the safeguard never sets its applied flag, so routing
+  falls through to the measured score untouched.
+- **MODE B `BOUNDED_DAMPENING`** — dampens by 0.85 with a hard floor at 0.70 of
+  the original score, and every record carries `before_score` alongside the result.
+
+Wiring MODE B surfaced a real defect worth stating: on a 600-row check, one
+`STANDARD_REVIEW` account dampened all the way into `MONITOR` — **removing it from
+the review queue**, which directly contradicts the guarantee printed on the
+safeguard's own record. It is now capped: MODE B may lower a case's priority,
+never its right to be looked at. The dampened score still appears in the record,
+so the cap is exactly as auditable as the dampening was. Measured on 600 rows:
+111 dampenings, 3 tier changes (all priority reductions *inside* review), **0
+queue exits**.
+
 ## 🖥️ Dashboard (7 pages, white background · black text)
 
 **Executive Overview** (tiers, budgets, calibration, drift, live queue) · **Alert Queue** (ranked, filterable) · **Case Detail** (SHAP drivers vs legitimate-cohort percentiles, model comparison, analyst actions, evidence export, LLM/deterministic narrative with source badge) · **Model Performance** (PR curve with CI, calibration, tournament with the **red REJECTED-LEAKAGE bar**, recall@FPR, tier precision) · **Feature Intelligence** (selection frequency, quarantine panel, verified-semantics registry) · **Drift & Monitoring** (PSI, champion/challenger governance) · **Model Card**.
 
+Plus **Business Value** (with an **Impact Simulator** — analyst capacity, review
+minutes, exposure per confirmed mule) and **ProofGraph** (evidence graph with a
+one-click JSON download that re-requests the API and saves the **response bytes
+unparsed**, so the file is the server's graph and not a re-serialisation of React
+state).
+
 Every page implements loading / empty / error states — with the API down you see an explicit error, never fake numbers, never a blank screen.
+
+**The Impact Simulator is the one deliberate exception to "every number is an API
+field"**, and it is labelled as such on screen: a `user-entered assumptions, not
+measured facts` badge, every card marked *measured —* or *your assumption —* with
+its arithmetic printed, and a "What this is not" row. Analyst capacity is
+**snapped to the largest measured budget at or below the entered value** — never
+interpolated — it refuses to answer below the smallest measured budget and says
+so rather than extrapolating above the largest.
+
+Layout is verified at **1280×720, 1366×768, 1440×900 and 1920×1080**
+(`frontend/src/resolutions.test.tsx`), which also asserts that **no source file
+branches on `innerWidth`/`matchMedia`** — so CSS is the only responsive
+mechanism — and that no declared width exceeds the content column. That suite
+states plainly in its own header that **jsdom does not lay out**, so pixel
+overlap is *not* measured there; what is measured is render completeness, the
+absence of width-conditional JS, and the declared layout rules.
 
 ---
 
@@ -311,13 +447,22 @@ Every page implements loading / empty / error states — with the API down you s
 
 [`FINAL_RESULTS.md`](docs/FINAL_RESULTS.md) — every measured number with CIs · [`FINAL_RELEASE_TEST_REPORT.md`](docs/FINAL_RELEASE_TEST_REPORT.md) — the PASS verdict and its evidence · [`FINAL_DATA_AND_LEAKAGE_AUDIT.md`](docs/FINAL_DATA_AND_LEAKAGE_AUDIT.md) — the three-leak story · [`FINAL_ACCURACY_AND_MODEL_SELECTION_REPORT.md`](docs/FINAL_ACCURACY_AND_MODEL_SELECTION_REPORT.md) — tournament & selection rationale · [`TRINETRA_LENS_REPORT.md`](docs/TRINETRA_LENS_REPORT.md) — the three lenses · [`JUDGE_QA.md`](docs/JUDGE_QA.md) — 18 prepared answers · [`DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) — 7-scene, 5–7 min demo · [`MODEL_CARD.md`](docs/MODEL_CARD.md) · [`DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md).
 
+**The experiments that tested our own positions:**
+[`FAIRNESS_VALIDATION.md`](docs/FAIRNESS_VALIDATION.md) — 8-arm sensitive-attribute ablation, `KEEP_EXCLUSION`, with MDE80 per arm ·
+[`FEATURE_SUBSET_SIZE_FINDING.md`](docs/FEATURE_SUBSET_SIZE_FINDING.md) — the sweep that says our shipped feature count is too small ·
+[`FEATURE_AVAILABILITY_AUDIT.md`](docs/FEATURE_AVAILABILITY_AUDIT.md) §8.1 — a hole in the firewall's second line of defence, found and closed ·
+[`ORGANISER_DRY_RUN.md`](docs/ORGANISER_DRY_RUN.md) — 11 input variants incl. two malformed payloads that must be *refused* ·
+[`NESTED_CV_MODEL_TOURNAMENT.md`](docs/NESTED_CV_MODEL_TOURNAMENT.md) — the run in which our own shipped family places third.
+
 ---
 
 ## 🔒 Non-negotiables (all machine-enforced)
 
 - ✅ **No leakage** — F3924/F3912/F2230/index quarantined; tests fail the build if any enters a model
 - ✅ **Locked test touched exactly once** — sentinel log; re-runs refuse
-- ✅ **Natural prevalence everywhere** — no SMOTE in the accepted model
+- ✅ **Natural prevalence everywhere** — no SMOTE in the accepted model, now backed by a 7-arm ablation (`KEEP_BASELINE`) rather than by assertion
+- ✅ **Protected attributes excluded, and the cost measured** — gender never reaches the frame; the 8-arm ablation prices the exclusion at −0.0001 AP and shows gender *hurts* (−0.0048)
+- ✅ **The leakage firewall's second line of defence is whole** — `assert_clean` refuses all 13 manifest columns (it refused only 9 until 2026-08-14; nothing had leaked, and the gap is documented rather than silently patched)
 - ✅ **No automatic freezing** — review tiers only; freeze = recommendation + analyst + 2nd approver, audited
 - ✅ **Never "guilty", never "certified safe"** — behavioural risk ≠ intent; benign state is *not currently flagged, monitoring continues*
 - ✅ **LLM cannot touch a score** — validated narration, deterministic fallback, scoring identical with Ollama stopped
@@ -327,6 +472,25 @@ Every page implements loading / empty / error states — with the API down you s
 ## ⚠️ Honest limits
 
 17 locked-test positives → wide CIs (reported, not hidden) · flat per-account snapshot → no counterparty graph, no ring-detection claims (roadmap) · sleeper mules invisible before activation · negatives are a single-month snapshot (label-trust caveat documented) · out-of-time testing impossible on this file (time ≡ label — documented instead of faked).
+
+**Fairness caveats we will not round off.** The slice audit reports **10 female
+positives and 3 in the unrecorded-gender bin** — no slice conclusion at those
+counts is stable, and the M/F recall gap (0.863 vs 0.700) is 44/51 against 7/10,
+where a single additional miss moves the figure by 10 pp. It is monitored, not
+explained. The most actionable line in that table has nothing to do with gender:
+the **"(not recorded)" group has the lowest selection rate of any group and
+recall 0.000 in every arm**. One row in the extract has a **negative age**,
+counted explicitly so its bin does not hide it. And the ablation measures
+**ranking and slice rates only** — calibration-within-group and equalised odds are
+not tested.
+
+**Neither ablation is a licence to stop looking.** `F3890`/`F3891`/`F3894` remain
+admissible, so a future retrain could select one and make a demographic the top
+SHAP contributor with nothing in the pipeline objecting — there is no check
+requiring a corroborating non-demographic reason. That gap is documented with the
+remedy named, not left for a reader to find.
+
+**Open finding, not yet acted on:** a same-model, same-fold sweep either side of the shipped feature count says **200 features beat the shipped 120** by a paired +0.024 AP (0.80577 vs 0.78161; sign 0.035, Wilcoxon 0.008, paired-t 0.010 over 15 folds). Acting on it is a full retrain — selection, calibration, bundle, thresholds and every artifact that quotes 0.76904 — so the champion is **unchanged** and every number above still describes a model that actually exists. Written up in [`docs/FEATURE_SUBSET_SIZE_FINDING.md`](docs/FEATURE_SUBSET_SIZE_FINDING.md), and `verify_metrics.sh` fails if that write-up ever stops naming the winning arm.
 
 ---
 

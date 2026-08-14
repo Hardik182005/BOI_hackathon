@@ -57,10 +57,26 @@ are quarantined; this is why our honest headline is lower than naive analyses
 of this dataset.
 
 **Why not use SMOTE?**
-Synthetic oversampling distorts the base rate and corrupts calibrated
-probabilities that our review-tier thresholds depend on. We change the loss
-(class weights) and the metric, not the data. Natural prevalence is preserved
-in every validation and test split.
+We measured it rather than asserting it: six resampling arms across the same 15
+nested outer folds (`artifacts/metrics/smote_ablation.json`, verdict
+**`KEEP_BASELINE`**). The honest reading is not "SMOTE hurt" — every SMOTE ratio
+came out *slightly positive* (+0.005 to +0.012 AP) and simply failed the
+pre-registered sign test. What decides it is the control arm: plain random
+duplication buys +0.005 on its own, so synthesising new points beyond
+re-weighting is worth roughly +0.007 against a fold spread of ±0.10. That is
+not a reason to manufacture minority examples by interpolating between 81 real
+mules in 3,924 dimensions. Random undersampling is the one unambiguous result:
+−0.134, p = 0.0001. So we change the loss (class weights) and the metric, not
+the data, and natural prevalence is preserved in every validation and test split.
+
+One caveat we should state before a judge finds it: this ablation scored
+**ranking only**. The calibration argument — that synthetic oversampling
+distorts the base rate and corrupts the probabilities our review tiers depend on
+— is the textbook reason and it is why the thresholds are built the way they
+are, but this run did not measure Brier or ECE per arm, so we are not claiming
+it as our own finding. `smote_0.10` also clears Wilcoxon (p = 0.010) while
+failing the sign test (p = 0.12); the sign test was named before the run, so it
+stands rather than being swapped for the test that reads better.
 
 **Why not use an LLM as the classifier?**
 The task is tabular classification with 3,900 anonymised numeric features.

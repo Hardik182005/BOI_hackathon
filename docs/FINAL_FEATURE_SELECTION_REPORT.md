@@ -38,6 +38,17 @@ full pool 0.5874 ± 0.0276 (LGBM) > top-15 0.3357 ± 0.1399 (LGBM). Compact stil
 beats the full matrix; the optimum moved from 60 to 120 once the leaked columns
 stopped doing the work.
 
+> **OPEN FINDING — 120 may still be cut too deep.** The ladder above compares
+> sizes *across different model families* (top-250 and full pool are LGBM,
+> top-120 is XGBoost), so it cannot cleanly separate "wider is worse" from
+> "LGBM is worse here". A same-model, same-fold sweep now exists and disagrees:
+> holding the learner fixed, **top-200 scores 0.80577 against top-120's 0.78161,
+> a paired +0.024 that rejects on all three tests** (sign 0.035, Wilcoxon 0.008,
+> paired-t 0.010, 15 folds), while top-100 is indistinguishable from top-120
+> (p = 0.30). The champion has **not** been re-fitted at 200 — that is a full
+> retrain — so every number shipped elsewhere still describes `xgboost_top_120`.
+> Detail, and the reason this was not acted on: `docs/FEATURE_SUBSET_SIZE_FINDING.md`.
+
 Latency scales with width: in the retired run, top-60 evaluation was ~14×
 faster than the full matrix (52 s vs 710 s per full CV pass). In the
 leakage-free run the same relationship holds at the new operating point:

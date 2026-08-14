@@ -109,11 +109,23 @@ Taken at face value, they beat us. Four verified facts about that comparison:
    judges a leakage audit, and ours is `docs/LEAKAGE_AUDIT.md` and
    `docs/FEATURE_AVAILABILITY_AUDIT.md`.
 4. **SMOTE on 81 positives.** C3 reports SMOTE lifting recall 61 % → 88 %. We
-   tested resampling and rejected it: synthesising minority points by
-   interpolating between 81 real mules in a 3,924-dimensional space manufactures
-   examples that correspond to no real account, and it inflates cross-validated
-   recall while degrading calibration — which is why our probabilities carry
-   Brier 0.0031 and ECE 0.0015.
+   now have the measurement rather than the argument: six resampling arms on the
+   same 15 nested outer folds, `artifacts/metrics/smote_ablation.json`, verdict
+   **`KEEP_BASELINE`**. Every SMOTE ratio drifted *slightly positive* on average
+   (+0.005 to +0.012 AP) and none cleared the pre-registered sign test; the
+   control decides it, because plain random duplication buys +0.005, so
+   synthesising points beyond re-weighting is worth about +0.007 — noise at this
+   fold spread (±0.10). Undersampling is the one clear result: −0.134, p =
+   0.0001.
+
+   Two honesty notes. Until 2026-08-14 this paragraph said "we tested resampling
+   and rejected it" when no such test had been run — it was an assertion, and
+   the run is what makes it a finding. And `smote_0.10` does reject on Wilcoxon
+   (p = 0.010) while failing the sign test (p = 0.12); the rule named the sign
+   test before the run, so the rule stands rather than being swapped for the
+   test that reads better. What this run does **not** establish is the
+   calibration claim — it measured ranking only. Our Brier 0.0031 and ECE 0.0015
+   are real, but "SMOTE would degrade them" remains untested here.
 
 **The gap we claim over C3 is not accuracy. It is verifiability.** Our number
 comes with a sealed prediction hash timestamped before any label was readable, a
