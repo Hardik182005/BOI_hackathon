@@ -182,6 +182,38 @@ Full record: `docs/ORGANISER_DRY_RUN.md` §3.
 | release gate | fails if the §42 rehearsal's quarantine invariances stop holding |
 | inference | uploads carrying quarantined columns are accepted and **ignored**, provably |
 | `artifacts/models/model_manifest.json` | records `leakage_status: FIREWALL_ADMITTED_ONLY` |
+| `firewall.assert_clean()` | refuses all 13 manifest columns at bundle-freeze and at scoring-service load |
+
+### 8.1 A hole in the second line of defence, found and closed (2026-08-14)
+
+`assert_clean` is the function called at bundle-freeze time and by the scoring
+service, and its own docstring promises that "a leaking artifact cannot be
+shipped even if a training script is wrong". It was checking two grounds -
+`hard_quarantine` (9 columns) and the forbidden availability classes - and so
+**refused only 9 of the manifest's 13**. The four it let through were:
+
+- `F3892` (GENDER), excluded on **fairness** grounds, not availability, so no
+  availability class describes it; and
+- `F3916` / `F3917` / `F3918` (the L1-L3 alert flags), whose class is
+  `PRE_EXISTING_RISK_CONTEXT` - deliberately *not* in `FORBIDDEN_CLASSES`.
+
+Nothing leaked, and nothing shipped wrong. The check that was actually holding
+is `release_gate.no_target_or_f3912_leakage`, which tests the frozen bundle
+against the full 13-entry manifest; the shipped bundle's 120 features are
+disjoint from all 13, verified. So this was a redundancy that was not redundant,
+not a breach.
+
+It is closed by having `assert_clean` read the same three config lists that
+`quarantine_manifest()` writes the file from - `hard_quarantine`,
+`conditional_quarantine`, `fairness_excluded` - so the two checks now refuse the
+same set **by construction** rather than by two hand-maintained lists happening
+to agree. `tests/unit/test_firewall_assert_clean_covers_manifest.py`
+parametrises over the shipped manifest and asserts each entry is refused, plus
+that the shipped bundle still passes; a future 14th quarantine entry is
+therefore covered without anyone remembering to add it here.
+
+Surfaced while building the §31 fairness ablation, which needed to know what
+would stop gender if the ablation's re-admission switch were ever left on.
 
 The cost of all this is on record and is not small: the champion scores
 **0.7690** where the leaked variant scores **0.9419**. We publish both, and serve

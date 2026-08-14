@@ -186,18 +186,41 @@ def assert_clean(features: Sequence[str], *, context: str = "model",
 
     Called by the release gate, by bundle freezing and by the scoring service
     so a leaking artifact cannot be shipped even if a training script is wrong.
+
+    The three grounds are checked here, not two. Until 2026-08-14 this function
+    covered ``hard_quarantine`` and the forbidden availability classes only,
+    which left **4 of the manifest's 13 columns** able to pass: ``F3892``
+    (GENDER, excluded on fairness grounds rather than availability) and
+    ``F3916``/``F3917``/``F3918`` (the L1-L3 alert flags, whose class is
+    ``PRE_EXISTING_RISK_CONTEXT`` and therefore not forbidden). Nothing shipped
+    with them - ``release_gate.no_target_or_f3912_leakage`` tests the bundle
+    against the full manifest and is the check that was actually holding - but
+    the docstring above promises a second line of defence, and for those four
+    columns there was only ever one. A guarantee with a hole in it that happens
+    not to be exercised is still a guarantee with a hole in it.
+
+    The three config lists below are exactly the three that ``quarantine_manifest``
+    writes into the 13-entry file, so this check and the release gate now refuse
+    the same set by construction rather than by two lists agreeing.
     """
     reg = registry or fd.load_registry()
     cfg = config()
     violations: list[str] = []
+    grounds = (
+        (cfg.hard_quarantine, ""),
+        (cfg.conditional_quarantine, "quarantined until proven pre-decision: "),
+        (cfg.fairness_excluded, "excluded by fairness policy: "),
+    )
     for col in features:
-        if col in cfg.hard_quarantine:
-            violations.append(f"{col} ({cfg.hard_quarantine[col]})")
-            continue
-        rec = fd.describe(col, reg)
-        if rec["availability_class"] in FORBIDDEN_CLASSES:
-            violations.append(f"{col} ({rec['variable_name']}: "
-                              f"{rec['availability_class']})")
+        for listing, prefix in grounds:
+            if col in listing:
+                violations.append(f"{col} ({prefix}{listing[col]})")
+                break
+        else:
+            rec = fd.describe(col, reg)
+            if rec["availability_class"] in FORBIDDEN_CLASSES:
+                violations.append(f"{col} ({rec['variable_name']}: "
+                                  f"{rec['availability_class']})")
     if violations:
         raise LeakageViolation(
             f"{context} contains quarantined feature(s): " + "; ".join(violations)
