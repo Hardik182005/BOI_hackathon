@@ -221,3 +221,88 @@ def escalation_confidence(
         ],
         "merchant": merchant.to_dict() if merchant is not None else None,
     }
+
+
+# --------------------------------------------------------------------------
+# MODE B - bounded, logged score dampening (opt-in, off by default)
+# --------------------------------------------------------------------------
+
+MODE_A = "CONFIDENCE_ONLY"
+MODE_B = "BOUNDED_DAMPENING"
+
+# The floor exists so dampening can never clear an account. Even the strongest
+# business evidence leaves a case at 70% of its measured risk, which keeps it
+# in the review queue rather than removing it from oversight.
+DAMPENING_FLOOR = 0.70
+
+
+def apply_merchant_safeguard(
+    *,
+    calibrated_risk: float,
+    merchant: MerchantVerdict | None,
+    mode: str = MODE_A,
+    policy_version: str = "1.0",
+    dampening_factor: float = 0.85,
+    floor: float = DAMPENING_FLOOR,
+) -> dict[str, Any]:
+    """Apply the merchant safeguard and return a complete audit record.
+
+    MODE A is the default and the one that ships: strong business evidence
+    lowers auto-escalation confidence and never touches the score.
+
+    MODE B exists because a reviewer may legitimately want the score itself
+    dampened for corroborated merchants - but a blind multiplier is how a
+    fraud system talks itself out of a true positive. So MODE B is opt-in,
+    bounded by ``floor``, applies only to the STRONG_BUSINESS_EVIDENCE band,
+    and every application is recorded with the before and after value. A
+    dampening that is not logged did not happen as far as this system is
+    concerned.
+
+    The returned record always states which mode ran, so no downstream reader
+    has to infer whether a score was adjusted.
+    """
+    if mode not in (MODE_A, MODE_B):
+        raise ValueError(f"unknown merchant safeguard mode {mode!r}")
+    if not 0.0 < floor <= 1.0:
+        raise ValueError("floor must be in (0, 1]")
+
+    before = float(calibrated_risk)
+    band = merchant.band if merchant is not None else None
+    eligible = band == "STRONG_BUSINESS_EVIDENCE"
+
+    applied = False
+    after = before
+    reason: str
+
+    if mode == MODE_A:
+        reason = ("MODE A: business evidence adjusts escalation confidence only; "
+                  "the score is untouched by design")
+    elif not eligible:
+        reason = (f"MODE B armed but the merchant band is {band!r}, not "
+                  "STRONG_BUSINESS_EVIDENCE; no dampening applied")
+    else:
+        factor = max(float(dampening_factor), float(floor))
+        after = before * factor
+        applied = True
+        reason = (f"MODE B: corroborated merchant evidence dampened the score by "
+                  f"factor {factor:.2f} (floored at {floor:.2f}); the account "
+                  "remains in the review queue")
+
+    return {
+        "policy_version": policy_version,
+        "mode": mode,
+        "merchant_safeguard_applied": applied,
+        "merchant_band": band,
+        "before_score": round(before, 6),
+        "after_policy_score": round(after, 6),
+        "delta": round(after - before, 6),
+        "dampening_factor": (round(max(float(dampening_factor), float(floor)), 4)
+                             if applied else None),
+        "floor": floor,
+        "reason": reason,
+        "guarantees": [
+            "dampening is bounded below by the floor and can never reach zero",
+            "no mode removes an account from the review queue",
+            "an unapplied safeguard is still recorded, so silence is not evidence",
+        ],
+    }

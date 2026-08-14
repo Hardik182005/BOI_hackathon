@@ -34,3 +34,16 @@ anomaly:
 human_review:
   freeze_recommendation_requires: ["analyst_id", "reason", "case_id"]
   auto_actions_allowed: false   # nothing punitive happens automatically, ever
+
+# Merchant Context Safeguard (addendum UPDATE 9, upgrade prompt 14.2).
+# CONFIDENCE_ONLY is what ships: business evidence lowers the confidence in an
+# automatic escalation and never touches the score. BOUNDED_DAMPENING is the
+# opt-in policy experiment - it multiplies the score that ROUTES the case,
+# never the calibrated risk that is reported, and it is bounded by the floor so
+# no merchant can be dampened out of the review queue. Which mode ran must be
+# answerable from this file, so the scorer reads it here rather than taking it
+# as an argument.
+merchant_safeguard:
+  mode: CONFIDENCE_ONLY         # CONFIDENCE_ONLY (MODE A) | BOUNDED_DAMPENING (MODE B)
+  dampening_factor: 0.85        # MODE B only; clamped up to `floor`
+  floor: 0.70                   # MODE B can never take a score below this share of it
