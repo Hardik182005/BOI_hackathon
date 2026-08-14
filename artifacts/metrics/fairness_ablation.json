@@ -1,0 +1,2471 @@
+{
+  "generated_utc": "2026-08-14T08:47:23.106039+00:00",
+  "spec": "section 31 - sensitive attribute testing (model ablations)",
+  "question": "Does giving the model a protected or demographic attribute improve detection enough to justify using it?",
+  "sensitive_columns": [
+    {
+      "column": "F3892",
+      "variable": "GENDER",
+      "kind": "gender",
+      "meaning": "customer gender",
+      "in_model_frame": false,
+      "how_tested": "re-admitted and injected; see gender_handling"
+    },
+    {
+      "column": "F3890",
+      "variable": "AREA_CATEGORY",
+      "kind": "geography",
+      "meaning": "area category of the customer",
+      "in_model_frame": true,
+      "how_tested": "ablation on the frame column"
+    },
+    {
+      "column": "F3891",
+      "variable": "CUST_OCCP",
+      "kind": "occupation",
+      "meaning": "occupation code",
+      "in_model_frame": true,
+      "how_tested": "ablation on the frame column"
+    },
+    {
+      "column": "F3894",
+      "variable": "AGE_IN_YRS",
+      "kind": "age",
+      "meaning": "customer age as of alert date",
+      "in_model_frame": true,
+      "how_tested": "ablation on the frame column"
+    }
+  ],
+  "design": {
+    "protocol": "nested outer folds",
+    "outer_folds": 15,
+    "n_repeats": 3,
+    "n_inner_folds": 4,
+    "family": "xgboost at default configuration (no tuning inside an arm)",
+    "n_features": 120,
+    "feature_ranking": "the fold's own outer-train ranking, computed once and shared by every arm; no arm re-ranks",
+    "forcing_rule": "a forced column is ADDED to the top 120 rather than swapped for the 120th, so a null result is not confounded by the loss of a wanted feature",
+    "locked_test_read": false,
+    "seed": 42
+  },
+  "gender_handling": {
+    "source": "muleguard.features.frame.build_model_frame(include_gender=True)",
+    "isolation_asserted": true,
+    "n_distinct_encoded_values": 3,
+    "n_missing": 2598,
+    "why_injection": "F3892 is removed by the firewall before the frame exists, so it cannot be ranked. Rebuilding the ranking with it admitted would change every column's rank and stop the arms being paired on identical pools; injecting the single column holds everything else fixed.",
+    "not_answered_by_this_run": "whether stability selection would have CHOSEN gender if offered. This run answers whether a model that has it beats one that does not, which is the question the policy turns on."
+  },
+  "rank_of_sensitive_column_in_fold_ranking": {
+    "F3890": {
+      "per_fold": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        514
+      ],
+      "folds_ranked_inside_top_120": 0,
+      "note": "null means the selector gave it zero importance in every inner fold, so it never entered the ranking"
+    },
+    "F3891": {
+      "per_fold": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "folds_ranked_inside_top_120": 0,
+      "note": "null means the selector gave it zero importance in every inner fold, so it never entered the ranking"
+    },
+    "F3894": {
+      "per_fold": [
+        148,
+        69,
+        265,
+        199,
+        146,
+        null,
+        178,
+        null,
+        null,
+        243,
+        296,
+        355,
+        291,
+        null,
+        null
+      ],
+      "folds_ranked_inside_top_120": 1,
+      "note": "null means the selector gave it zero importance in every inner fold, so it never entered the ranking"
+    }
+  },
+  "arms": {
+    "baseline": {
+      "what": "the shipped pool: the fold's own top 120, untouched",
+      "columns_struck_from_the_ranking": [],
+      "columns_forced_into_the_pool": [],
+      "n_features_per_fold": [
+        120
+      ],
+      "folds_whose_pool_differs_from_baseline": 0,
+      "fold_ap_mean": 0.78161,
+      "fold_ap_std": 0.10031,
+      "fold_ap": [
+        0.85967,
+        0.96378,
+        0.8167,
+        0.54048,
+        0.75033,
+        0.63098,
+        0.80456,
+        0.82594,
+        0.75908,
+        0.91384,
+        0.72674,
+        0.83665,
+        0.76609,
+        0.73946,
+        0.78982
+      ]
+    },
+    "sensitive_excluded": {
+      "what": "geography, occupation and age struck from the fold ranking before the top 120 is taken - a no-op in any fold that did not rank one of them inside 120, which is the finding",
+      "columns_struck_from_the_ranking": [
+        "F3890",
+        "F3891",
+        "F3894"
+      ],
+      "columns_forced_into_the_pool": [],
+      "n_features_per_fold": [
+        120
+      ],
+      "folds_whose_pool_differs_from_baseline": 1,
+      "fold_ap_mean": 0.78149,
+      "fold_ap_std": 0.10011,
+      "fold_ap": [
+        0.85967,
+        0.96209,
+        0.8167,
+        0.54048,
+        0.75033,
+        0.63098,
+        0.80456,
+        0.82594,
+        0.75908,
+        0.91384,
+        0.72674,
+        0.83665,
+        0.76609,
+        0.73946,
+        0.78982
+      ]
+    },
+    "geography_forced": {
+      "what": "top 120 plus F3890 AREA_CATEGORY",
+      "columns_struck_from_the_ranking": [],
+      "columns_forced_into_the_pool": [
+        "F3890"
+      ],
+      "n_features_per_fold": [
+        121
+      ],
+      "folds_whose_pool_differs_from_baseline": 15,
+      "fold_ap_mean": 0.77658,
+      "fold_ap_std": 0.10468,
+      "fold_ap": [
+        0.85612,
+        0.98383,
+        0.78649,
+        0.53547,
+        0.74666,
+        0.62473,
+        0.79655,
+        0.82211,
+        0.73392,
+        0.9124,
+        0.73693,
+        0.84758,
+        0.76348,
+        0.71881,
+        0.78366
+      ]
+    },
+    "occupation_forced": {
+      "what": "top 120 plus F3891 CUST_OCCP",
+      "columns_struck_from_the_ranking": [],
+      "columns_forced_into_the_pool": [
+        "F3891"
+      ],
+      "n_features_per_fold": [
+        121
+      ],
+      "folds_whose_pool_differs_from_baseline": 15,
+      "fold_ap_mean": 0.77712,
+      "fold_ap_std": 0.10215,
+      "fold_ap": [
+        0.85819,
+        0.96957,
+        0.78235,
+        0.53407,
+        0.74683,
+        0.61756,
+        0.7932,
+        0.82534,
+        0.74935,
+        0.90492,
+        0.74302,
+        0.84339,
+        0.76881,
+        0.73248,
+        0.7877
+      ]
+    },
+    "age_forced": {
+      "what": "top 120 plus F3894 AGE_IN_YRS",
+      "columns_struck_from_the_ranking": [],
+      "columns_forced_into_the_pool": [
+        "F3894"
+      ],
+      "n_features_per_fold": [
+        120,
+        121
+      ],
+      "folds_whose_pool_differs_from_baseline": 14,
+      "fold_ap_mean": 0.7831,
+      "fold_ap_std": 0.09805,
+      "fold_ap": [
+        0.85976,
+        0.96378,
+        0.78369,
+        0.55103,
+        0.74569,
+        0.64829,
+        0.79489,
+        0.84058,
+        0.74374,
+        0.92297,
+        0.74553,
+        0.84426,
+        0.77833,
+        0.73334,
+        0.79067
+      ]
+    },
+    "gender_forced": {
+      "what": "top 120 plus F3892 GENDER, re-admitted through the frame builder's fairness-ablation switch",
+      "columns_struck_from_the_ranking": [],
+      "columns_forced_into_the_pool": [
+        "F3892"
+      ],
+      "n_features_per_fold": [
+        121
+      ],
+      "folds_whose_pool_differs_from_baseline": 15,
+      "fold_ap_mean": 0.77679,
+      "fold_ap_std": 0.10031,
+      "fold_ap": [
+        0.85706,
+        0.95242,
+        0.79708,
+        0.53823,
+        0.7766,
+        0.6128,
+        0.80175,
+        0.81839,
+        0.74909,
+        0.91862,
+        0.72737,
+        0.82417,
+        0.75274,
+        0.74624,
+        0.77936
+      ]
+    },
+    "sensitive_forced": {
+      "what": "top 120 plus all three admissible demographics",
+      "columns_struck_from_the_ranking": [],
+      "columns_forced_into_the_pool": [
+        "F3890",
+        "F3891",
+        "F3894"
+      ],
+      "n_features_per_fold": [
+        122,
+        123
+      ],
+      "folds_whose_pool_differs_from_baseline": 15,
+      "fold_ap_mean": 0.77608,
+      "fold_ap_std": 0.09971,
+      "fold_ap": [
+        0.85968,
+        0.95836,
+        0.78266,
+        0.5455,
+        0.75671,
+        0.63097,
+        0.79905,
+        0.81818,
+        0.74652,
+        0.91997,
+        0.71691,
+        0.83449,
+        0.7738,
+        0.71741,
+        0.781
+      ]
+    },
+    "all_four_forced": {
+      "what": "top 120 plus every column Description.xlsx marks sensitive",
+      "columns_struck_from_the_ranking": [],
+      "columns_forced_into_the_pool": [
+        "F3890",
+        "F3891",
+        "F3894",
+        "F3892"
+      ],
+      "n_features_per_fold": [
+        123,
+        124
+      ],
+      "folds_whose_pool_differs_from_baseline": 15,
+      "fold_ap_mean": 0.78039,
+      "fold_ap_std": 0.09496,
+      "fold_ap": [
+        0.86497,
+        0.94348,
+        0.7864,
+        0.55716,
+        0.7457,
+        0.64893,
+        0.79837,
+        0.82817,
+        0.74682,
+        0.92004,
+        0.72951,
+        0.85128,
+        0.77539,
+        0.7326,
+        0.77704
+      ]
+    }
+  },
+  "paired_vs_baseline": {
+    "sensitive_excluded": {
+      "comparison": "sensitive_excluded vs baseline",
+      "baseline_arm": "baseline",
+      "test_arm": "sensitive_excluded",
+      "n_folds": 15,
+      "mean_paired_diff": -0.00011,
+      "median_paired_diff": 0.0,
+      "std_of_paired_diff": 0.00044,
+      "ci95_of_mean": [
+        -0.00036,
+        0.00013
+      ],
+      "per_fold_diff": [
+        0.0,
+        -0.00169,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "n_folds_improved": 0,
+      "n_folds_worse": 1,
+      "n_folds_tied": 14,
+      "sign_test_p_two_sided": 1.0,
+      "wilcoxon_p_two_sided": 0.31731,
+      "paired_t_p_two_sided": 0.33428,
+      "paired_t_statistic": -1.0,
+      "n_tests_below_0.05": 0,
+      "tests_disagree": false,
+      "min_detectable_effect_80pct_power": 0.00032,
+      "yardstick": "paired on identical outer folds - judge against std_of_paired_diff=0.00044, NOT against the project's 0.0905 unpaired seed-noise floor"
+    },
+    "geography_forced": {
+      "comparison": "geography_forced vs baseline",
+      "baseline_arm": "baseline",
+      "test_arm": "geography_forced",
+      "n_folds": 15,
+      "mean_paired_diff": -0.00503,
+      "median_paired_diff": -0.00383,
+      "std_of_paired_diff": 0.01319,
+      "ci95_of_mean": [
+        -0.01233,
+        0.00228
+      ],
+      "per_fold_diff": [
+        -0.00355,
+        0.02004,
+        -0.03021,
+        -0.00501,
+        -0.00367,
+        -0.00626,
+        -0.00801,
+        -0.00383,
+        -0.02516,
+        -0.00144,
+        0.01019,
+        0.01093,
+        -0.00261,
+        -0.02066,
+        -0.00616
+      ],
+      "n_folds_improved": 3,
+      "n_folds_worse": 12,
+      "n_folds_tied": 0,
+      "sign_test_p_two_sided": 0.03516,
+      "wilcoxon_p_two_sided": 0.13538,
+      "paired_t_p_two_sided": 0.16203,
+      "paired_t_statistic": -1.4762,
+      "n_tests_below_0.05": 1,
+      "tests_disagree": true,
+      "min_detectable_effect_80pct_power": 0.00954,
+      "yardstick": "paired on identical outer folds - judge against std_of_paired_diff=0.01319, NOT against the project's 0.0905 unpaired seed-noise floor"
+    },
+    "occupation_forced": {
+      "comparison": "occupation_forced vs baseline",
+      "baseline_arm": "baseline",
+      "test_arm": "occupation_forced",
+      "n_folds": 15,
+      "mean_paired_diff": -0.00449,
+      "median_paired_diff": -0.0035,
+      "std_of_paired_diff": 0.01141,
+      "ci95_of_mean": [
+        -0.0108,
+        0.00183
+      ],
+      "per_fold_diff": [
+        -0.00148,
+        0.00579,
+        -0.03435,
+        -0.00641,
+        -0.0035,
+        -0.01342,
+        -0.01136,
+        -0.00059,
+        -0.00973,
+        -0.00891,
+        0.01628,
+        0.00674,
+        0.00272,
+        -0.00698,
+        -0.00212
+      ],
+      "n_folds_improved": 4,
+      "n_folds_worse": 11,
+      "n_folds_tied": 0,
+      "sign_test_p_two_sided": 0.11847,
+      "wilcoxon_p_two_sided": 0.12054,
+      "paired_t_p_two_sided": 0.14981,
+      "paired_t_statistic": -1.5239,
+      "n_tests_below_0.05": 0,
+      "tests_disagree": false,
+      "min_detectable_effect_80pct_power": 0.00825,
+      "yardstick": "paired on identical outer folds - judge against std_of_paired_diff=0.01141, NOT against the project's 0.0905 unpaired seed-noise floor"
+    },
+    "age_forced": {
+      "comparison": "age_forced vs baseline",
+      "baseline_arm": "baseline",
+      "test_arm": "age_forced",
+      "n_folds": 15,
+      "mean_paired_diff": 0.0015,
+      "median_paired_diff": 0.00085,
+      "std_of_paired_diff": 0.01392,
+      "ci95_of_mean": [
+        -0.00622,
+        0.00921
+      ],
+      "per_fold_diff": [
+        0.0001,
+        0.0,
+        -0.03302,
+        0.01055,
+        -0.00464,
+        0.01731,
+        -0.00967,
+        0.01465,
+        -0.01534,
+        0.00913,
+        0.01879,
+        0.00761,
+        0.01224,
+        -0.00613,
+        0.00085
+      ],
+      "n_folds_improved": 9,
+      "n_folds_worse": 5,
+      "n_folds_tied": 1,
+      "sign_test_p_two_sided": 0.42395,
+      "wilcoxon_p_two_sided": 0.39673,
+      "paired_t_p_two_sided": 0.68373,
+      "paired_t_statistic": 0.416,
+      "n_tests_below_0.05": 0,
+      "tests_disagree": false,
+      "min_detectable_effect_80pct_power": 0.01007,
+      "yardstick": "paired on identical outer folds - judge against std_of_paired_diff=0.01392, NOT against the project's 0.0905 unpaired seed-noise floor"
+    },
+    "gender_forced": {
+      "comparison": "gender_forced vs baseline",
+      "baseline_arm": "baseline",
+      "test_arm": "gender_forced",
+      "n_folds": 15,
+      "mean_paired_diff": -0.00481,
+      "median_paired_diff": -0.00755,
+      "std_of_paired_diff": 0.01158,
+      "ci95_of_mean": [
+        -0.01123,
+        0.0016
+      ],
+      "per_fold_diff": [
+        -0.00261,
+        -0.01137,
+        -0.01962,
+        -0.00225,
+        0.02627,
+        -0.01819,
+        -0.00281,
+        -0.00755,
+        -0.00999,
+        0.00478,
+        0.00063,
+        -0.01248,
+        -0.01335,
+        0.00678,
+        -0.01046
+      ],
+      "n_folds_improved": 4,
+      "n_folds_worse": 11,
+      "n_folds_tied": 0,
+      "sign_test_p_two_sided": 0.11847,
+      "wilcoxon_p_two_sided": 0.06372,
+      "paired_t_p_two_sided": 0.12967,
+      "paired_t_statistic": -1.6101,
+      "n_tests_below_0.05": 0,
+      "tests_disagree": false,
+      "min_detectable_effect_80pct_power": 0.00838,
+      "yardstick": "paired on identical outer folds - judge against std_of_paired_diff=0.01158, NOT against the project's 0.0905 unpaired seed-noise floor"
+    },
+    "sensitive_forced": {
+      "comparison": "sensitive_forced vs baseline",
+      "baseline_arm": "baseline",
+      "test_arm": "sensitive_forced",
+      "n_folds": 15,
+      "mean_paired_diff": -0.00553,
+      "median_paired_diff": -0.00542,
+      "std_of_paired_diff": 0.01136,
+      "ci95_of_mean": [
+        -0.01182,
+        0.00076
+      ],
+      "per_fold_diff": [
+        1e-05,
+        -0.00542,
+        -0.03405,
+        0.00502,
+        0.00638,
+        -2e-05,
+        -0.00551,
+        -0.00776,
+        -0.01256,
+        0.00614,
+        -0.00983,
+        -0.00216,
+        0.00771,
+        -0.02205,
+        -0.00882
+      ],
+      "n_folds_improved": 5,
+      "n_folds_worse": 10,
+      "n_folds_tied": 0,
+      "sign_test_p_two_sided": 0.30176,
+      "wilcoxon_p_two_sided": 0.08325,
+      "paired_t_p_two_sided": 0.08042,
+      "paired_t_statistic": -1.8845,
+      "n_tests_below_0.05": 0,
+      "tests_disagree": false,
+      "min_detectable_effect_80pct_power": 0.00822,
+      "yardstick": "paired on identical outer folds - judge against std_of_paired_diff=0.01136, NOT against the project's 0.0905 unpaired seed-noise floor"
+    },
+    "all_four_forced": {
+      "comparison": "all_four_forced vs baseline",
+      "baseline_arm": "baseline",
+      "test_arm": "all_four_forced",
+      "n_folds": 15,
+      "mean_paired_diff": -0.00122,
+      "median_paired_diff": 0.00223,
+      "std_of_paired_diff": 0.01391,
+      "ci95_of_mean": [
+        -0.00892,
+        0.00649
+      ],
+      "per_fold_diff": [
+        0.0053,
+        -0.02031,
+        -0.03031,
+        0.01669,
+        -0.00463,
+        0.01794,
+        -0.00619,
+        0.00223,
+        -0.01226,
+        0.0062,
+        0.00277,
+        0.01463,
+        0.0093,
+        -0.00687,
+        -0.01279
+      ],
+      "n_folds_improved": 8,
+      "n_folds_worse": 7,
+      "n_folds_tied": 0,
+      "sign_test_p_two_sided": 1.0,
+      "wilcoxon_p_two_sided": 0.89038,
+      "paired_t_p_two_sided": 0.73948,
+      "paired_t_statistic": -0.3392,
+      "n_tests_below_0.05": 0,
+      "tests_disagree": false,
+      "min_detectable_effect_80pct_power": 0.01006,
+      "yardstick": "paired on identical outer folds - judge against std_of_paired_diff=0.01391, NOT against the project's 0.0905 unpaired seed-noise floor"
+    }
+  },
+  "decision_rule": {
+    "text": "a sensitive attribute is re-admitted to the accepted primary model only if its arm's mean paired difference is positive AND the sign test rejects at 0.05. Fixed before the run. Anything else - including a positive mean that the sign test cannot separate from noise - is KEEP_EXCLUSION.",
+    "arms_meeting_the_rule": [],
+    "note": "sensitive_excluded is scored and reported but is not a candidate for re-admission; it is the control that shows what removing the attributes costs."
+  },
+  "verdict": "KEEP_EXCLUSION",
+  "slice_audit": {
+    "budget": 100,
+    "score": "mean of the 3 outer-fold OOF score matrices, which is how the companion audit ranks dev rows",
+    "group_source": "raw columns, not model features - so gender can be sliced on even though the model never sees it",
+    "reporting_rule": {
+      "selection_rate": "reported only when the group has >= 50 rows",
+      "recall": "reported only when the group has >= 3 positives, matching docs/FAIRNESS_AND_SENSITIVE_FEATURE_AUDIT.md so the two documents can be read together",
+      "suppressed_groups_still_report_their_size": true
+    },
+    "impossible_age_rows": 1,
+    "impossible_age_note": "ages below zero exist in this extract and fall in the '< 25' bin; counted here so the bin does not hide them",
+    "overall": {
+      "baseline": {
+        "selection_rate": 0.01377,
+        "recall_at_100": 0.79688
+      },
+      "sensitive_excluded": {
+        "selection_rate": 0.01377,
+        "recall_at_100": 0.8125
+      },
+      "geography_forced": {
+        "selection_rate": 0.01377,
+        "recall_at_100": 0.8125
+      },
+      "occupation_forced": {
+        "selection_rate": 0.01377,
+        "recall_at_100": 0.8125
+      },
+      "age_forced": {
+        "selection_rate": 0.01377,
+        "recall_at_100": 0.8125
+      },
+      "gender_forced": {
+        "selection_rate": 0.01377,
+        "recall_at_100": 0.8125
+      },
+      "sensitive_forced": {
+        "selection_rate": 0.01377,
+        "recall_at_100": 0.8125
+      },
+      "all_four_forced": {
+        "selection_rate": 0.01377,
+        "recall_at_100": 0.8125
+      }
+    },
+    "by_arm": {
+      "baseline": {
+        "gender": {
+          "groups": [
+            {
+              "group": "M",
+              "n": 4003,
+              "positives": 51,
+              "n_flagged": 72,
+              "selection_rate": 0.01799,
+              "group_prevalence": 0.01274,
+              "recall_at_100": 0.86275
+            },
+            {
+              "group": "F",
+              "n": 1140,
+              "positives": 10,
+              "n_flagged": 19,
+              "selection_rate": 0.01667,
+              "group_prevalence": 0.00877,
+              "recall_at_100": 0.7
+            },
+            {
+              "group": "(not recorded)",
+              "n": 2072,
+              "positives": 3,
+              "n_flagged": 8,
+              "selection_rate": 0.00386,
+              "group_prevalence": 0.00145,
+              "recall_at_100": 0.0
+            }
+          ],
+          "suppressed": [
+            {
+              "group": "O",
+              "n": 49,
+              "positives": 0,
+              "reason": "n < 50; a selection rate here is one alert wide"
+            }
+          ]
+        },
+        "geography": {
+          "groups": [
+            {
+              "group": "R",
+              "n": 1595,
+              "positives": 22,
+              "n_flagged": 39,
+              "selection_rate": 0.02445,
+              "group_prevalence": 0.01379,
+              "recall_at_100": 0.90909
+            },
+            {
+              "group": "SU",
+              "n": 1915,
+              "positives": 17,
+              "n_flagged": 33,
+              "selection_rate": 0.01723,
+              "group_prevalence": 0.00888,
+              "recall_at_100": 0.88235
+            },
+            {
+              "group": "M",
+              "n": 2351,
+              "positives": 16,
+              "n_flagged": 19,
+              "selection_rate": 0.00808,
+              "group_prevalence": 0.00681,
+              "recall_at_100": 0.6875
+            },
+            {
+              "group": "U",
+              "n": 1403,
+              "positives": 9,
+              "n_flagged": 9,
+              "selection_rate": 0.00641,
+              "group_prevalence": 0.00641,
+              "recall_at_100": 0.55556
+            }
+          ],
+          "suppressed": []
+        },
+        "occupation": {
+          "groups": [
+            {
+              "group": "student",
+              "n": 944,
+              "positives": 15,
+              "n_flagged": 28,
+              "selection_rate": 0.02966,
+              "group_prevalence": 0.01589,
+              "recall_at_100": 0.93333
+            },
+            {
+              "group": "agriculture",
+              "n": 883,
+              "positives": 13,
+              "n_flagged": 23,
+              "selection_rate": 0.02605,
+              "group_prevalence": 0.01472,
+              "recall_at_100": 0.92308
+            },
+            {
+              "group": "housewife",
+              "n": 540,
+              "positives": 3,
+              "n_flagged": 5,
+              "selection_rate": 0.00926,
+              "group_prevalence": 0.00556,
+              "recall_at_100": 0.33333
+            },
+            {
+              "group": "selfemployed",
+              "n": 3151,
+              "positives": 20,
+              "n_flagged": 29,
+              "selection_rate": 0.0092,
+              "group_prevalence": 0.00635,
+              "recall_at_100": 0.85
+            },
+            {
+              "group": "salaried",
+              "n": 1534,
+              "positives": 13,
+              "n_flagged": 14,
+              "selection_rate": 0.00913,
+              "group_prevalence": 0.00847,
+              "recall_at_100": 0.53846
+            },
+            {
+              "group": "others",
+              "n": 138,
+              "positives": 0,
+              "n_flagged": 1,
+              "selection_rate": 0.00725,
+              "group_prevalence": 0.0,
+              "recall_at_100": null,
+              "recall_suppressed": "0 positives < 3"
+            },
+            {
+              "group": "retired",
+              "n": 74,
+              "positives": 0,
+              "n_flagged": 0,
+              "selection_rate": 0.0,
+              "group_prevalence": 0.0,
+              "recall_at_100": null,
+              "recall_suppressed": "0 positives < 3"
+            }
+          ],
+          "suppressed": []
+        },
+        "age": {
+          "groups": [
+            {
+              "group": "25-34",
+              "n": 2062,
+              "positives": 25,
+              "n_flagged": 42,
+              "selection_rate": 0.02037,
+              "group_prevalence": 0.01212,
+              "recall_at_100": 0.84
+            },
+            {
+              "group": "35-44",
+              "n": 1626,
+              "positives": 11,
+              "n_flagged": 22,
+              "selection_rate": 0.01353,
+              "group_prevalence": 0.00677,
+              "recall_at_100": 0.72727
+            },
+            {
+              "group": "< 25",
+              "n": 1755,
+              "positives": 17,
+              "n_flagged": 22,
+              "selection_rate": 0.01254,
+              "group_prevalence": 0.00969,
+              "recall_at_100": 0.82353
+            },
+            {
+              "group": "55-64",
+              "n": 550,
+              "positives": 3,
+              "n_flagged": 5,
+              "selection_rate": 0.00909,
+              "group_prevalence": 0.00545,
+              "recall_at_100": 0.66667
+            },
+            {
+              "group": "45-54",
+              "n": 896,
+              "positives": 6,
+              "n_flagged": 7,
+              "selection_rate": 0.00781,
+              "group_prevalence": 0.0067,
+              "recall_at_100": 0.83333
+            },
+            {
+              "group": "65+",
+              "n": 372,
+              "positives": 2,
+              "n_flagged": 2,
+              "selection_rate": 0.00538,
+              "group_prevalence": 0.00538,
+              "recall_at_100": null,
+              "recall_suppressed": "2 positives < 3"
+            }
+          ],
+          "suppressed": [
+            {
+              "group": "(not recorded)",
+              "n": 3,
+              "positives": 0,
+              "reason": "n < 50; a selection rate here is one alert wide"
+            }
+          ]
+        }
+      },
+      "sensitive_excluded": {
+        "gender": {
+          "groups": [
+            {
+              "group": "M",
+              "n": 4003,
+              "positives": 51,
+              "n_flagged": 73,
+              "selection_rate": 0.01824,
+              "group_prevalence": 0.01274,
+              "recall_at_100": 0.88235
+            },
+            {
+              "group": "F",
+              "n": 1140,
+              "positives": 10,
+              "n_flagged": 18,
+              "selection_rate": 0.01579,
+              "group_prevalence": 0.00877,
+              "recall_at_100": 0.7
+            },
+            {
+              "group": "(not recorded)",
+              "n": 2072,
+              "positives": 3,
+              "n_flagged": 8,
+              "selection_rate": 0.00386,
+              "group_prevalence": 0.00145,
+              "recall_at_100": 0.0
+            }
+          ],
+          "suppressed": [
+            {
+              "group": "O",
+              "n": 49,
+              "positives": 0,
+              "reason": "n < 50; a selection rate here is one alert wide"
+            }
+          ]
+        },
+        "geography": {
+          "groups": [
+            {
+              "group": "R",
+              "n": 1595,
+              "positives": 22,
+              "n_flagged": 38,
+              "selection_rate": 0.02382,
+              "group_prevalence": 0.01379,
+              "recall_at_100": 0.90909
+            },
+            {
+              "group": "SU",
+              "n": 1915,
+              "positives": 17,
+              "n_flagged": 33,
+              "selection_rate": 0.01723,
+              "group_prevalence": 0.00888,
+              "recall_at_100": 0.88235
+            },
+            {
+              "group": "M",
+              "n": 2351,
+              "positives": 16,
+              "n_flagged": 19,
+              "selection_rate": 0.00808,
+              "group_prevalence": 0.00681,
+              "recall_at_100": 0.6875
+            },
+            {
+              "group": "U",
+              "n": 1403,
+              "positives": 9,
+              "n_flagged": 10,
+              "selection_rate": 0.00713,
+              "group_prevalence": 0.00641,
+              "recall_at_100": 0.66667
+            }
+          ],
+          "suppressed": []
+        },
+        "occupation": {
+          "groups": [
+            {
+              "group": "student",
+              "n": 944,
+              "positives": 15,
+              "n_flagged": 28,
+              "selection_rate": 0.02966,
+              "group_prevalence": 0.01589,
+              "recall_at_100": 0.93333
+            },
+            {
+              "group": "agriculture",
+              "n": 883,
+              "positives": 13,
+              "n_flagged": 23,
+              "selection_rate": 0.02605,
+              "group_prevalence": 0.01472,
+              "recall_at_100": 0.92308
+            },
+            {
+              "group": "salaried",
+              "n": 1534,
+              "positives": 13,
+              "n_flagged": 15,
+              "selection_rate": 0.00978,
+              "group_prevalence": 0.00847,
+              "recall_at_100": 0.61538
+            },
+            {
+              "group": "selfemployed",
+              "n": 3151,
+              "positives": 20,
+              "n_flagged": 29,
+              "selection_rate": 0.0092,
+              "group_prevalence": 0.00635,
+              "recall_at_100": 0.85
+            },
+            {
+              "group": "housewife",
+              "n": 540,
+              "positives": 3,
+              "n_flagged": 4,
+              "selection_rate": 0.00741,
+              "group_prevalence": 0.00556,
+              "recall_at_100": 0.33333
+            },
+            {
+              "group": "others",
+              "n": 138,
+              "positives": 0,
+              "n_flagged": 1,
+              "selection_rate": 0.00725,
+              "group_prevalence": 0.0,
+              "recall_at_100": null,
+              "recall_suppressed": "0 positives < 3"
+            },
+            {
+              "group": "retired",
+              "n": 74,
+              "positives": 0,
+              "n_flagged": 0,
+              "selection_rate": 0.0,
+              "group_prevalence": 0.0,
+              "recall_at_100": null,
+              "recall_suppressed": "0 positives < 3"
+            }
+          ],
+          "suppressed": []
+        },
+        "age": {
+          "groups": [
+            {
+              "group": "25-34",
+              "n": 2062,
+              "positives": 25,
+              "n_flagged": 41,
+              "selection_rate": 0.01988,
+              "group_prevalence": 0.01212,
+              "recall_at_100": 0.84
+            },
+            {
+              "group": "35-44",
+              "n": 1626,
+              "positives": 11,
+              "n_flagged": 22,
+              "selection_rate": 0.01353,
+              "group_prevalence": 0.00677,
+              "recall_at_100": 0.72727
+            },
+            {
+              "group": "< 25",
+              "n": 1755,
+              "positives": 17,
+              "n_flagged": 22,
+              "selection_rate": 0.01254,
+              "group_prevalence": 0.00969,
+              "recall_at_100": 0.82353
+            },
+            {
+              "group": "55-64",
+              "n": 550,
+              "positives": 3,
+              "n_flagged": 5,
+              "selection_rate": 0.00909,
+              "group_prevalence": 0.00545,
+              "recall_at_100": 0.66667
+            },
+            {
+              "group": "45-54",
+              "n": 896,
+              "positives": 6,
+              "n_flagged": 8,
+              "selection_rate": 0.00893,
+              "group_prevalence": 0.0067,
+              "recall_at_100": 1.0
+            },
+            {
+              "group": "65+",
+              "n": 372,
+              "positives": 2,
+              "n_flagged": 2,
+              "selection_rate": 0.00538,
+              "group_prevalence": 0.00538,
+              "recall_at_100": null,
+              "recall_suppressed": "2 positives < 3"
+            }
+          ],
+          "suppressed": [
+            {
+              "group": "(not recorded)",
+              "n": 3,
+              "positives": 0,
+              "reason": "n < 50; a selection rate here is one alert wide"
+            }
+          ]
+        }
+      },
+      "geography_forced": {
+        "gender": {
+          "groups": [
+            {
+              "group": "M",
+              "n": 4003,
+              "positives": 51,
+              "n_flagged": 74,
+              "selection_rate": 0.01849,
+              "group_prevalence": 0.01274,
+              "recall_at_100": 0.88235
+            },
+            {
+              "group": "F",
+              "n": 1140,
+              "positives": 10,
+              "n_flagged": 18,
+              "selection_rate": 0.01579,
+              "group_prevalence": 0.00877,
+              "recall_at_100": 0.7
+            },
+            {
+              "group": "(not recorded)",
+              "n": 2072,
+              "positives": 3,
+              "n_flagged": 7,
+              "selection_rate": 0.00338,
+              "group_prevalence": 0.00145,
+              "recall_at_100": 0.0
+            }
+          ],
+          "suppressed": [
+            {
+              "group": "O",
+              "n": 49,
+              "positives": 0,
+              "reason": "n < 50; a selection rate here is one alert wide"
+            }
+          ]
+        },
+        "geography": {
+          "groups": [
+            {
+              "group": "R",
+              "n": 1595,
+              "positives": 22,
+              "n_flagged": 37,
+              "selection_rate": 0.0232,
+              "group_prevalence": 0.01379,
+              "recall_at_100": 0.90909
+            },
+            {
+              "group": "SU",
+              "n": 1915,
+              "positives": 17,
+              "n_flagged": 35,
+              "selection_rate": 0.01828,
+              "group_prevalence": 0.00888,
+              "recall_at_100": 0.88235
+            },
+            {
+              "group": "M",
+              "n": 2351,
+              "positives": 16,
+              "n_flagged": 18,
+              "selection_rate": 0.00766,
+              "group_prevalence": 0.00681,
+              "recall_at_100": 0.6875
+            },
+            {
+              "group": "U",
+              "n": 1403,
+              "positives": 9,
+              "n_flagged": 10,
+              "selection_rate": 0.00713,
+              "group_prevalence": 0.00641,
+              "recall_at_100": 0.66667
+            }
+          ],
+          "suppressed": []
+        },
+        "occupation": {
+          "groups": [
+            {
+              "group": "student",
+              "n": 944,
+              "positives": 15,
+              "n_flagged": 28,
+              "selection_rate": 0.02966,
+              "group_prevalence": 0.01589,
+              "recall_at_100": 0.93333
+            },
+            {
+              "group": "agriculture",
+              "n": 883,
+              "positives": 13,
+              "n_flagged": 23,
+              "selection_rate": 0.02605,
+              "group_prevalence": 0.01472,
+              "recall_at_100": 0.92308
+            },
+            {
+              "group": "salaried",
+              "n": 1534,
+              "positives": 13,
+              "n_flagged": 15,
+              "selection_rate": 0.00978,
+              "group_prevalence": 0.00847,
+              "recall_at_100": 0.61538
+            },
+            {
+              "group": "housewife",
+              "n": 540,
+              "positives": 3,
+              "n_flagged": 5,
+              "selection_rate": 0.00926,
+              "group_prevalence": 0.00556,
+              "recall_at_100": 0.33333
+            },
+            {
+              "group": "selfemployed",
+              "n": 3151,
+              "positives": 20,
+              "n_flagged": 28,
+              "selection_rate": 0.00889,
+              "group_prevalence": 0.00635,
+              "recall_at_100": 0.85
+            },
+            {
+              "group": "others",
+              "n": 138,
+              "positives": 0,
+              "n_flagged": 1,
+              "selection_rate": 0.00725,
+              "group_prevalence": 0.0,
+              "recall_at_100": null,
+              "recall_suppressed": "0 positives < 3"
+            },
+            {
+              "group": "retired",
+              "n": 74,
+              "positives": 0,
+              "n_flagged": 0,
+              "selection_rate": 0.0,
+              "group_prevalence": 0.0,
+              "recall_at_100": null,
+              "recall_suppressed": "0 positives < 3"
+            }
+          ],
+          "suppressed": []
+        },
+        "age": {
+          "groups": [
+            {
+              "group": "25-34",
+              "n": 2062,
+              "positives": 25,
+              "n_flagged": 43,
+              "selection_rate": 0.02085,
+              "group_prevalence": 0.01212,
+              "recall_at_100": 0.84
+            },
+            {
+              "group": "35-44",
+              "n": 1626,
+              "positives": 11,
+              "n_flagged": 22,
+              "selection_rate": 0.01353,
+              "group_prevalence": 0.00677,
+              "recall_at_100": 0.72727
+            },
+            {
+              "group": "< 25",
+              "n": 1755,
+              "positives": 17,
+              "n_flagged": 22,
+              "selection_rate": 0.01254,
+              "group_prevalence": 0.00969,
+              "recall_at_100": 0.82353
+            },
+            {
+              "group": "55-64",
+              "n": 550,
+              "positives": 3,
+              "n_flagged": 5,
+              "selection_rate": 0.00909,
+              "group_prevalence": 0.00545,
+              "recall_at_100": 0.66667
+            },
+            {
+              "group": "45-54",
+              "n": 896,
+              "positives": 6,
+              "n_flagged": 7,
+              "selection_rate": 0.00781,
+              "group_prevalence": 0.0067,
+              "recall_at_100": 1.0
+            },
+            {
+              "group": "65+",
+              "n": 372,
+              "positives": 2,
+              "n_flagged": 1,
+              "selection_rate": 0.00269,
+              "group_prevalence": 0.00538,
+              "recall_at_100": null,
+              "recall_suppressed": "2 positives < 3"
+            }
+          ],
+          "suppressed": [
+            {
+              "group": "(not recorded)",
+              "n": 3,
+              "positives": 0,
+              "reason": "n < 50; a selection rate here is one alert wide"
+            }
+          ]
+        }
+      },
+      "occupation_forced": {
+        "gender": {
+          "groups": [
+            {
+              "group": "M",
+              "n": 4003,
+              "positives": 51,
+              "n_flagged": 75,
+              "selection_rate": 0.01874,
+              "group_prevalence": 0.01274,
+              "recall_at_100": 0.88235
+            },
+            {
+              "group": "F",
+              "n": 1140,
+              "positives": 10,
+              "n_flagged": 17,
+              "selection_rate": 0.01491,
+              "group_prevalence": 0.00877,
+              "recall_at_100": 0.7
+            },
+            {
+              "group": "(not recorded)",
+              "n": 2072,
+              "positives": 3,
+              "n_flagged": 7,
+              "selection_rate": 0.00338,
+              "group_prevalence": 0.00145,
+              "recall_at_100": 0.0
+            }
+          ],
+          "suppressed": [
+            {
+              "group": "O",
+              "n": 49,
+              "positives": 0,
+              "reason": "n < 50; a selection rate here is one alert wide"
+            }
+          ]
+        },
+        "geography": {
+          "groups": [
+            {
+              "group": "R",
+              "n": 1595,
+              "positives": 22,
+              "n_flagged": 38,
+              "selection_rate": 0.02382,
+              "group_prevalence": 0.01379,
+              "recall_at_100": 0.90909
+            },
+            {
+              "group": "SU",
+              "n": 1915,
+              "positives": 17,
+              "n_flagged": 35,
+              "selection_rate": 0.01828,
+              "group_prevalence": 0.00888,
+              "recall_at_100": 0.88235
+            },
+            {
+              "group": "M",
+              "n": 2351,
+              "positives": 16,
+              "n_flagged": 17,
+              "selection_rate": 0.00723,
+              "group_prevalence": 0.00681,
+              "recall_at_100": 0.6875
+            },
+            {
+              "group": "U",
+              "n": 1403,
+              "positives": 9,
+              "n_flagged": 10,
+              "selection_rate": 0.00713,
+              "group_prevalence": 0.00641,
+              "recall_at_100": 0.66667
+            }
+          ],
+          "suppressed": []
+        },
+        "occupation": {
+          "groups": [
+            {
+              "group": "student",
+              "n": 944,
+              "positives": 15,
+              "n_flagged": 27,
+              "selection_rate": 0.0286,
+              "group_prevalence": 0.01589,
+              "recall_at_100": 0.93333
+            },
+            {
+              "group": "agriculture",
+              "n": 883,
+              "positives": 13,
+              "n_flagged": 24,
+              "selection_rate": 0.02718,
+              "group_prevalence": 0.01472,
+              "recall_at_100": 0.92308
+            },
+            {
+              "group": "salaried",
+              "n": 1534,
+              "positives": 13,
+              "n_flagged": 16,
+              "selection_rate": 0.01043,
+              "group_prevalence": 0.00847,
+              "recall_at_100": 0.61538
+            },
+            {
+              "group": "selfemployed",
+              "n": 3151,
+              "positives": 20,
+              "n_flagged": 28,
+              "selection_rate": 0.00889,
+              "group_prevalence": 0.00635,
+              "recall_at_100": 0.85
+            },
+            {
+              "group": "housewife",
+              "n": 540,
+              "positives": 3,
+              "n_flagged": 4,
+              "selection_rate": 0.00741,
+              "group_prevalence": 0.00556,
+              "recall_at_100": 0.33333
+            },
+            {
+              "group": "others",
+              "n": 138,
+              "positives": 0,
+              "n_flagged": 1,
+              "selection_rate": 0.00725,
+              "group_prevalence": 0.0,
+              "recall_at_100": null,
+              "recall_suppressed": "0 positives < 3"
+            },
+            {
+              "group": "retired",
+              "n": 74,
+              "positives": 0,
+              "n_flagged": 0,
+              "selection_rate": 0.0,
+              "group_prevalence": 0.0,
+              "recall_at_100": null,
+              "recall_suppressed": "0 positives < 3"
+            }
+          ],
+          "suppressed": []
+        },
+        "age": {
+          "groups": [
+            {
+              "group": "25-34",
+              "n": 2062,
+              "positives": 25,
+              "n_flagged": 41,
+              "selection_rate": 0.01988,
+              "group_prevalence": 0.01212,
+              "recall_at_100": 0.84
+            },
+            {
+              "group": "35-44",
+              "n": 1626,
+              "positives": 11,
+              "n_flagged": 23,
+              "selection_rate": 0.01415,
+              "group_prevalence": 0.00677,
+              "recall_at_100": 0.72727
+            },
+            {
+              "group": "< 25",
+              "n": 1755,
+              "positives": 17,
+              "n_flagged": 22,
+              "selection_rate": 0.01254,
+              "group_prevalence": 0.00969,
+              "recall_at_100": 0.82353
+            },
+            {
+              "group": "55-64",
+              "n": 550,
+              "positives": 3,
+              "n_flagged": 5,
+              "selection_rate": 0.00909,
+              "group_prevalence": 0.00545,
+              "recall_at_100": 0.66667
+            },
+            {
+              "group": "45-54",
+              "n": 896,
+              "positives": 6,
+              "n_flagged": 7,
+              "selection_rate": 0.00781,
+              "group_prevalence": 0.0067,
+              "recall_at_100": 1.0
+            },
+            {
+              "group": "65+",
+              "n": 372,
+              "positives": 2,
+              "n_flagged": 2,
+              "selection_rate": 0.00538,
+              "group_prevalence": 0.00538,
+              "recall_at_100": null,
+              "recall_suppressed": "2 positives < 3"
+            }
+          ],
+          "suppressed": [
+            {
+              "group": "(not recorded)",
+              "n": 3,
+              "positives": 0,
+              "reason": "n < 50; a selection rate here is one alert wide"
+            }
+          ]
+        }
+      },
+      "age_forced": {
+        "gender": {
+          "groups": [
+            {
+              "group": "M",
+              "n": 4003,
+              "positives": 51,
+              "n_flagged": 75,
+              "selection_rate": 0.01874,
+              "group_prevalence": 0.01274,
+              "recall_at_100": 0.88235
+            },
+            {
+              "group": "F",
+              "n": 1140,
+              "positives": 10,
+              "n_flagged": 17,
+              "selection_rate": 0.01491,
+              "group_prevalence": 0.00877,
+              "recall_at_100": 0.7
+            },
+            {
+              "group": "(not recorded)",
+              "n": 2072,
+              "positives": 3,
+              "n_flagged": 7,
+              "selection_rate": 0.00338,
+              "group_prevalence": 0.00145,
+              "recall_at_100": 0.0
+            }
+          ],
+          "suppressed": [
+            {
+              "group": "O",
+              "n": 49,
+              "positives": 0,
+              "reason": "n < 50; a selection rate here is one alert wide"
+            }
+          ]
+        },
+        "geography": {
+          "groups": [
+            {
+              "group": "R",
+              "n": 1595,
+              "positives": 22,
+              "n_flagged": 39,
+              "selection_rate": 0.02445,
+              "group_prevalence": 0.01379,
+              "recall_at_100": 0.90909
+            },
+            {
+              "group": "SU",
+              "n": 1915,
+              "positives": 17,
+              "n_flagged": 34,
+              "selection_rate": 0.01775,
+              "group_prevalence": 0.00888,
+              "recall_at_100": 0.88235
+            },
+            {
+              "group": "M",
+              "n": 2351,
+              "positives": 16,
+              "n_flagged": 17,
+              "selection_rate": 0.00723,
+              "group_prevalence": 0.00681,
+              "recall_at_100": 0.6875
+            },
+            {
+              "group": "U",
+              "n": 1403,
+              "positives": 9,
+              "n_flagged": 10,
+              "selection_rate": 0.00713,
+              "group_prevalence": 0.00641,
+              "recall_at_100": 0.66667
+            }
+          ],
+          "suppressed": []
+        },
+        "occupation": {
+          "groups": [
+            {
+              "group": "student",
+              "n": 944,
+              "positives": 15,
+              "n_flagged": 28,
+              "selection_rate": 0.02966,
+              "group_prevalence": 0.01589,
+              "recall_at_100": 0.93333
+            },
+            {
+              "group": "agriculture",
+              "n": 883,
+              "positives": 13,
+              "n_flagged": 24,
+              "selection_rate": 0.02718,
+              "group_prevalence": 0.01472,
+              "recall_at_100": 0.92308
+            },
+            {
+              "group": "salaried",
+              "n": 1534,
+              "positives": 13,
+              "n_flagged": 15,
+              "selection_rate": 0.00978,
+              "group_prevalence": 0.00847,
+              "recall_at_100": 0.61538
+            },
+            {
+              "group": "selfemployed",
+              "n": 3151,
+              "positives": 20,
+              "n_flagged": 28,
+              "selection_rate": 0.00889,
+              "group_prevalence": 0.00635,
+              "recall_at_100": 0.85
+            },
+            {
+              "group": "housewife",
+              "n": 540,
+              "positives": 3,
+              "n_flagged": 4,
+              "selection_rate": 0.00741,
+              "group_prevalence": 0.00556,
+              "recall_at_100": 0.33333
+            },
+            {
+              "group": "others",
+              "n": 138,
+              "positives": 0,
+              "n_flagged": 1,
+              "selection_rate": 0.00725,
+              "group_prevalence": 0.0,
+              "recall_at_100": null,
+              "recall_suppressed": "0 positives < 3"
+            },
+            {
+              "group": "retired",
+              "n": 74,
+              "positives": 0,
+              "n_flagged": 0,
+              "selection_rate": 0.0,
+              "group_prevalence": 0.0,
+              "recall_at_100": null,
+              "recall_suppressed": "0 positives < 3"
+            }
+          ],
+          "suppressed": []
+        },
+        "age": {
+          "groups": [
+            {
+              "group": "25-34",
+              "n": 2062,
+              "positives": 25,
+              "n_flagged": 41,
+              "selection_rate": 0.01988,
+              "group_prevalence": 0.01212,
+              "recall_at_100": 0.84
+            },
+            {
+              "group": "35-44",
+              "n": 1626,
+              "positives": 11,
+              "n_flagged": 23,
+              "selection_rate": 0.01415,
+              "group_prevalence": 0.00677,
+              "recall_at_100": 0.72727
+            },
+            {
+              "group": "< 25",
+              "n": 1755,
+              "positives": 17,
+              "n_flagged": 23,
+              "selection_rate": 0.01311,
+              "group_prevalence": 0.00969,
+              "recall_at_100": 0.82353
+            },
+            {
+              "group": "55-64",
+              "n": 550,
+              "positives": 3,
+              "n_flagged": 5,
+              "selection_rate": 0.00909,
+              "group_prevalence": 0.00545,
+              "recall_at_100": 0.66667
+            },
+            {
+              "group": "45-54",
+              "n": 896,
+              "positives": 6,
+              "n_flagged": 7,
+              "selection_rate": 0.00781,
+              "group_prevalence": 0.0067,
+              "recall_at_100": 1.0
+            },
+            {
+              "group": "65+",
+              "n": 372,
+              "positives": 2,
+              "n_flagged": 1,
+              "selection_rate": 0.00269,
+              "group_prevalence": 0.00538,
+              "recall_at_100": null,
+              "recall_suppressed": "2 positives < 3"
+            }
+          ],
+          "suppressed": [
+            {
+              "group": "(not recorded)",
+              "n": 3,
+              "positives": 0,
+              "reason": "n < 50; a selection rate here is one alert wide"
+            }
+          ]
+        }
+      },
+      "gender_forced": {
+        "gender": {
+          "groups": [
+            {
+              "group": "M",
+              "n": 4003,
+              "positives": 51,
+              "n_flagged": 73,
+              "selection_rate": 0.01824,
+              "group_prevalence": 0.01274,
+              "recall_at_100": 0.88235
+            },
+            {
+              "group": "F",
+              "n": 1140,
+              "positives": 10,
+              "n_flagged": 19,
+              "selection_rate": 0.01667,
+              "group_prevalence": 0.00877,
+              "recall_at_100": 0.7
+            },
+            {
+              "group": "(not recorded)",
+              "n": 2072,
+              "positives": 3,
+              "n_flagged": 7,
+              "selection_rate": 0.00338,
+              "group_prevalence": 0.00145,
+              "recall_at_100": 0.0
+            }
+          ],
+          "suppressed": [
+            {
+              "group": "O",
+              "n": 49,
+              "positives": 0,
+              "reason": "n < 50; a selection rate here is one alert wide"
+            }
+          ]
+        },
+        "geography": {
+          "groups": [
+            {
+              "group": "R",
+              "n": 1595,
+              "positives": 22,
+              "n_flagged": 38,
+              "selection_rate": 0.02382,
+              "group_prevalence": 0.01379,
+              "recall_at_100": 0.90909
+            },
+            {
+              "group": "SU",
+              "n": 1915,
+              "positives": 17,
+              "n_flagged": 35,
+              "selection_rate": 0.01828,
+              "group_prevalence": 0.00888,
+              "recall_at_100": 0.88235
+            },
+            {
+              "group": "M",
+              "n": 2351,
+              "positives": 16,
+              "n_flagged": 17,
+              "selection_rate": 0.00723,
+              "group_prevalence": 0.00681,
+              "recall_at_100": 0.6875
+            },
+            {
+              "group": "U",
+              "n": 1403,
+              "positives": 9,
+              "n_flagged": 10,
+              "selection_rate": 0.00713,
+              "group_prevalence": 0.00641,
+              "recall_at_100": 0.66667
+            }
+          ],
+          "suppressed": []
+        },
+        "occupation": {
+          "groups": [
+            {
+              "group": "student",
+              "n": 944,
+              "positives": 15,
+              "n_flagged": 29,
+              "selection_rate": 0.03072,
+              "group_prevalence": 0.01589,
+              "recall_at_100": 0.93333
+            },
+            {
+              "group": "agriculture",
+              "n": 883,
+              "positives": 13,
+              "n_flagged": 22,
+              "selection_rate": 0.02492,
+              "group_prevalence": 0.01472,
+              "recall_at_100": 0.92308
+            },
+            {
+              "group": "housewife",
+              "n": 540,
+              "positives": 3,
+              "n_flagged": 6,
+              "selection_rate": 0.01111,
+              "group_prevalence": 0.00556,
+              "recall_at_100": 0.33333
+            },
+            {
+              "group": "salaried",
+              "n": 1534,
+              "positives": 13,
+              "n_flagged": 14,
+              "selection_rate": 0.00913,
+              "group_prevalence": 0.00847,
+              "recall_at_100": 0.61538
+            },
+            {
+              "group": "selfemployed",
+              "n": 3151,
+              "positives": 20,
+              "n_flagged": 28,
+              "selection_rate": 0.00889,
+              "group_prevalence": 0.00635,
+              "recall_at_100": 0.85
+            },
+            {
+              "group": "others",
+              "n": 138,
+              "positives": 0,
+              "n_flagged": 1,
+              "selection_rate": 0.00725,
+              "group_prevalence": 0.0,
+              "recall_at_100": null,
+              "recall_suppressed": "0 positives < 3"
+            },
+            {
+              "group": "retired",
+              "n": 74,
+              "positives": 0,
+              "n_flagged": 0,
+              "selection_rate": 0.0,
+              "group_prevalence": 0.0,
+              "recall_at_100": null,
+              "recall_suppressed": "0 positives < 3"
+            }
+          ],
+          "suppressed": []
+        },
+        "age": {
+          "groups": [
+            {
+              "group": "25-34",
+              "n": 2062,
+              "positives": 25,
+              "n_flagged": 44,
+              "selection_rate": 0.02134,
+              "group_prevalence": 0.01212,
+              "recall_at_100": 0.84
+            },
+            {
+              "group": "35-44",
+              "n": 1626,
+              "positives": 11,
+              "n_flagged": 21,
+              "selection_rate": 0.01292,
+              "group_prevalence": 0.00677,
+              "recall_at_100": 0.72727
+            },
+            {
+              "group": "< 25",
+              "n": 1755,
+              "positives": 17,
+              "n_flagged": 21,
+              "selection_rate": 0.01197,
+              "group_prevalence": 0.00969,
+              "recall_at_100": 0.82353
+            },
+            {
+              "group": "55-64",
+              "n": 550,
+              "positives": 3,
+              "n_flagged": 5,
+              "selection_rate": 0.00909,
+              "group_prevalence": 0.00545,
+              "recall_at_100": 0.66667
+            },
+            {
+              "group": "45-54",
+              "n": 896,
+              "positives": 6,
+              "n_flagged": 8,
+              "selection_rate": 0.00893,
+              "group_prevalence": 0.0067,
+              "recall_at_100": 1.0
+            },
+            {
+              "group": "65+",
+              "n": 372,
+              "positives": 2,
+              "n_flagged": 1,
+              "selection_rate": 0.00269,
+              "group_prevalence": 0.00538,
+              "recall_at_100": null,
+              "recall_suppressed": "2 positives < 3"
+            }
+          ],
+          "suppressed": [
+            {
+              "group": "(not recorded)",
+              "n": 3,
+              "positives": 0,
+              "reason": "n < 50; a selection rate here is one alert wide"
+            }
+          ]
+        }
+      },
+      "sensitive_forced": {
+        "gender": {
+          "groups": [
+            {
+              "group": "M",
+              "n": 4003,
+              "positives": 51,
+              "n_flagged": 74,
+              "selection_rate": 0.01849,
+              "group_prevalence": 0.01274,
+              "recall_at_100": 0.88235
+            },
+            {
+              "group": "F",
+              "n": 1140,
+              "positives": 10,
+              "n_flagged": 19,
+              "selection_rate": 0.01667,
+              "group_prevalence": 0.00877,
+              "recall_at_100": 0.7
+            },
+            {
+              "group": "(not recorded)",
+              "n": 2072,
+              "positives": 3,
+              "n_flagged": 6,
+              "selection_rate": 0.0029,
+              "group_prevalence": 0.00145,
+              "recall_at_100": 0.0
+            }
+          ],
+          "suppressed": [
+            {
+              "group": "O",
+              "n": 49,
+              "positives": 0,
+              "reason": "n < 50; a selection rate here is one alert wide"
+            }
+          ]
+        },
+        "geography": {
+          "groups": [
+            {
+              "group": "R",
+              "n": 1595,
+              "positives": 22,
+              "n_flagged": 40,
+              "selection_rate": 0.02508,
+              "group_prevalence": 0.01379,
+              "recall_at_100": 0.90909
+            },
+            {
+              "group": "SU",
+              "n": 1915,
+              "positives": 17,
+              "n_flagged": 34,
+              "selection_rate": 0.01775,
+              "group_prevalence": 0.00888,
+              "recall_at_100": 0.88235
+            },
+            {
+              "group": "M",
+              "n": 2351,
+              "positives": 16,
+              "n_flagged": 17,
+              "selection_rate": 0.00723,
+              "group_prevalence": 0.00681,
+              "recall_at_100": 0.6875
+            },
+            {
+              "group": "U",
+              "n": 1403,
+              "positives": 9,
+              "n_flagged": 9,
+              "selection_rate": 0.00641,
+              "group_prevalence": 0.00641,
+              "recall_at_100": 0.66667
+            }
+          ],
+          "suppressed": []
+        },
+        "occupation": {
+          "groups": [
+            {
+              "group": "student",
+              "n": 944,
+              "positives": 15,
+              "n_flagged": 27,
+              "selection_rate": 0.0286,
+              "group_prevalence": 0.01589,
+              "recall_at_100": 0.93333
+            },
+            {
+              "group": "agriculture",
+              "n": 883,
+              "positives": 13,
+              "n_flagged": 24,
+              "selection_rate": 0.02718,
+              "group_prevalence": 0.01472,
+              "recall_at_100": 0.92308
+            },
+            {
+              "group": "housewife",
+              "n": 540,
+              "positives": 3,
+              "n_flagged": 6,
+              "selection_rate": 0.01111,
+              "group_prevalence": 0.00556,
+              "recall_at_100": 0.33333
+            },
+            {
+              "group": "salaried",
+              "n": 1534,
+              "positives": 13,
+              "n_flagged": 14,
+              "selection_rate": 0.00913,
+              "group_prevalence": 0.00847,
+              "recall_at_100": 0.61538
+            },
+            {
+              "group": "selfemployed",
+              "n": 3151,
+              "positives": 20,
+              "n_flagged": 28,
+              "selection_rate": 0.00889,
+              "group_prevalence": 0.00635,
+              "recall_at_100": 0.85
+            },
+            {
+              "group": "others",
+              "n": 138,
+              "positives": 0,
+              "n_flagged": 1,
+              "selection_rate": 0.00725,
+              "group_prevalence": 0.0,
+              "recall_at_100": null,
+              "recall_suppressed": "0 positives < 3"
+            },
+            {
+              "group": "retired",
+              "n": 74,
+              "positives": 0,
+              "n_flagged": 0,
+              "selection_rate": 0.0,
+              "group_prevalence": 0.0,
+              "recall_at_100": null,
+              "recall_suppressed": "0 positives < 3"
+            }
+          ],
+          "suppressed": []
+        },
+        "age": {
+          "groups": [
+            {
+              "group": "25-34",
+              "n": 2062,
+              "positives": 25,
+              "n_flagged": 43,
+              "selection_rate": 0.02085,
+              "group_prevalence": 0.01212,
+              "recall_at_100": 0.84
+            },
+            {
+              "group": "35-44",
+              "n": 1626,
+              "positives": 11,
+              "n_flagged": 22,
+              "selection_rate": 0.01353,
+              "group_prevalence": 0.00677,
+              "recall_at_100": 0.72727
+            },
+            {
+              "group": "< 25",
+              "n": 1755,
+              "positives": 17,
+              "n_flagged": 21,
+              "selection_rate": 0.01197,
+              "group_prevalence": 0.00969,
+              "recall_at_100": 0.82353
+            },
+            {
+              "group": "55-64",
+              "n": 550,
+              "positives": 3,
+              "n_flagged": 5,
+              "selection_rate": 0.00909,
+              "group_prevalence": 0.00545,
+              "recall_at_100": 0.66667
+            },
+            {
+              "group": "45-54",
+              "n": 896,
+              "positives": 6,
+              "n_flagged": 8,
+              "selection_rate": 0.00893,
+              "group_prevalence": 0.0067,
+              "recall_at_100": 1.0
+            },
+            {
+              "group": "65+",
+              "n": 372,
+              "positives": 2,
+              "n_flagged": 1,
+              "selection_rate": 0.00269,
+              "group_prevalence": 0.00538,
+              "recall_at_100": null,
+              "recall_suppressed": "2 positives < 3"
+            }
+          ],
+          "suppressed": [
+            {
+              "group": "(not recorded)",
+              "n": 3,
+              "positives": 0,
+              "reason": "n < 50; a selection rate here is one alert wide"
+            }
+          ]
+        }
+      },
+      "all_four_forced": {
+        "gender": {
+          "groups": [
+            {
+              "group": "M",
+              "n": 4003,
+              "positives": 51,
+              "n_flagged": 72,
+              "selection_rate": 0.01799,
+              "group_prevalence": 0.01274,
+              "recall_at_100": 0.88235
+            },
+            {
+              "group": "F",
+              "n": 1140,
+              "positives": 10,
+              "n_flagged": 19,
+              "selection_rate": 0.01667,
+              "group_prevalence": 0.00877,
+              "recall_at_100": 0.7
+            },
+            {
+              "group": "(not recorded)",
+              "n": 2072,
+              "positives": 3,
+              "n_flagged": 8,
+              "selection_rate": 0.00386,
+              "group_prevalence": 0.00145,
+              "recall_at_100": 0.0
+            }
+          ],
+          "suppressed": [
+            {
+              "group": "O",
+              "n": 49,
+              "positives": 0,
+              "reason": "n < 50; a selection rate here is one alert wide"
+            }
+          ]
+        },
+        "geography": {
+          "groups": [
+            {
+              "group": "R",
+              "n": 1595,
+              "positives": 22,
+              "n_flagged": 37,
+              "selection_rate": 0.0232,
+              "group_prevalence": 0.01379,
+              "recall_at_100": 0.90909
+            },
+            {
+              "group": "SU",
+              "n": 1915,
+              "positives": 17,
+              "n_flagged": 33,
+              "selection_rate": 0.01723,
+              "group_prevalence": 0.00888,
+              "recall_at_100": 0.88235
+            },
+            {
+              "group": "M",
+              "n": 2351,
+              "positives": 16,
+              "n_flagged": 19,
+              "selection_rate": 0.00808,
+              "group_prevalence": 0.00681,
+              "recall_at_100": 0.6875
+            },
+            {
+              "group": "U",
+              "n": 1403,
+              "positives": 9,
+              "n_flagged": 11,
+              "selection_rate": 0.00784,
+              "group_prevalence": 0.00641,
+              "recall_at_100": 0.66667
+            }
+          ],
+          "suppressed": []
+        },
+        "occupation": {
+          "groups": [
+            {
+              "group": "student",
+              "n": 944,
+              "positives": 15,
+              "n_flagged": 26,
+              "selection_rate": 0.02754,
+              "group_prevalence": 0.01589,
+              "recall_at_100": 0.93333
+            },
+            {
+              "group": "agriculture",
+              "n": 883,
+              "positives": 13,
+              "n_flagged": 23,
+              "selection_rate": 0.02605,
+              "group_prevalence": 0.01472,
+              "recall_at_100": 0.92308
+            },
+            {
+              "group": "salaried",
+              "n": 1534,
+              "positives": 13,
+              "n_flagged": 16,
+              "selection_rate": 0.01043,
+              "group_prevalence": 0.00847,
+              "recall_at_100": 0.61538
+            },
+            {
+              "group": "housewife",
+              "n": 540,
+              "positives": 3,
+              "n_flagged": 5,
+              "selection_rate": 0.00926,
+              "group_prevalence": 0.00556,
+              "recall_at_100": 0.33333
+            },
+            {
+              "group": "selfemployed",
+              "n": 3151,
+              "positives": 20,
+              "n_flagged": 29,
+              "selection_rate": 0.0092,
+              "group_prevalence": 0.00635,
+              "recall_at_100": 0.85
+            },
+            {
+              "group": "others",
+              "n": 138,
+              "positives": 0,
+              "n_flagged": 1,
+              "selection_rate": 0.00725,
+              "group_prevalence": 0.0,
+              "recall_at_100": null,
+              "recall_suppressed": "0 positives < 3"
+            },
+            {
+              "group": "retired",
+              "n": 74,
+              "positives": 0,
+              "n_flagged": 0,
+              "selection_rate": 0.0,
+              "group_prevalence": 0.0,
+              "recall_at_100": null,
+              "recall_suppressed": "0 positives < 3"
+            }
+          ],
+          "suppressed": []
+        },
+        "age": {
+          "groups": [
+            {
+              "group": "25-34",
+              "n": 2062,
+              "positives": 25,
+              "n_flagged": 42,
+              "selection_rate": 0.02037,
+              "group_prevalence": 0.01212,
+              "recall_at_100": 0.84
+            },
+            {
+              "group": "35-44",
+              "n": 1626,
+              "positives": 11,
+              "n_flagged": 23,
+              "selection_rate": 0.01415,
+              "group_prevalence": 0.00677,
+              "recall_at_100": 0.72727
+            },
+            {
+              "group": "< 25",
+              "n": 1755,
+              "positives": 17,
+              "n_flagged": 22,
+              "selection_rate": 0.01254,
+              "group_prevalence": 0.00969,
+              "recall_at_100": 0.82353
+            },
+            {
+              "group": "55-64",
+              "n": 550,
+              "positives": 3,
+              "n_flagged": 5,
+              "selection_rate": 0.00909,
+              "group_prevalence": 0.00545,
+              "recall_at_100": 0.66667
+            },
+            {
+              "group": "45-54",
+              "n": 896,
+              "positives": 6,
+              "n_flagged": 7,
+              "selection_rate": 0.00781,
+              "group_prevalence": 0.0067,
+              "recall_at_100": 1.0
+            },
+            {
+              "group": "65+",
+              "n": 372,
+              "positives": 2,
+              "n_flagged": 1,
+              "selection_rate": 0.00269,
+              "group_prevalence": 0.00538,
+              "recall_at_100": null,
+              "recall_suppressed": "2 positives < 3"
+            }
+          ],
+          "suppressed": [
+            {
+              "group": "(not recorded)",
+              "n": 3,
+              "positives": 0,
+              "reason": "n < 50; a selection rate here is one alert wide"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "interpretation": "the sensitive_excluded arm is the control that matters most: if it is identical to baseline on every fold, then the exclusion policy costs nothing because the selector never wanted the attributes in the first place, and no amount of paired statistics is needed to say so",
+  "runtime_s": 2269.0
+}
