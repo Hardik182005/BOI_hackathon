@@ -1,0 +1,137 @@
+{
+  "generated_utc": "2026-08-14T08:49:10.332331+00:00",
+  "scope": "read-only verification of the shipped accuracy claims; no model was retrained and the locked test set was not read",
+  "n_checks": 10,
+  "n_passed": 10,
+  "checks": [
+    {
+      "check": "bundle_integrity",
+      "verifies": "the served model is the one the registry signed",
+      "passed": true,
+      "detail": {
+        "recomputed_sha256": "d12914de5abee99aa18b80e3d41ae2da800dbf9355b53f3a9c0e06806921efc5",
+        "registry_sha256": "d12914de5abee99aa18b80e3d41ae2da800dbf9355b53f3a9c0e06806921efc5"
+      },
+      "note": "on-disk bundle matches the registry signature"
+    },
+    {
+      "check": "champion_identity",
+      "verifies": "registry, bundle and accuracy table name one model",
+      "passed": true,
+      "detail": {
+        "registry": "xgboost_top_120",
+        "bundle": "xgboost_top_120",
+        "accuracy_table": "xgboost_top_120"
+      },
+      "note": "all three name xgboost_top_120"
+    },
+    {
+      "check": "pr_auc_reproduces",
+      "verifies": "the headline accuracy recomputes from saved predictions",
+      "passed": true,
+      "detail": {
+        "recomputed": 0.76904,
+        "registry": 0.76904,
+        "n_repeats": 3,
+        "source": "final_model_oof_predictions.parquet"
+      },
+      "note": "recomputed 0.76904 vs registry 0.76904"
+    },
+    {
+      "check": "leakage_firewall",
+      "verifies": "no quarantined column reaches the shipped model",
+      "passed": true,
+      "detail": {
+        "n_quarantined": 13,
+        "n_shipped_features": 120,
+        "breaches": []
+      },
+      "note": "0 of 13 quarantined columns reach the model"
+    },
+    {
+      "check": "locked_test_untouched",
+      "verifies": "no reported metric was computed on held-out rows",
+      "passed": true,
+      "detail": {
+        "locked_test_rows": 1818,
+        "dev_rows": 7264,
+        "distinct_oof_rows": 7264,
+        "locked_rows_in_oof": 0
+      },
+      "note": "no out-of-fold prediction touches a locked-test row"
+    },
+    {
+      "check": "policy_thresholds",
+      "verifies": "the risk tiers are ordered and in range",
+      "passed": true,
+      "detail": {
+        "critical_risk": 0.9338487190474695,
+        "urgent_risk": 0.09773832436704985,
+        "standard_risk": 0.013182620557866929
+      },
+      "note": "critical > urgent > standard, all in (0, 1]"
+    },
+    {
+      "check": "calibration",
+      "verifies": "probabilities are calibrated, not raw margins",
+      "passed": true,
+      "detail": {
+        "calibrator": "PlattCalibrator",
+        "brier": 0.002582859419789497,
+        "source": "final_locked_test_metrics.json"
+      },
+      "note": "calibrator=PlattCalibrator, stored brier=0.002582859419789497"
+    },
+    {
+      "check": "accuracy_table",
+      "verifies": "the definitive table is complete and self-consistent",
+      "passed": true,
+      "detail": {
+        "n_models": 32,
+        "n_columns": 27,
+        "champion_pr_auc": 0.76904,
+        "unrejected_models_above_champion": []
+      },
+      "note": "32 models, 27 columns, champion leads every non-rejected row"
+    },
+    {
+      "check": "ablations_present",
+      "verifies": "every design decision has a recorded experiment",
+      "passed": true,
+      "detail": {
+        "verdicts": {
+          "feature/meta ablation": "present",
+          "resampling (SMOTE)": "KEEP_BASELINE",
+          "sensitive-attribute": "KEEP_EXCLUSION",
+          "missingness signature": {
+            "keep": true,
+            "conditions": {
+              "mean_gain_positive": true,
+              "improved_in_at_least_70pct_of_folds": true,
+              "at_least_3_indicators_stable_in_80pct_of_folds": true
+            },
+            "rule": "All three conditions are required. A positive mean with unstable indicators is rejected as noise."
+          }
+        },
+        "missing": []
+      },
+      "note": "every design decision has a recorded experiment"
+    },
+    {
+      "check": "open_findings_declared",
+      "verifies": "an experiment that beat the shipped setup is written up, not buried",
+      "passed": true,
+      "detail": {
+        "winning_arms": [
+          "full_clean_top200"
+        ],
+        "undeclared": [],
+        "declared_in": "docs\\FEATURE_SUBSET_SIZE_FINDING.md",
+        "reading": "a winning arm is a finding to schedule, not a defect to hide; the champion is unchanged and still quotes the number it actually produces"
+      },
+      "note": "1 arm(s) beat the shipped configuration and are declared in FEATURE_SUBSET_SIZE_FINDING.md"
+    }
+  ],
+  "verdict": "PASS",
+  "failed": []
+}

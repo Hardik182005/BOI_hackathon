@@ -622,6 +622,16 @@ SOURCES: list[Source] = [
     Source(f"{M}/tabpfn_latency.json",
            _none("operational timing measurement, not a model comparison"),
            kind="NOT_AN_EXPERIMENT"),
+    Source(f"{M}/final_accuracy_table.json",
+           _none("section 55's presentation of results already recorded here; "
+                 "it re-derives 27 columns from the saved OOF predictions and "
+                 "fits nothing, so it adds a view, not a result"),
+           kind="NOT_AN_EXPERIMENT"),
+    Source(f"{M}/verify_metrics.json",
+           _none("verification run: nine checks that the shipped artifacts "
+                 "agree with the predictions behind them. A pass is evidence "
+                 "about the ledger, not a new entry in it"),
+           kind="NOT_AN_EXPERIMENT"),
     Source(f"{M}/global_shap_importance.json", _global_shap),
     Source(f"{M}/tuning_overfit_test.json", _tuning_overfit),
     Source(f"{M}/nested_promotion_decision.json",
@@ -658,6 +668,20 @@ SOURCES: list[Source] = [
     Source(f"{M}/nested_generalization_score.json",
            _simple("generalization report", "components reported separately", "grade",
                    "PENDING_RUN", "section 54", CV_NESTED)),
+    Source(f"{M}/smote_ablation.json",
+           _simple("resampling arms (SMOTE / over / under)", "verdict", "verdict",
+                   "PENDING_RUN",
+                   "section 12: turns the repo's standing claim that class "
+                   "weights beat SMOTE from an assertion into a measurement. "
+                   "Resampling touches the training fold only", CV_NESTED)),
+    Source(f"{M}/fairness_ablation.json",
+           _simple("sensitive-attribute arms (gender / age / occupation / area)",
+                   "verdict", "verdict", "DIAGNOSTIC",
+                   "section 31: the price of the fairness position, measured in "
+                   "both directions - what the model loses when the demographics "
+                   "are struck from the ranking, and what it gains when each is "
+                   "forced into the pool. Decides nothing about the champion; "
+                   "the verdict governs the exclusion policy", CV_NESTED)),
 ]
 
 
