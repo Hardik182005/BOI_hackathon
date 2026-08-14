@@ -33,6 +33,9 @@ data/processed/*
 # --- Databases / studies ---
 *.db
 *.sqlite3
+# Demo case database ships with the repo so a fresh clone has a populated
+# review queue. Synthetic DEMO-*/qa-harness records only, no customer data.
+!artifacts/muleguard.db
 artifacts/optuna/*
 
 # --- Node ---
@@ -50,6 +53,11 @@ Thumbs.db
 artifacts/models/*.bin
 artifacts/models/*.cbm
 artifacts/models/*.joblib
+# The two serving models ship with the repo so a fresh clone can score
+# without a multi-hour retrain. Both are covered by the release manifest
+# and verified against their registry SHA-256 at gate time.
+!artifacts/models/final_bundle.joblib
+!artifacts/models/merchant_verifier.joblib
 artifacts/tabpfn_cache/
 artifacts/predictions/
 
