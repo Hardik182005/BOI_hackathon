@@ -38,6 +38,27 @@ async function request(path: string, init?: RequestInit): Promise<Json> {
   return unwrap(res);
 }
 
+// The endpoint's own bytes, unparsed. A file rebuilt from React state is only
+// as trustworthy as the component that held it; this one is the response the
+// page was drawn from, which is what makes a downloaded ProofGraph evidence.
+async function requestText(path: string): Promise<string> {
+  let res: Response;
+  try {
+    res = await fetch(path, { headers: { "Content-Type": "application/json" } });
+  } catch {
+    throw new ApiError(0, "API unreachable - is the backend running on :8000?");
+  }
+  const body = await res.text();
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      detail = JSON.parse(body).detail ?? detail;
+    } catch { /* keep statusText */ }
+    throw new ApiError(res.status, String(detail));
+  }
+  return body;
+}
+
 // Multipart upload. The Content-Type header is deliberately not set: the
 // browser has to add the multipart boundary itself, and overriding it makes
 // FastAPI reject the body before it ever reaches a route.
@@ -92,6 +113,8 @@ export const api = {
   // Dual-evidence ProofGraph.
   proofgraph: (caseId: string, twin = true) =>
     request(`/v1/proofgraph/${encodeURIComponent(caseId)}?twin=${twin}`),
+  proofgraphJson: (caseId: string, twin = true) =>
+    requestText(`/v1/proofgraph/${encodeURIComponent(caseId)}?twin=${twin}`),
 
   // Used by Graph Lab to ask the running backend which routes actually exist,
   // rather than assuming a counterparty-graph endpoint is deployed.

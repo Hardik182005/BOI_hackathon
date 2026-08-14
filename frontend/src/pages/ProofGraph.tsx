@@ -31,7 +31,26 @@ const byWeight = (a: any, b: any) => (b.weight ?? 0) - (a.weight ?? 0);
 export default function ProofGraph() {
   const { caseId = "" } = useParams();
   const [showAll, setShowAll] = useState(false);
+  const [saveErr, setSaveErr] = useState<string | null>(null);
   const { data, error, loading } = usePoll(() => api.proofgraph(caseId), [caseId]);
+
+  // The file is the endpoint's response, byte for byte - not this component's
+  // parsed copy of it re-serialised. A reviewer who keeps the JSON can hand it
+  // to someone who re-requests the same case and get the same object back.
+  const saveJson = async () => {
+    setSaveErr(null);
+    try {
+      const text = await api.proofgraphJson(caseId);
+      const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `proofgraph_${caseId}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e: any) {
+      setSaveErr(e?.message ?? "the ProofGraph could not be downloaded");
+    }
+  };
 
   if (loading) return <Loading what={`evidence graph for ${caseId}`} />;
   if (error) return <ErrorState msg={error} />;
@@ -83,10 +102,16 @@ export default function ProofGraph() {
       <div className="card" style={{ marginTop: 14 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
           <h3 style={{ margin: 0 }}>Evidence graph — every node names the column or metric it came from</h3>
-          <button className="btn secondary" onClick={() => setShowAll((v) => !v)}>
-            {showAll ? "Show the top nodes only" : "Show every node"}
-          </button>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button className="btn secondary" onClick={() => setShowAll((v) => !v)}>
+              {showAll ? "Show the top nodes only" : "Show every node"}
+            </button>
+            <button className="btn secondary" onClick={saveJson}>
+              Download ProofGraph JSON
+            </button>
+          </div>
         </div>
+        {saveErr && <ErrorState msg={saveErr} />}
         <GraphCanvas nodes={nodes} edges={edges} showAll={showAll} />
         <div className="legend">
           {Object.entries(NODE_STYLE).map(([k, s]) => (
@@ -97,6 +122,11 @@ export default function ProofGraph() {
           ))}
         </div>
         <div className="notice">{data.provenance_statement}</div>
+        <div style={{ fontSize: 11.5, color: "var(--muted)", marginTop: 6 }}>
+          The download is the /v1/proofgraph/{caseId} response itself, so it holds
+          every node the API returned — including the lower-weight ones this canvas
+          caps — rather than the subset drawn above.
+        </div>
       </div>
 
       <h3 style={{ fontSize: 14, margin: "20px 0 8px" }}>Model Courtroom</h3>

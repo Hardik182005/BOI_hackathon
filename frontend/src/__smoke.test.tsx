@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import ValidationLab from "./pages/ValidationLab";
@@ -36,7 +36,14 @@ const stub = () =>
     else if (url === "/v1/graph/status") body = { status: "UNAVAILABLE" };
     else if (url.startsWith("/v1/validation/seals/")) body = { seal: (seals as any).seals[0], verification: { verified: true, detail: "ok" } };
     if (body == null) return Promise.reject(new TypeError(`unmocked ${url}`));
-    return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(body) } as any);
+    // `text` serves the same object as `json`, because the ProofGraph download
+    // reads the response body unparsed and the whole claim of that button is
+    // that the file and the rendered page came from one response.
+    return Promise.resolve({
+      ok: true, status: 200,
+      json: () => Promise.resolve(body),
+      text: () => Promise.resolve(JSON.stringify(body)),
+    } as any);
   }));
 
 describe("new pages render real API payloads", () => {
@@ -76,6 +83,80 @@ describe("new pages render real API payloads", () => {
     expect(document.querySelectorAll("svg rect").length).toBeGreaterThan(3);
     expect(screen.getAllByText(/Counterfactual twin/).length).toBeGreaterThan(0);
     expect(screen.getByText(/Model disagreement/)).toBeInTheDocument();
+  });
+
+  it("Impact Simulator prices the user's assumptions against a measured row", async () => {
+    render(<BusinessValue />);
+    // The panel heading, not the footer sentence that also names the simulator.
+    await waitFor(() =>
+      expect(screen.getByText(/Impact Simulator — what-if/)).toBeInTheDocument());
+    expect(screen.getByText(/user-entered assumptions, not measured facts/)).toBeInTheDocument();
+
+    // The default 50 alerts/day lands exactly on a budget the artifact
+    // evaluated, so the mule count has to be that row's true_positives - not a
+    // rate applied to the capacity the user typed. Scoped to the panel because
+    // the budget table above prints the same pair for every measured row.
+    const sim = screen.getByText(/Impact Simulator — what-if/).closest(".card") as HTMLElement;
+    const measured = (metrics as any).locked_test.recall_at_budget
+      .find((b: any) => b.budget === 50);
+    expect(within(sim).getByText(
+      `${measured.true_positives} of ${(metrics as any).locked_test.n_positives}`
+    )).toBeInTheDocument();
+
+    // A rupee figure is the user's number multiplied by a measured count, so
+    // changing the assumption has to change the figure - and the panel has to
+    // keep saying whose number it is.
+    const before = screen.getByText(/mules found ×/).textContent;
+    fireEvent.change(screen.getByLabelText(/Assumed fraud exposure/), {
+      target: { value: "500000" },
+    });
+    await waitFor(() =>
+      expect(screen.getByText(/mules found ×/).textContent).not.toEqual(before));
+    expect(screen.getAllByText(/your assumption —/).length).toBeGreaterThan(2);
+
+    // Below every measured budget the panel refuses rather than extrapolating.
+    fireEvent.change(screen.getByLabelText(/Alerts analysts can review/), {
+      target: { value: "3" },
+    });
+    await waitFor(() =>
+      expect(screen.getByText(/is below every measured point/)).toBeInTheDocument());
+  });
+
+  it("ProofGraph downloads the backend's own JSON, not a rebuilt copy", async () => {
+    const blobs: Blob[] = [];
+    const revoked: string[] = [];
+    // jsdom has no object-URL machinery; these stand in for it so the bytes
+    // handed to the browser can be read back and compared with the fixture.
+    (URL as any).createObjectURL = vi.fn((b: Blob) => { blobs.push(b); return "blob:pg"; });
+    (URL as any).revokeObjectURL = vi.fn((u: string) => { revoked.push(u); });
+    const realCreate = document.createElement.bind(document);
+    const anchors: HTMLAnchorElement[] = [];
+    const spy = vi.spyOn(document, "createElement").mockImplementation(((tag: string) => {
+      const el = realCreate(tag);
+      if (tag === "a") anchors.push(el as HTMLAnchorElement);
+      return el;
+    }) as any);
+
+    render(
+      <MemoryRouter initialEntries={["/proof/CASE-45C8DE5165"]}>
+        <Routes><Route path="/proof/:caseId" element={<ProofGraph />} /></Routes>
+      </MemoryRouter>
+    );
+    await waitFor(() => expect(screen.getByText("Prosecution")).toBeInTheDocument());
+    fireEvent.click(screen.getByText("Download ProofGraph JSON"));
+
+    await waitFor(() => expect(blobs.length).toBe(1));
+    // jsdom's Blob has no text(); FileReader is how its bytes come back.
+    const bytes = await new Promise<string>((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(String(fr.result));
+      fr.onerror = () => reject(fr.error);
+      fr.readAsText(blobs[0]);
+    });
+    expect(JSON.parse(bytes)).toEqual(pg);
+    expect(anchors[anchors.length - 1]?.download).toBe("proofgraph_CASE-45C8DE5165.json");
+    expect(revoked).toEqual(["blob:pg"]);
+    spy.mockRestore();
   });
 
   it("Validation Lab: no metric before reveal, three ordered steps after run", async () => {

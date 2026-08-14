@@ -14,5 +14,10 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test-setup.ts"],
     globals: true,
+    // vitest stubs stylesheets to nothing by default, which also empties a
+    // `?raw` import of one. The resolution test reads styles.css as text - it
+    // is the only place the desktop layout is actually defined - so the stub
+    // has to be off for that import to carry the rules it asserts on.
+    css: true,
   },
 } as any);
