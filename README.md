@@ -9,8 +9,6 @@
 
 **Team Kryptonite** · Hardik Hinduja · Avinash Gehi · Sahil Deshmukh · Siddharth Dey
 
-> *Sees the mule. Spares the look-alike. Never certifies the unseen.*
-
 <br/>
 
 [![Metric Verification](https://img.shields.io/badge/Metric%20Verification-10%2F10%20PASS-2ea44f?style=for-the-badge)](artifacts/metrics/verify_metrics.json)
@@ -121,126 +119,79 @@ is written to an append-only audit log.
 
 ```mermaid
 flowchart TB
-    RAW["<b>DataSet.xlsx</b><br/>9,082 × 3,925 · immutable<br/>SHA-256 pinned"]
+    A["DataSet.xlsx · 9,082 × 3,925<br/>immutable, SHA-256 pinned"]
+    B["Leakage firewall — 4 columns quarantined"]
+    C["Splits — locked test 1,818 · dev 7,264"]
+    D["Model core — 120 features<br/>nested CV, XGBoost, calibrated"]
+    E["Lens 1 · DETECT"]
+    F["Lens 2 · SPARE THE LOOK-ALIKE"]
+    G["Lens 3 · NEVER CERTIFY THE UNSEEN"]
+    H["Policy engine — rules only, no ML, no LLM<br/>CRITICAL · URGENT · STANDARD · OOD · MONITOR"]
+    I["FastAPI — SHAP evidence + append-only audit"]
+    J["Dashboard → human analyst decides"]
+    K["Ollama · optional<br/>narration only, cannot touch a score"]
 
-    subgraph GOV["🔒 GOVERNANCE — enforced before any model sees a column"]
-        direction LR
-        FW["<b>Feature Availability Firewall</b><br/>quarantine: F3924 · F3912<br/>F2230 · __UNNAMED__0"]
-        SPL["<b>Split Manager</b><br/>locked test 1,818 · dev 7,264<br/>single-touch seal"]
-    end
+    A --> B --> C --> D --> E --> F --> G --> H --> I --> J
+    K -.-> J
 
-    subgraph ML["🧠 MODEL CORE — trained entirely behind the firewall"]
-        direction LR
-        SEL["Stability selection<br/>3,925 → 120 features"]
-        TRN["Nested CV · 3×5 outer, 4 inner<br/>Optuna tuning inside each fold"]
-        CAL["Platt calibration<br/>+ Mondrian conformal"]
-    end
+    classDef guard fill:#fff4e5,stroke:#b26a00,color:#3d2500
+    classDef lens fill:#e6f4ea,stroke:#137333,color:#0b2b16
+    classDef rule fill:#fce8e6,stroke:#c5221f,color:#3d0b0a
+    classDef opt fill:#f1f3f4,stroke:#9aa0a6,color:#202124
 
-    subgraph LENS["👁️ TRINETRA — three lenses"]
-        direction TB
-        L1["<b>LENS 1 · DETECT</b><br/>XGBoost + LGBM/CatBoost agreement"]
-        L2["<b>LENS 2 · SPARE THE LOOK-ALIKE</b><br/>hard-negative verifier · conformal abstention"]
-        L3["<b>LENS 3 · NEVER CERTIFY THE UNSEEN</b><br/>IsolationForest · OOD detector"]
-        L1 --> L2 --> L3
-    end
-
-    POL["<b>⚖️ DETERMINISTIC POLICY ENGINE</b><br/>no ML · no LLM · pure rules<br/>CRITICAL │ URGENT │ STANDARD │ OOD_REVIEW │ MONITOR"]
-
-    subgraph SERVE["🚀 SERVING"]
-        direction LR
-        API["<b>FastAPI</b> :8001<br/>score · batch · file upload"]
-        AUD["<b>Append-only audit</b><br/>SQLite triggers block<br/>UPDATE / DELETE"]
-        SHAP["<b>TreeSHAP</b><br/>evidence packets"]
-    end
-
-    UI["<b>🖥️ React Dashboard</b> :5173<br/>12 screens · every number from an API field"]
-    LLM["<b>🗣️ Ollama</b> — OPTIONAL, guarded<br/>narration only · validated · fallback<br/><i>cannot touch any score</i>"]
-    HUM["<b>👤 HUMAN ANALYST DECIDES</b><br/>freeze = recommendation + 2nd approver"]
-
-    RAW --> GOV --> ML --> LENS --> POL --> SERVE
-    SERVE --> UI --> HUM
-    LLM -.narrate only.-> UI
-
-    classDef gov fill:#fff4e5,stroke:#b26a00,color:#3d2500,stroke-width:2px
-    classDef ml fill:#e8f0fe,stroke:#1a73e8,color:#0b1f3a,stroke-width:2px
-    classDef lens fill:#e6f4ea,stroke:#137333,color:#0b2b16,stroke-width:2px
-    classDef pol fill:#fce8e6,stroke:#c5221f,color:#3d0b0a,stroke-width:3px
-    classDef serve fill:#f3e8fd,stroke:#7627bb,color:#2a0b47,stroke-width:2px
-    classDef opt fill:#f1f3f4,stroke:#9aa0a6,color:#202124,stroke-dasharray:5 3
-    classDef data fill:#e0f7fa,stroke:#00697c,color:#00232a,stroke-width:2px
-
-    class RAW data
-    class FW,SPL gov
-    class SEL,TRN,CAL ml
-    class L1,L2,L3 lens
-    class POL pol
-    class API,AUD,SHAP,UI serve
-    class LLM opt
-    class HUM pol
+    class B,C guard
+    class E,F,G lens
+    class H rule
+    class K opt
 ```
 
 ### 3.2 Scoring path — what happens to a single account
 
 ```mermaid
 flowchart LR
-    IN["Account<br/>features"] --> SCHEMA{"Schema<br/>valid?"}
-    SCHEMA -->|"F3924 present<br/>or feature missing"| REJ["<b>422</b><br/>never silent<br/>zero-fill"]
-    SCHEMA -->|ok| D["<b>LENS 1</b><br/>calibrated<br/>probability"]
-
-    D --> OOD{"<b>LENS 3</b><br/>in<br/>distribution?"}
-    OOD -->|no| TOOD["<b>OOD_REVIEW</b><br/><i>not certified,<br/>routed to a human</i>"]
-    OOD -->|yes| V{"<b>LENS 2</b><br/>survives<br/>verifier +<br/>conformal?"}
-
-    V -->|"look-alike<br/>protected"| TMON["<b>MONITOR</b><br/><i>not currently<br/>flagged</i>"]
-    V -->|confirmed| TIER{"Policy engine<br/>threshold band"}
-
-    TIER -->|highest| T1["<b>CRITICAL</b>"]
-    TIER -->|high| T2["<b>URGENT</b>"]
-    TIER -->|moderate| T3["<b>STANDARD</b>"]
-
-    T1 & T2 & T3 & TOOD & TMON --> Q["Ranked review queue<br/>+ SHAP evidence packet"]
-    Q --> A["👤 Analyst decision<br/><i>audited, reversible</i>"]
+    A["Account<br/>features"] --> B{"Schema valid?"}
+    B -->|"F3924, or a<br/>missing feature"| R["422 — refused<br/>never zero-filled"]
+    B -->|ok| C["Lens 1<br/>calibrated probability"]
+    C --> D{"Lens 3<br/>in distribution?"}
+    D -->|no| T4["OOD_REVIEW"]
+    D -->|yes| E{"Lens 2 — survives<br/>verifier + conformal?"}
+    E -->|"look-alike"| T5["MONITOR"]
+    E -->|yes| F["Tier by threshold<br/>CRITICAL · URGENT · STANDARD"]
+    F --> Q["Review queue<br/>+ SHAP packet"]
+    T4 --> Q
+    T5 --> Q
+    Q --> Z["Analyst decides<br/>audited"]
 
     classDef rej fill:#fce8e6,stroke:#c5221f,color:#3d0b0a
     classDef lens fill:#e6f4ea,stroke:#137333,color:#0b2b16
     classDef tier fill:#fff4e5,stroke:#b26a00,color:#3d2500
-    classDef ok fill:#e8f0fe,stroke:#1a73e8,color:#0b1f3a
 
-    class REJ rej
-    class D,OOD,V lens
-    class T1,T2,T3,TOOD,TMON tier
-    class Q,A,IN,SCHEMA,TIER ok
+    class R rej
+    class C,D,E lens
+    class F,T4,T5 tier
 ```
 
 ### 3.3 Training & validation protocol
 
 ```mermaid
 flowchart TB
-    A["DataSet.xlsx"] --> B["<b>audit_data</b><br/>ingest · fingerprint · profile"]
-    B --> C{"<b>LEAKAGE FIREWALL</b>"}
+    A["DataSet.xlsx"] --> B["audit_data — ingest · fingerprint"]
+    B --> C{"Leakage firewall"}
+    C -->|reject| X["F3924 · F3912<br/>F2230 · __UNNAMED__0"]
+    C -->|admit| D["make_splits"]
+    D --> E["Locked test · 1,818<br/>sealed, single touch"]
+    D --> F["Dev set · 7,264"]
+    F --> G["nested_cv — 5 outer × 3 repeats, 4 inner<br/>selection + tuning inside each fold"]
+    G --> H["tournament_v2 → build_lenses_v2 → shield_v2<br/>champion · calibration · conformal · thresholds"]
+    H --> I["evaluate — locked test, exactly once"]
+    E --> I
+    I --> J["final_report — every number<br/>regenerated from saved predictions"]
 
-    C -->|quarantined| X["<b>❌ F3924</b> target<br/><b>❌ F3912</b> corr 0.97<br/><b>❌ F2230</b> month ≡ label<br/><b>❌ __UNNAMED__0</b> row index"]
-    C -->|admitted| D["<b>make_splits</b>"]
-
-    D --> E["<b>🔒 LOCKED TEST</b><br/>n = 1,818 · 17 mules<br/>sealed · single touch"]
-    D --> F["<b>DEV SET</b><br/>n = 7,264 · 64 mules"]
-
-    F --> G["<b>nested_cv</b> — primary protocol<br/>5 outer × 3 repeats, 4 inner<br/>selection + tuning <i>inside</i> each fold"]
-    G --> H["<b>tournament_v2</b><br/>champion + serving-cost veto"]
-    H --> I["<b>build_lenses_v2</b><br/>calibration · conformal<br/>verifier · OOD · threshold freeze"]
-    I --> J["<b>shield_v2</b><br/>adversarial validation"]
-    J --> K["<b>evaluate</b><br/>🔒 locked test — EXACTLY ONCE<br/><i>a second run refuses</i>"]
-    K --> L["<b>final_report</b><br/>every number regenerated<br/>from saved predictions"]
-
-    classDef bad fill:#fce8e6,stroke:#c5221f,color:#3d0b0a,stroke-width:2px
-    classDef seal fill:#fff4e5,stroke:#b26a00,color:#3d2500,stroke-width:3px
-    classDef proc fill:#e8f0fe,stroke:#1a73e8,color:#0b1f3a
-    classDef out fill:#e6f4ea,stroke:#137333,color:#0b2b16
+    classDef bad fill:#fce8e6,stroke:#c5221f,color:#3d0b0a
+    classDef seal fill:#fff4e5,stroke:#b26a00,color:#3d2500
 
     class X bad
-    class E,K seal
-    class B,D,G,H,I,J proc
-    class L,F out
+    class E,I seal
 ```
 
 > **The local LLM cannot compute, alter, or influence any score, tier, threshold, or
@@ -877,8 +828,6 @@ describes a model that actually exists.** Written up in
 
 **Team Kryptonite** · Problem Statement 2
 **PSB Cybersecurity, Fraud & AI Hackathon 2026 · Bank of India × IIT Hyderabad**
-
-*Sees the mule. Spares the look-alike. Never certifies the unseen.*
 
 <br/>
 
