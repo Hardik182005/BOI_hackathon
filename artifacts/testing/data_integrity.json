@@ -87,7 +87,7 @@
     "spec_section": "57",
     "spec_name_of": "artifacts/testing/data_integrity_results.json",
     "source_sha256": "02fd3604e6f49f65abe37f50b1b00b5e3c75fe5f13a78c82174150e5d8a3a8dd",
-    "regenerated_utc": "2026-08-13T18:02:48+00:00",
+    "regenerated_utc": "2026-08-14T08:02:07+00:00",
     "note": "Content is the source file's, unmodified. This file exists because the final-validation prompt names it; the source is the working copy the pipeline writes."
   }
 }

@@ -1,0 +1,4 @@
+arm,metric,std_of_paired_diff,sign_test_p,wilcoxon_p,paired_t_p,verdict,protocol,delta_vs_full_clean,metric_name,source_file,source_sha256
+full_clean,0.78161,,,,,BASELINE,NESTED,0.0,PR_AUC,feature_subset_ablation.csv,c87bc9067f20b0f1711fde46bd6a8ee02d89b5cc8ad7cad556e2de4481143aff
+no_meta_features,0.78443,0.01685,0.3877,0.93747,0.5265,NO_CHANGE,NESTED,0.00282,PR_AUC,feature_subset_ablation.csv,c87bc9067f20b0f1711fde46bd6a8ee02d89b5cc8ad7cad556e2de4481143aff
+meta_features_only,0.16754,0.12498,0.00006,0.00006,,NO_CHANGE,NESTED,-0.61407,PR_AUC,feature_subset_ablation.csv,c87bc9067f20b0f1711fde46bd6a8ee02d89b5cc8ad7cad556e2de4481143aff

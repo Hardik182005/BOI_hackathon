@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-08-13T17:56:53.569227+00:00",
+  "generated_utc": "2026-08-14T08:42:03.684745+00:00",
   "spec": "section 42 - dry-run the organiser validation experience",
   "mock_file": {
     "path": "artifacts\\dry_run\\mock_hidden_validation.xlsx",
@@ -20,7 +20,7 @@
       "variant": "baseline",
       "http_status": 200,
       "overall": "WARN",
-      "seal_id": "seal-20260813T175609-6f2c8686",
+      "seal_id": "seal-20260814T083838-df9bfb85",
       "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
       "compatibility_score": 99.97,
       "compatibility_band": "HIGH_COMPATIBILITY",
@@ -43,13 +43,14 @@
         "n_missing_required": 0,
         "n_unexpected_columns": 3807,
         "schema_completeness": 1.0
-      }
+      },
+      "expectation": "SCORED"
     },
     {
       "variant": "baseline_csv",
       "http_status": 200,
       "overall": "WARN",
-      "seal_id": "seal-20260813T175614-6cfc40d6",
+      "seal_id": "seal-20260814T083904-1c4a64da",
       "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
       "compatibility_score": 99.97,
       "compatibility_band": "HIGH_COMPATIBILITY",
@@ -72,13 +73,14 @@
         "n_missing_required": 0,
         "n_unexpected_columns": 3807,
         "schema_completeness": 1.0
-      }
+      },
+      "expectation": "SCORED"
     },
     {
       "variant": "shuffled_column_order",
       "http_status": 200,
       "overall": "WARN",
-      "seal_id": "seal-20260813T175621-69366080",
+      "seal_id": "seal-20260814T083932-3970d812",
       "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
       "compatibility_score": 99.97,
       "compatibility_band": "HIGH_COMPATIBILITY",
@@ -101,13 +103,14 @@
         "n_missing_required": 0,
         "n_unexpected_columns": 3807,
         "schema_completeness": 1.0
-      }
+      },
+      "expectation": "SCORED"
     },
     {
       "variant": "extra_columns",
       "http_status": 200,
       "overall": "WARN",
-      "seal_id": "seal-20260813T175627-7ba0fcf4",
+      "seal_id": "seal-20260814T083957-9e922554",
       "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
       "compatibility_score": 99.97,
       "compatibility_band": "HIGH_COMPATIBILITY",
@@ -130,13 +133,14 @@
         "n_missing_required": 0,
         "n_unexpected_columns": 3810,
         "schema_completeness": 1.0
-      }
+      },
+      "expectation": "SCORED"
     },
     {
       "variant": "f3912_present",
       "http_status": 200,
       "overall": "WARN",
-      "seal_id": "seal-20260813T175633-36b13a2c",
+      "seal_id": "seal-20260814T084020-3e5d30fd",
       "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
       "compatibility_score": 99.97,
       "compatibility_band": "HIGH_COMPATIBILITY",
@@ -159,13 +163,14 @@
         "n_missing_required": 0,
         "n_unexpected_columns": 3807,
         "schema_completeness": 1.0
-      }
+      },
+      "expectation": "SCORED"
     },
     {
       "variant": "resolution_fields_present",
       "http_status": 200,
       "overall": "WARN",
-      "seal_id": "seal-20260813T175639-1bad67da",
+      "seal_id": "seal-20260814T084044-6db35708",
       "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
       "compatibility_score": 99.97,
       "compatibility_band": "HIGH_COMPATIBILITY",
@@ -188,13 +193,14 @@
         "n_missing_required": 0,
         "n_unexpected_columns": 3807,
         "schema_completeness": 1.0
-      }
+      },
+      "expectation": "SCORED"
     },
     {
       "variant": "category_changes",
       "http_status": 200,
       "overall": "WARN",
-      "seal_id": "seal-20260813T175645-a139bd04",
+      "seal_id": "seal-20260814T084114-d6ae434a",
       "prediction_sha256": "4718c126b285ba325f50014a838ec06a30c269b8e31ca5b3861bd0469e6dcecf",
       "compatibility_score": 99.85,
       "compatibility_band": "HIGH_COMPATIBILITY",
@@ -217,13 +223,14 @@
         "n_missing_required": 0,
         "n_unexpected_columns": 3807,
         "schema_completeness": 1.0
-      }
+      },
+      "expectation": "SCORED"
     },
     {
       "variant": "missing_optional_fields",
       "http_status": 200,
       "overall": "WARN",
-      "seal_id": "seal-20260813T175651-22b12134",
+      "seal_id": "seal-20260814T084129-f213fd65",
       "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
       "compatibility_score": 99.97,
       "compatibility_band": "HIGH_COMPATIBILITY",
@@ -246,10 +253,81 @@
         "n_missing_required": 0,
         "n_unexpected_columns": 3767,
         "schema_completeness": 1.0
-      }
+      },
+      "expectation": "SCORED"
+    },
+    {
+      "variant": "variable_name_headers",
+      "http_status": 200,
+      "overall": "WARN",
+      "seal_id": "seal-20260814T084155-4b4386fe",
+      "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
+      "compatibility_score": 99.97,
+      "compatibility_band": "HIGH_COMPATIBILITY",
+      "rows_in": 1818,
+      "cols_in": 3924,
+      "checks": {
+        "accepted": true,
+        "schema_not_rejected": true,
+        "no_target_required": true,
+        "scored": true,
+        "row_count_preserved": true,
+        "model_unchanged": true
+      },
+      "verdict": "PASS",
+      "failed_checks": [],
+      "summary": "No label column was present, so there is nothing to reveal; download the sealed predictions instead",
+      "schema": {
+        "n_columns": 3937,
+        "n_present": 120,
+        "n_missing_required": 0,
+        "n_unexpected_columns": 3807,
+        "schema_completeness": 1.0
+      },
+      "expectation": "SCORED"
+    },
+    {
+      "variant": "corrupted_xlsx",
+      "http_status": 422,
+      "expectation": "REFUSAL",
+      "why_refusal_is_correct": "a truncated workbook cannot be parsed; scoring it would mean inventing rows",
+      "seal_id": null,
+      "prediction_sha256": null,
+      "compatibility_score": null,
+      "compatibility_band": null,
+      "checks": {
+        "refused": true,
+        "refused_cleanly": true,
+        "did_not_score": true,
+        "gave_a_reason": true,
+        "model_unchanged": true
+      },
+      "verdict": "PASS",
+      "failed_checks": [],
+      "summary": "file could not be parsed safely: CalamineError"
+    },
+    {
+      "variant": "duplicate_columns",
+      "http_status": 422,
+      "expectation": "REFUSAL",
+      "why_refusal_is_correct": "a repeated column name has no single correct reading, so silently keeping one of the two would be a guess",
+      "seal_id": null,
+      "prediction_sha256": null,
+      "compatibility_score": null,
+      "compatibility_band": null,
+      "checks": {
+        "refused": true,
+        "refused_cleanly": true,
+        "did_not_score": true,
+        "gave_a_reason": true,
+        "model_unchanged": true
+      },
+      "verdict": "PASS",
+      "failed_checks": [],
+      "summary": "duplicate column names in upload"
     }
   ],
-  "variants_passed": "8/8",
+  "variants_passed": "11/11",
   "prediction_invariance": {
     "reference_variant": "baseline_csv",
     "reference_prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
@@ -286,8 +364,8 @@
   "offline_label_comparison": {
     "http_status": 200,
     "state": "METRICS_REVEALED",
-    "sealed_utc": "2026-08-13T17:56:09.442357+00:00",
-    "revealed_utc": "2026-08-13T17:56:53.209601+00:00",
+    "sealed_utc": "2026-08-14T08:38:38.092004+00:00",
+    "revealed_utc": "2026-08-14T08:42:03.018116+00:00",
     "seal_verified": true,
     "prediction_sha256": "cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649",
     "metrics": {
@@ -337,7 +415,7 @@
         "interpretation": "external AP minus nested-CV AP mean; a large negative value means the external set is harder than cross-validation suggested"
       }
     },
-    "integrity_statement": "Predictions were sealed at 2026-08-13T17:56:09.442357+00:00 with SHA-256 cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649. The file was re-hashed at reveal time and matched. These metrics therefore belong to predictions that existed before any label was read."
+    "integrity_statement": "Predictions were sealed at 2026-08-14T08:38:38.092004+00:00 with SHA-256 cc9f65a1945b407ba7c8b61943f3be087f148a4d0dfb1b7741a287aa949c4649. The file was re-hashed at reveal time and matched. These metrics therefore belong to predictions that existed before any label was read."
   },
   "leakage_statement": "the revealed metric cannot have leaked into training: the target column was dropped from the uploaded workbook before it left this process, the API withholds any label column it finds before scoring, and the labels were supplied only at reveal time against a prediction file whose hash was already recorded",
   "verdict": "PASS"

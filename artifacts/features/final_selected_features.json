@@ -2994,7 +2994,7 @@
     "spec_section": "57",
     "spec_name_of": "artifacts/features/selected_features_v2.json",
     "source_sha256": "ecc8527d6148f565576b7ce2529a9a42d81e92fa9fc165f62f97586dfa9464ea",
-    "regenerated_utc": "2026-08-13T18:02:48+00:00",
+    "regenerated_utc": "2026-08-14T08:02:08+00:00",
     "note": "Content is the source file's, unmodified. This file exists because the final-validation prompt names it; the source is the working copy the pipeline writes."
   }
 }

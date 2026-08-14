@@ -1,0 +1,52 @@
+{
+  "generated_utc": "2026-08-14T07:22:08.347621+00:00",
+  "source_file": "Description.xlsx",
+  "source_sha256": "7d30652b72d4b79b3feeb3e14ebe67177988b3155912ea33f284f140e8774b20",
+  "n_rows_in_workbook": 3924,
+  "n_rows_parsed": 3924,
+  "parse_failures": 0,
+  "coverage": {
+    "window_resolved": 1.0,
+    "direction_resolved": 1.0,
+    "family_resolved": 1.0,
+    "semantic_tags_present": 1.0,
+    "description_present": 1.0
+  },
+  "unresolved": {
+    "window_unknown": {
+      "count": 0,
+      "share": 0.0,
+      "examples": []
+    },
+    "direction_unknown": {
+      "count": 0,
+      "share": 0.0,
+      "examples": []
+    },
+    "family_other": {
+      "count": 0,
+      "share": 0.0,
+      "examples": []
+    },
+    "no_description_text": {
+      "count": 0,
+      "examples": []
+    },
+    "no_variable_name": {
+      "count": 0,
+      "examples": []
+    },
+    "no_semantic_tags": {
+      "count": 0,
+      "examples": []
+    },
+    "non_standard_feature_id": {
+      "count": 0,
+      "examples": []
+    }
+  },
+  "interpretation": [
+    "'unresolved' rows are still usable features - an unknown window or direction only means the name did not encode one, not that the column was dropped",
+    "every workbook row produced a record; a parse failure count above zero would mean features silently vanished from the registry"
+  ]
+}

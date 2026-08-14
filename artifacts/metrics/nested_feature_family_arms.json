@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-08-13T17:29:42.049428+00:00",
+  "generated_utc": "2026-08-14T07:59:14.315990+00:00",
   "sections": [
     "15",
     "16",
@@ -86,6 +86,56 @@
         0.76609,
         0.73946,
         0.78982
+      ]
+    },
+    "full_clean_top200": {
+      "pool_size": 3925,
+      "columns_used_per_fold": [
+        200
+      ],
+      "fold_ap_mean": 0.80577,
+      "fold_ap_std": 0.10633,
+      "fold_ap": [
+        0.88913,
+        0.96626,
+        0.79261,
+        0.56364,
+        0.78351,
+        0.60928,
+        0.86694,
+        0.8427,
+        0.8215,
+        0.94643,
+        0.71039,
+        0.87108,
+        0.80961,
+        0.82173,
+        0.7917
+      ]
+    },
+    "full_clean_top100": {
+      "pool_size": 3925,
+      "columns_used_per_fold": [
+        100
+      ],
+      "fold_ap_mean": 0.77533,
+      "fold_ap_std": 0.1008,
+      "fold_ap": [
+        0.84658,
+        0.98383,
+        0.81351,
+        0.53391,
+        0.76119,
+        0.61276,
+        0.79895,
+        0.8081,
+        0.77874,
+        0.8562,
+        0.72755,
+        0.83115,
+        0.78059,
+        0.71365,
+        0.78325
       ]
     },
     "full_clean_top60": {
@@ -290,6 +340,88 @@
     }
   },
   "paired_vs_full_clean": {
+    "full_clean_top200": {
+      "comparison": "full_clean_top200 vs full_clean",
+      "baseline_arm": "full_clean",
+      "test_arm": "full_clean_top200",
+      "n_folds": 15,
+      "mean_paired_diff": 0.02416,
+      "median_paired_diff": 0.02946,
+      "std_of_paired_diff": 0.03169,
+      "ci95_of_mean": [
+        0.00661,
+        0.04171
+      ],
+      "per_fold_diff": [
+        0.02946,
+        0.00247,
+        -0.02409,
+        0.02316,
+        0.03318,
+        -0.0217,
+        0.06238,
+        0.01677,
+        0.06243,
+        0.03259,
+        -0.01634,
+        0.03443,
+        0.04352,
+        0.08226,
+        0.00188
+      ],
+      "n_folds_improved": 12,
+      "n_folds_worse": 3,
+      "n_folds_tied": 0,
+      "sign_test_p_two_sided": 0.03516,
+      "wilcoxon_p_two_sided": 0.00836,
+      "paired_t_p_two_sided": 0.01048,
+      "paired_t_statistic": 2.9531,
+      "n_tests_below_0.05": 3,
+      "tests_disagree": false,
+      "min_detectable_effect_80pct_power": 0.02292,
+      "yardstick": "paired on identical outer folds - judge against std_of_paired_diff=0.03169, NOT against the project's 0.0905 unpaired seed-noise floor"
+    },
+    "full_clean_top100": {
+      "comparison": "full_clean_top100 vs full_clean",
+      "baseline_arm": "full_clean",
+      "test_arm": "full_clean_top100",
+      "n_folds": 15,
+      "mean_paired_diff": -0.00628,
+      "median_paired_diff": -0.00561,
+      "std_of_paired_diff": 0.01981,
+      "ci95_of_mean": [
+        -0.01725,
+        0.00469
+      ],
+      "per_fold_diff": [
+        -0.01308,
+        0.02004,
+        -0.0032,
+        -0.00657,
+        0.01087,
+        -0.01823,
+        -0.00561,
+        -0.01784,
+        0.01966,
+        -0.05764,
+        0.00081,
+        -0.0055,
+        0.01451,
+        -0.02581,
+        -0.00657
+      ],
+      "n_folds_improved": 5,
+      "n_folds_worse": 10,
+      "n_folds_tied": 0,
+      "sign_test_p_two_sided": 0.30176,
+      "wilcoxon_p_two_sided": 0.33026,
+      "paired_t_p_two_sided": 0.24005,
+      "paired_t_statistic": -1.227,
+      "n_tests_below_0.05": 0,
+      "tests_disagree": false,
+      "min_detectable_effect_80pct_power": 0.01433,
+      "yardstick": "paired on identical outer folds - judge against std_of_paired_diff=0.01981, NOT against the project's 0.0905 unpaired seed-noise floor"
+    },
     "full_clean_top60": {
       "comparison": "full_clean_top60 vs full_clean",
       "baseline_arm": "full_clean",
@@ -622,6 +754,8 @@
   "rule": {
     "text": "an arm replaces full_clean only if its mean paired difference is positive and at least 2 of the 3 paired tests give p < 0.05. A pool is not kept because a bank marked it, and the alert-context block is not accepted on a large jump without a timing review.",
     "verdicts": {
+      "full_clean_top200": "REPLACES_FULL_CLEAN",
+      "full_clean_top100": "NO_CHANGE",
       "full_clean_top60": "NO_CHANGE",
       "full_clean_top30": "NO_CHANGE",
       "bank_prior": "NO_CHANGE",
@@ -632,5 +766,5 @@
       "meta_features_only": "NO_CHANGE"
     }
   },
-  "runtime_seconds": 184.0
+  "runtime_seconds": 539.7
 }

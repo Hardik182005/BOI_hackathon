@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-08-13T18:02:48+00:00",
+  "generated_utc": "2026-08-14T08:02:08+00:00",
   "spec_sections": [
     "57",
     "58"
@@ -18,7 +18,7 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "e8557bc8156bdcb8e9762e0ab76d322e687ff5fed8e9b0d4a363bff50dead8cb",
+      "sha256": "dc4bb1c99a312f1074412d3e712cf1eb0b85982c9f5509279287499ac653a0f1",
       "bytes": 1744
     },
     {
@@ -30,7 +30,7 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "6def8ee459376d11769657cb031d48343e1c2a271ae4a300327c7b7b776fb7b5",
+      "sha256": "2e72745b5a5aad197b20be8b21cebdb6cb679b4638acfc7d80b8431e4055c694",
       "bytes": 2258
     },
     {
@@ -42,7 +42,7 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "b324b5c8d92c16c8f1db22191025c310538562fcc99a5d968abcc2d4d265f57a",
+      "sha256": "73e0c5cdca9ef6ebb27c385e02ede4cf78305d7cb2f7592dbb9f7232fe50deb7",
       "bytes": 4855
     },
     {
@@ -54,7 +54,7 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "7c7969bb07065d1dbfe78f4e6159879e962b68588fc44f1bfc7919fa1a702135",
+      "sha256": "dea3085b94929ca3b53402de753efb22d38a201077703f3909980713d9a39a01",
       "bytes": 1252
     },
     {
@@ -66,7 +66,7 @@
       "pending_run": "muleguard.cli.nested_cv --repeats 3 --inner 4",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "7c56792cfecf1f0f4fd7058f2b8200b8a1bea8011fb65260af91cf16de8b0c8d",
+      "sha256": "21ea153ea00ca24d37e7aaa499f3ef034326762a47533d9e6212cae7b84635da",
       "bytes": 42052
     },
     {
@@ -79,7 +79,7 @@
       "pending_run": "muleguard.cli.nested_ses --stages posremoval",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "61df9688c81f4696353dc2442348ea8e715cddb4b3b3b8795475955ebcb9ad58",
+      "sha256": "8f18e959c9d1dace94c22fc8a4242624481b2ce392c78a9ab4ab5907bbe75869",
       "bytes": 8702
     },
     {
@@ -91,7 +91,7 @@
       "pending_run": "muleguard.cli.nested_ses --stages shift",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "8d666d27cf013e1de352c205e2d603b41264ab4a381784ed4a51531f6ac967a6",
+      "sha256": "521ceee1397d36302a631c1d6ce596542dd8df810ef93d7acf14066167ce4f95",
       "bytes": 14222
     },
     {
@@ -103,7 +103,7 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "2a2eff9495ef190c650afc5161073cc95bdee7174536f30e9ef88188d946aab4",
+      "sha256": "c41c937230f621839a8c1cb2db9d81ea1852e567b42a00f95ebb7f105664454f",
       "bytes": 28034
     },
     {
@@ -115,7 +115,7 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "0518ed593c31b5b58c9050f8d4175a9daf901c0c6c314be56406f2b24e818e66",
+      "sha256": "f714484d469f597b400888e0055fe80d8f786287e96699346793bbaecf86ea24",
       "bytes": 17759
     },
     {
@@ -127,7 +127,7 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "423ef4cb03563c6b120765e0351f241e9c67dc59c5cbbcbcb7b3b02769c1d0bd",
+      "sha256": "bc4ae1ea97a37b9d864886bab9c377e67ae01ddc6968b0b30968280c04306de4",
       "bytes": 2311
     },
     {
@@ -139,7 +139,7 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "92eb824353cac9f6b9f90f148efdad3cf031ec218c78e84f72361502d5fd73c0",
+      "sha256": "b0003d8f993b19b308e321034732f8db0cb8270d13b328c68686ab991c822841",
       "bytes": 1960
     },
     {
@@ -178,7 +178,7 @@
       "pending_run": "muleguard.cli.nested_cv --repeats 3 --inner 4",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "7c56792cfecf1f0f4fd7058f2b8200b8a1bea8011fb65260af91cf16de8b0c8d",
+      "sha256": "21ea153ea00ca24d37e7aaa499f3ef034326762a47533d9e6212cae7b84635da",
       "bytes": 42052
     },
     {
@@ -204,7 +204,7 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "2a2eff9495ef190c650afc5161073cc95bdee7174536f30e9ef88188d946aab4",
+      "sha256": "c41c937230f621839a8c1cb2db9d81ea1852e567b42a00f95ebb7f105664454f",
       "bytes": 28034
     },
     {
@@ -217,11 +217,11 @@
       "pending_run": "muleguard.cli.nested_ses --stages families",
       "status": "DERIVED",
       "detail": {
-        "rows": 9,
+        "rows": 11,
         "protocol": "NESTED"
       },
-      "sha256": "c87bc9067f20b0f1711fde46bd6a8ee02d89b5cc8ad7cad556e2de4481143aff",
-      "bytes": 669
+      "sha256": "091c9de5b71d4b8a0cd2bbbb0bd9b364c0d4cb2e0ba066b48be7e7abf2f543fb",
+      "bytes": 840
     },
     {
       "spec": "artifacts/metrics/alert_context_ablation.csv",
@@ -313,7 +313,7 @@
       "pending_run": "",
       "status": "DERIVED",
       "detail": {},
-      "sha256": "b55dbf1e34689b277f40cdd275db1f16d078bc2d33918415bc080a570d69b58d",
+      "sha256": "108685bed36f1571da491a8ca6a42abad381bee6acdf8a47079ddaab48861336",
       "bytes": 68496
     },
     {

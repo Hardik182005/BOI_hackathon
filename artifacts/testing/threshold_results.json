@@ -613,7 +613,7 @@
       "artifacts/metrics/lens_stack_oof_v2.json",
       "artifacts/metrics/metric_battery.json"
     ],
-    "regenerated_utc": "2026-08-13T18:02:48+00:00",
+    "regenerated_utc": "2026-08-14T08:02:08+00:00",
     "note": "The frozen policy is the shipped one; the candidate table is what it was chosen from."
   }
 }

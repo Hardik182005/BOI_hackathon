@@ -85,7 +85,7 @@
     "spec_section": "57",
     "spec_name_of": "artifacts/testing/backend_test_results.json",
     "source_sha256": "942050a2b2ab8102dc4a182be5c3241d26cd452384012dace46b51de4525ac6e",
-    "regenerated_utc": "2026-08-13T18:02:48+00:00",
+    "regenerated_utc": "2026-08-14T08:02:08+00:00",
     "note": "Content is the source file's, unmodified. This file exists because the final-validation prompt names it; the source is the working copy the pipeline writes."
   }
 }

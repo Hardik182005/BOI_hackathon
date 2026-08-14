@@ -63,7 +63,7 @@
     "spec_section": "57",
     "spec_name_of": "artifacts/testing/api_frontend_consistency.json",
     "source_sha256": "828755c8b0d1dc5bafc6c53e91e90ea0075cb8805e51c2587bb1f5c20b4fdc39",
-    "regenerated_utc": "2026-08-13T18:02:48+00:00",
+    "regenerated_utc": "2026-08-14T08:02:08+00:00",
     "note": "Content is the source file's, unmodified. This file exists because the final-validation prompt names it; the source is the working copy the pipeline writes."
   }
 }

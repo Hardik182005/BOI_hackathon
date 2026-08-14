@@ -40,7 +40,7 @@
     "spec_section": "57",
     "spec_name_of": "artifacts/testing/leakage_test_results.json",
     "source_sha256": "3ba1eb025d50adb79a9e6445746055b49ca9203cab947d446e9f5f30b028f088",
-    "regenerated_utc": "2026-08-13T18:02:48+00:00",
+    "regenerated_utc": "2026-08-14T08:02:08+00:00",
     "note": "Content is the source file's, unmodified. This file exists because the final-validation prompt names it; the source is the working copy the pipeline writes."
   }
 }
