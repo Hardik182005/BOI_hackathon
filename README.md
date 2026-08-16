@@ -453,6 +453,79 @@ docker compose up --build
 # frontend → http://localhost:5173     api → http://localhost:8001/docs
 ```
 
+### 6.4 Judge walkthrough — score your own dataset
+
+**The fastest way to test this system is to give it a file it has never seen.**
+Every step below is a verified round trip, not a description of one.
+
+```bash
+./run.sh                     # then open http://localhost:5173
+```
+
+<b>Option A · Score a file and get results back (≈3 s for 1,818 rows)</b>
+
+**Executive Overview → `Upload Validation Dataset`**, or from the terminal:
+
+```bash
+curl -X POST -F "file=@your_dataset.xlsx" \
+     http://127.0.0.1:8001/v1/score/file -o scored.csv
+```
+
+Returns one row per account:
+
+| column | meaning |
+|---|---|
+| `calibrated_risk` | Platt-calibrated mule probability |
+| `risk_tier` | `CRITICAL` / `URGENT` / `STANDARD` / `OOD` / `MONITOR` |
+| `review_status` | `HUMAN_REVIEW_REQUIRED` or `NOT_CURRENTLY_FLAGGED` |
+| `model_agreement` | cross-family agreement (XGB / LGBM / CatBoost) |
+| `conformal_status` | conformal prediction set |
+| `ood_status` | in- or out-of-distribution |
+| `model_version` | the bundle that produced the row |
+
+<b>Option B · Sealed validation — the protocol that cannot cheat</b>
+
+**Test Model / Validation Lab.** Two deliberately separate actions:
+
+1. **`Run sealed validation`** — schema check → shield → score → **SHA-256 seal**.
+   You get a seal ID and a hash. **No metric is produced, and none exists yet** —
+   the panel says so explicitly rather than showing a provisional number.
+2. **`Reveal Validation Metrics`** — upload your label file *now*, as a second
+   step. Only then are labels read, and only then do metrics appear.
+
+Nothing in the scoring path ever had access to the labels. Uploading a file
+**cannot** trigger retraining, feature selection, calibration fitting or
+threshold movement — the model fingerprint is compared before and after.
+
+**Reproducing our headline:** running `artifacts/dry_run/mock_hidden_validation.xlsx`
+through the sealed protocol and revealing with `mock_hidden_labels.csv`
+(label column `F3924`) returns **PR-AUC 0.7263 · ROC-AUC 0.9665 ·
+Recall@25 70.6% · Recall@100 82.4%** — byte-identical to the locked-test
+figures published in §4.1.
+
+<b>What to expect — stated up front, so nothing looks like a fault</b>
+
+- **Schema Integrity may report `WARN`, and that is not a failure.** Our own
+  organiser mock trips it: `F3886` arrives entirely empty, so the step flags one
+  all-null required feature and carries that fact into the compatibility score.
+  Scoring proceeds; the warning is the system refusing to hide a data fact.
+- **Your file needs the raw `F` columns.** 120 features are required; in the
+  mock, 117 come from the file and 3 `MG_*` meta-features are derived from the
+  file's own raw columns — never from training data, labels or other rows.
+- **A missing required feature returns HTTP 422, never a silent zero-fill.**
+  `F3924` in a scoring request is refused outright.
+- **No labels in your file → no accuracy number, by design.** You get scores and
+  tiers; metrics require the explicit reveal step above.
+
+<b>Verify the claims without trusting the UI</b>
+
+```bash
+bash scripts/verify_metrics.sh     # recomputes headline metrics from saved predictions
+```
+
+Guided tour: [`DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) (6 scenes, 5–7 min) ·
+Questions we expect: [`JUDGE_QA.md`](docs/JUDGE_QA.md)
+
 ---
 
 ## 7. Training Pipeline

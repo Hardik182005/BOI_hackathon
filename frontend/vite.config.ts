@@ -8,6 +8,11 @@ export default defineConfig({
     proxy: {
       "/v1": "http://127.0.0.1:8001",
       "/health": "http://127.0.0.1:8001",
+      // Graph Lab asks the backend which routes it actually serves rather than
+      // assuming a counterparty-graph endpoint is deployed. Without this entry
+      // the dev server answers /openapi.json with index.html and the page
+      // reports "the response was not JSON".
+      "/openapi.json": "http://127.0.0.1:8001",
     },
   },
   test: {

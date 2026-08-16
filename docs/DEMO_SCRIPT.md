@@ -1,6 +1,6 @@
 # Demo Script (5–7 minutes)
 
-Preparation: API on :8000, dashboard on :5173, `muleguard.cli.demo --via-api`
+Preparation: API on :8001, dashboard on :5173, `muleguard.cli.demo --via-api`
 already run (populates the queue with the five scenario cases), Ollama
 running with any preferred model (optional — Scene 6 kills it live).
 
