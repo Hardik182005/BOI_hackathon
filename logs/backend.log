@@ -1,30 +1,32 @@
-INFO:     Started server process [43756]
+INFO:     Started server process [14744]
 INFO:     Waiting for application startup.
-2026-07-11 03:15:50,678 INFO    muleguard.models.scoring | bundle loaded: winner=catboost_tuned_top60 sha-fp=7d1be90fe23b
-2026-07-11 03:15:50,679 INFO    muleguard.api.main | startup complete, model warm
+2026-08-23 16:41:58,752 INFO    muleguard.models.scoring | bundle loaded: winner=xgboost_top_120 sha-fp=7d1be90fe23b
+2026-08-23 16:41:58,756 INFO    muleguard.api.main | model integrity verified: final_bundle.joblib sha256=d12914de5abee99a
+2026-08-23 16:41:58,757 INFO    muleguard.api.main | startup complete, model warm
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8001 (Press CTRL+C to quit)
-INFO:     127.0.0.1:4628 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     127.0.0.1:4632 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     127.0.0.1:4639 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:4640 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36338 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36339 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36340 - "GET /v1/model HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10528 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10532 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10535 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10540 - "GET /health/live HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10541 - "GET /health/ready HTTP/1.1" 200 OK
+2026-08-23 16:42:04,514 INFO    muleguard.api.main | model integrity verified: final_bundle.joblib sha256=d12914de5abee99a
+INFO:     127.0.0.1:10542 - "GET /v1/model HTTP/1.1" 200 OK
+2026-08-23 16:42:04,908 INFO    muleguard.features.frame | model frame: 3925 raw columns + 13 meta-features
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:36341 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
+INFO:     127.0.0.1:10543 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:36342 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
+INFO:     127.0.0.1:10544 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
@@ -33,149 +35,130 @@ E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: U
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:36343 - "POST /v1/score/batch HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36344 - "GET /v1/cases?limit=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36345 - "GET /v1/cases/CASE-18A744455E HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36346 - "POST /v1/reports/CASE-18A744455E/generate?use_llm=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36347 - "POST /v1/score HTTP/1.1" 422 Unprocessable Content
-INFO:     127.0.0.1:36348 - "POST /v1/score HTTP/1.1" 422 Unprocessable Content
-INFO:     127.0.0.1:36349 - "POST /v1/score HTTP/1.1" 422 Unprocessable Content
-INFO:     127.0.0.1:36350 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36351 - "GET /v1/drift/status HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36382 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36383 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36384 - "GET /v1/model HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:36385 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:36386 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
+INFO:     127.0.0.1:10545 - "POST /v1/score/batch HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10546 - "GET /v1/cases?limit=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10547 - "GET /v1/cases/CASE-2BEDFA0645 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10548 - "POST /v1/reports/CASE-2BEDFA0645/generate?use_llm=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10549 - "POST /v1/score HTTP/1.1" 422 Unprocessable Content
+INFO:     127.0.0.1:10550 - "POST /v1/score HTTP/1.1" 422 Unprocessable Content
+INFO:     127.0.0.1:10551 - "POST /v1/score HTTP/1.1" 422 Unprocessable Content
+INFO:     127.0.0.1:10552 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10553 - "GET /v1/drift/status HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
+INFO:     127.0.0.1:8319 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:36387 - "POST /v1/score/batch HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36388 - "GET /v1/cases?limit=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36389 - "GET /v1/cases/CASE-18A744455E HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36390 - "POST /v1/reports/CASE-18A744455E/generate?use_llm=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36391 - "POST /v1/score HTTP/1.1" 422 Unprocessable Content
-INFO:     127.0.0.1:36392 - "POST /v1/score HTTP/1.1" 422 Unprocessable Content
-INFO:     127.0.0.1:36393 - "POST /v1/score HTTP/1.1" 422 Unprocessable Content
-INFO:     127.0.0.1:36394 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36395 - "GET /v1/drift/status HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
+INFO:     127.0.0.1:8320 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:61976 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:61977 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8321 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:61978 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
+INFO:     127.0.0.1:8322 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:61979 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:61980 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8323 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:61981 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
+INFO:     127.0.0.1:8324 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:61982 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:61983 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8325 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:61984 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
+INFO:     127.0.0.1:8326 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:61985 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:61986 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8327 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:61987 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
+INFO:     127.0.0.1:8328 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:61988 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:61989 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8329 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:61990 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
+INFO:     127.0.0.1:8330 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
+INFO:     127.0.0.1:8331 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
+INFO:     127.0.0.1:8332 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:61991 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:61994 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:61995 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:61993 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:61992 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
+INFO:     127.0.0.1:8333 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
@@ -202,6 +185,11 @@ E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: U
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
+INFO:     127.0.0.1:8336 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8337 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8335 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8334 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8338 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
@@ -214,195 +202,93 @@ E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: U
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:61997 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62000 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:61999 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:61998 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:61996 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62004 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62002 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62003 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62001 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62005 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:6052 - "POST /v1/score/file HTTP/1.1" 422 Unprocessable Content
-INFO:     127.0.0.1:6053 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     127.0.0.1:6054 - "GET /v1/model HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:6055 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:6056 - "GET /v1/drift/status HTTP/1.1" 200 OK
-INFO:     127.0.0.1:6057 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:6058 - "GET /v1/model HTTP/1.1" 200 OK
-INFO:     127.0.0.1:6059 - "GET /v1/cases?limit=3 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:6060 - "GET /v1/cases/CASE-18A744455E HTTP/1.1" 200 OK
-INFO:     127.0.0.1:6061 - "GET /v1/cases/CASE-45C8DE5165 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:6062 - "GET /v1/cases/CASE-DF00B7CDAC HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39660 - "GET /v1/cases/CASE-X%27%3B%20DROP%20TABLE%20cases%3B-- HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:58970 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58971 - "POST /v1/score HTTP/1.1" 422 Unprocessable Content
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:58977 - "POST /v1/score/file HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:55743 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:55744 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:55745 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:55746 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:55747 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:55748 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:55749 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:55750 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:55751 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8342 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8348 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8343 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8345 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8347 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8339 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8341 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8344 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8340 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8346 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8350 - "POST /v1/score/file HTTP/1.1" 422 Unprocessable Content
+INFO:     127.0.0.1:8351 - "GET /health/live HTTP/1.1" 200 OK
+2026-08-23 16:43:08,472 INFO    muleguard.api.main | model integrity verified: final_bundle.joblib sha256=d12914de5abee99a
+INFO:     127.0.0.1:8352 - "GET /v1/model HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:55752 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
+INFO:     127.0.0.1:8353 - "POST /v1/score HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8354 - "POST /v1/cases/CASE-A058C3C579/decision HTTP/1.1" 422 Unprocessable Content
+INFO:     127.0.0.1:8355 - "POST /v1/cases/CASE-A058C3C579/decision HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8356 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8357 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+2026-08-23 16:43:10,389 INFO    muleguard.api.main | model integrity verified: final_bundle.joblib sha256=d12914de5abee99a
+INFO:     127.0.0.1:8358 - "GET /v1/model HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8359 - "GET /v1/cases?limit=3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8360 - "GET /v1/cases/CASE-18A744455E HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8361 - "GET /v1/cases/CASE-1D16D2774B HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8362 - "GET /v1/cases/CASE-FDC57EB161 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8451 - "GET /v1/cases/CASE-X%27%3B%20DROP%20TABLE%20cases%3B-- HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:8452 - "GET /health/live HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8453 - "GET /v1/cases?limit=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8454 - "POST /v1/cases/CASE-18A744455E/decision HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8455 - "GET /v1/cases/CASE-18A744455E HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8456 - "GET /v1/validation/seals/../../config HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:8457 - "POST /v1/score HTTP/1.1" 422 Unprocessable Content
+INFO:     127.0.0.1:8458 - "POST /v1/score/file HTTP/1.1" 413 Content Too Large
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:55753 - "POST /v1/score HTTP/1.1" 200 OK
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
 E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
   warnings.warn(
-INFO:     127.0.0.1:55754 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:55755 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:55756 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:55757 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:55758 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55759 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55762 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55760 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55761 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:55766 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55764 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55768 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55765 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55769 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55772 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55767 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55770 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55771 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55763 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55773 - "POST /v1/score/file HTTP/1.1" 422 Unprocessable Content
-INFO:     127.0.0.1:55774 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55775 - "GET /v1/model HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:55776 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55777 - "GET /v1/drift/status HTTP/1.1" 200 OK
-INFO:     127.0.0.1:9297 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     127.0.0.1:9298 - "GET /v1/model HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36101 - "POST /v1/score/file HTTP/1.1" 200 OK
