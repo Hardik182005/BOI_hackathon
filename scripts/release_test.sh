@@ -24,7 +24,38 @@ if ! curl -s -o /dev/null --max-time 3 "http://127.0.0.1:${API_PORT:-8001}/healt
     sleep 1
   done
 fi
+# The harness also checks that the shipped UI is actually served, so the dev
+# server has to be up for that check to measure anything. Without this the
+# suite reported "frontend_test_results: FAIL (6/7), dev_server_serves_html:
+# no dev server on :5173" on every run - a red blocker that described the
+# harness, not the product.
+# Killing $! is not enough: it is the subshell, npm is its child and the vite
+# node process is its grandchild, so the port stays held. Free the port the
+# same way scripts/stop.sh does, and only that port - the backend is still
+# wanted by whatever runs next.
+stop_vite() {
+  [ -n "${VITE_PID:-}" ] || return 0
+  VITE_PID=""
+  local pids
+  pids=$(netstat -ano 2>/dev/null | grep ":5173 " | grep LISTENING | awk '{print $5}' | sort -u)
+  for pid in $pids; do
+    taskkill //PID "$pid" //F >/dev/null 2>&1 || kill -9 "$pid" 2>/dev/null
+  done
+}
+if ! curl -s -o /dev/null --max-time 3 "http://localhost:5173"; then
+  echo "frontend dev server not running - starting for harness"
+  (cd frontend && npm run dev) > artifacts/testing/harness_frontend_start.log 2>&1 &
+  VITE_PID=$!
+  trap stop_vite EXIT INT TERM
+  for i in $(seq 1 60); do
+    curl -s -o /dev/null "http://localhost:5173" && break
+    sleep 1
+  done
+fi
+
 "$PY" -m muleguard.cli.qa_harness all || FAIL=1
+
+stop_vite
 
 step "ML release gate (leakage/split/metric-trace/determinism blockers)"
 "$PY" -m muleguard.cli.release_gate || FAIL=1
