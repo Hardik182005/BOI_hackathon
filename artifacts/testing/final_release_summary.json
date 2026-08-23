@@ -1,11 +1,9 @@
 {
-  "generated_utc": "2026-08-13T17:55:48.846717+00:00",
-  "verdict": "FAIL",
-  "blockers": [
-    "ML release gate: FAIL"
-  ],
+  "generated_utc": "2026-08-23T11:20:05.742394+00:00",
+  "verdict": "PASS",
+  "blockers": [],
   "environment": {
-    "commit": "f280c6fc576b61bbe4edb4c2981ff5fa253e831f",
+    "commit": "7967be068fa5d10b7975751b63675cb710ff5897",
     "os": "Windows-11-10.0.22631-SP0",
     "python": "3.13.2",
     "compute_mode": "cpu_16gb",
@@ -132,7 +130,7 @@
     "pytest_backend": 93,
     "vitest_frontend": 3
   },
-  "ml_release_gate": "FAIL",
+  "ml_release_gate": "PASS",
   "final_artifact_aliases": [
     "final_model_comparison.csv",
     "final_oof_metrics.json",
@@ -140,8 +138,6 @@
     "final_threshold_table.csv",
     "final_oof_predictions.parquet",
     "final_locked_test_predictions.parquet",
-    "final_selected_features.json",
-    "final_selection_frequency.csv",
     "final_precision_recall_curve.png",
     "final_calibration_curve.png",
     "final_recall_at_budget.png",

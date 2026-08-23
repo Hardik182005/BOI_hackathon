@@ -1,15 +1,15 @@
 {
-  "generated_utc": "2026-08-13T17:55:46.803878+00:00",
+  "generated_utc": "2026-08-23T11:20:04.352930+00:00",
   "git": {
     "branch": "main",
-    "commit_sha": "f280c6fc576b61bbe4edb4c2981ff5fa253e831f",
+    "commit_sha": "7967be068fa5d10b7975751b63675cb710ff5897",
     "is_dirty": "yes"
   },
-  "verdict": "FAIL",
+  "verdict": "PASS",
   "checks": {
     "no_target_or_f3912_leakage": {
       "passed": true,
-      "detail": "120 bundle features disjoint from 4 quarantined",
+      "detail": "120 bundle features disjoint from 13 quarantined",
       "description": "target/F3912/F2230/index quarantined from bundle features"
     },
     "no_split_overlap": {
@@ -63,8 +63,8 @@
       "description": ".env absent from git; no hardcoded secrets"
     },
     "tests_pass": {
-      "passed": false,
-      "detail": "1 failed, 407 passed in 256.77s (0:04:16)",
+      "passed": true,
+      "detail": "799 passed in 354.99s (0:05:54)",
       "description": "full pytest suite green"
     },
     "probabilities_bounded": {
@@ -119,7 +119,7 @@
     },
     "organiser_dry_run_passed": {
       "passed": true,
-      "detail": "8/8 variants, invariance sound=True, model unchanged=True, locked-test PR-AUC 0.7262714933700882",
+      "detail": "11/11 variants, invariance sound=True, model unchanged=True, locked-test PR-AUC 0.7262714933700882",
       "description": "the section 42 rehearsal scored every malformed export without moving the model"
     }
   },

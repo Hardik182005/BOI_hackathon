@@ -1,9 +1,9 @@
 {
-  "generated_utc": "2026-08-13T17:57:03+00:00",
+  "generated_utc": "2026-08-23T11:20:24+00:00",
   "champion": "xgboost_top_120",
   "champion_promoted_utc": "2026-08-13T02:53:19.184309+00:00",
-  "verdict": "FAIL",
-  "verdict_is_one_of_the_three_permitted": true,
+  "verdict": "PENDING_EVIDENCE",
+  "verdict_is_one_of_the_three_permitted": false,
   "verdict_rule": "FAIL if any section 63 blocker is BLOCKED. Otherwise a section 65 verdict is issued only when every blocker is CLEAR and every section 64 criterion is MET; while evidence is outstanding the verdict is PENDING_EVIDENCE, because a PASS over incomplete evidence is a guess, not a verdict.",
   "release_blockers": [
     {
@@ -48,32 +48,32 @@
     },
     {
       "text": "train-validation overlap",
-      "status": "STALE",
-      "detail": "all checks passed, but artifacts/testing/leakage_results.json was recorded before xgboost_top_120 was promoted; re-run scripts/release_test.sh",
+      "status": "CLEAR",
+      "detail": "checks passed 6/6",
       "evidence": [
         "artifacts/testing/leakage_results.json"
       ]
     },
     {
       "text": "preprocessing fitted on validation",
-      "status": "STALE",
-      "detail": "all checks passed, but artifacts/testing/leakage_results.json was recorded before xgboost_top_120 was promoted; re-run scripts/release_test.sh",
+      "status": "CLEAR",
+      "detail": "checks passed 6/6",
       "evidence": [
         "artifacts/testing/leakage_results.json"
       ]
     },
     {
       "text": "feature selection fitted on validation",
-      "status": "STALE",
-      "detail": "all checks passed, but artifacts/testing/leakage_results.json was recorded before xgboost_top_120 was promoted; re-run scripts/release_test.sh",
+      "status": "CLEAR",
+      "detail": "checks passed 6/6",
       "evidence": [
         "artifacts/testing/leakage_results.json"
       ]
     },
     {
       "text": "test labels used for tuning",
-      "status": "STALE",
-      "detail": "all checks passed, but artifacts/testing/leakage_results.json was recorded before xgboost_top_120 was promoted; re-run scripts/release_test.sh",
+      "status": "CLEAR",
+      "detail": "checks passed 6/6",
       "evidence": [
         "artifacts/testing/leakage_results.json"
       ]
@@ -112,8 +112,8 @@
     },
     {
       "text": "model artifact cannot reproduce saved predictions",
-      "status": "STALE",
-      "detail": "all checks passed, but artifacts/testing/leakage_results.json was recorded before xgboost_top_120 was promoted; re-run scripts/release_test.sh",
+      "status": "CLEAR",
+      "detail": "checks passed 6/6",
       "evidence": [
         "artifacts/testing/leakage_results.json"
       ]
@@ -160,16 +160,16 @@
     },
     {
       "text": "P0 defect",
-      "status": "BLOCKED",
-      "detail": "open blockers: ['ML release gate: FAIL']",
+      "status": "CLEAR",
+      "detail": "release summary records no open blockers",
       "evidence": [
         "artifacts/testing/final_release_summary.json"
       ]
     },
     {
       "text": "unapproved P1 defect",
-      "status": "BLOCKED",
-      "detail": "open blockers: ['ML release gate: FAIL']",
+      "status": "CLEAR",
+      "detail": "release summary records no open blockers",
       "evidence": [
         "artifacts/testing/final_release_summary.json"
       ]
@@ -179,8 +179,8 @@
     {
       "group": "Data",
       "text": "DataSet.xlsx fingerprinted",
-      "status": "NOT_MET",
-      "detail": "workbook SHA-256 recorded and re-verified, but recorded before xgboost_top_120 was promoted",
+      "status": "MET",
+      "detail": "workbook SHA-256 recorded and re-verified",
       "evidence": [
         "artifacts/testing/data_integrity.json"
       ]
@@ -197,8 +197,8 @@
     {
       "group": "Data",
       "text": "target verified",
-      "status": "NOT_MET",
-      "detail": "all checks passed, but artifacts/testing/data_integrity.json was recorded before xgboost_top_120 was promoted; re-run scripts/release_test.sh",
+      "status": "MET",
+      "detail": "checks passed 11/11",
       "evidence": [
         "artifacts/testing/data_integrity.json"
       ]
@@ -350,8 +350,8 @@
     {
       "group": "Runtime",
       "text": "one-command run works",
-      "status": "NOT_MET",
-      "detail": "run.sh brought the stack up, but recorded before xgboost_top_120 was promoted",
+      "status": "MET",
+      "detail": "run.sh brought the stack up",
       "evidence": [
         "artifacts/testing/one_command_startup.log"
       ]
@@ -361,22 +361,22 @@
   "sections": {
     "A. Environment": "```text\nGit SHA: f280c6fc576b61bbe4edb4c2981ff5fa253e831f (working tree dirty)\nPython: 3.13.2\nNode: recorded by scripts/test_frontend.sh\nCPU: Intel64 Family 6 Model 140 Stepping 1, GenuineIntel - 4 physical / 8 logical cores\nRAM: 16.93 GB total\nGPU: none - CUDA available: False, compute mode cpu_16gb\nDataSet SHA: 7d1be90fe23b57460184f2f7566d572cc3a40fc6d17d436fe33219e80eabc204\nDescription SHA: 7d30652b72d4b79b3feeb3e14ebe67177988b3155912ea33f284f140e8774b20\n```",
     "B. Verified Primary Dataset": "```text\nRows: 9082 (development 7264, locked test 1818)\nFeature columns: 3924\nTarget: Target (1 = mule account)\nPositives: 81 overall; 64 in development\nNegatives: 9001 overall; 7200 in development\nPrevalence: 0.008919 overall\nNaive accuracy: 0.991081 (predict every account legitimate)\nNo-skill AP: 0.008811 on development\n```",
-    "C. Leakage Firewall": "```text\nHard excluded: 4 columns, all excluded from every model, selector, ensemble and lens: F2230, F3912, F3924, __UNNAMED__0\nConditional quarantine: none - quarantine policy None is unconditional; a column is either admissible or excluded\nF2230 verdict: EXCLUDED. snapshot-month label artifact: ALL 9,001 negatives are the 2025-10 snapshot, ALL 81 positives are Sep/Nov/Dec snapshots - the month deterministically reconstructs the target (balanced reconstruction 1.0). Also invalidates any out-of-time split on this column.\nF3916-18 verdict: EXCLUDED. quarantined\nTarget leakage detected?: YES, and firewalled. F3912 alone scored 0.94190 PR-AUC against 0.61416 without it. Firewall check: CLEAR - none of F2230, F3892, F3898, F3899, F3912, F3913, F3914, F3915, F3916, F3917, F3918, F3924, __UNNAMED__0 appear among the champion's 120 input features\n```",
+    "C. Leakage Firewall": "```text\nHard excluded: 13 columns, all excluded from every model, selector, ensemble and lens: F2230, F3892, F3898, F3899, F3912, F3913, F3914, F3915, F3916, F3917, F3918, F3924, __UNNAMED__0\nConditional quarantine: none - quarantine policy 2.0 is unconditional; a column is either admissible or excluded\nF2230 verdict: EXCLUDED. MNTH snapshot month - deterministically reconstructs the label in this extract\nF3916-18 verdict: EXCLUDED. L3_FLG - customer risk level, time-of-availability undetermined\nTarget leakage detected?: YES, and firewalled. F3912 alone scored 0.94190 PR-AUC against 0.61416 without it. Firewall check: CLEAR - none of F2230, F3892, F3898, F3899, F3912, F3913, F3914, F3915, F3916, F3917, F3918, F3924, __UNNAMED__0 appear among the champion's 120 input features\n```",
     "D. Model Tournament": "| model | protocol | features | PR-AUC mean | PR-AUC std | note |\n| --- | --- | --- | --- | --- | --- |\n| tabpfn_top_60 | FLAT 3x5 | 60 | 0.91100 | 0.00436 | OK |\n| xgboost_top_120 | FLAT 3x5 | 120 | 0.76904 | 0.02663 | OK |\n| xgboost_top_60 | FLAT 3x5 | 60 | 0.74082 | 0.04981 | OK |\n| lightgbm_top_60 | FLAT 3x5 | 60 | 0.69918 | 0.02733 | OK |\n| catboost_top_60 | FLAT 3x5 | 60 | 0.69630 | 0.04168 | OK |\n| xgboost_top_30 | FLAT 3x5 | 30 | 0.68974 | 0.01224 | OK |\n| lightgbm_top_120 | FLAT 3x5 | 120 | 0.68621 | 0.04045 | OK |\n| lightgbm_top_30 | FLAT 3x5 | 30 | 0.66281 | 0.01609 | OK |\n| lightgbm_viewA_top_60 | FLAT 3x5 | 60 | 0.65844 | 0.02341 | OK |\n| catboost_top_120 | FLAT 3x5 | 120 | 0.64670 | 0.06993 | OK |\n| lightgbm_viewB_top_60 | FLAT 3x5 | 60 | 0.64543 | 0.04847 | OK |\n| lightgbm_top_250 | FLAT 3x5 | 250 | 0.64419 | 0.02999 | OK |\n| lightgbm_full_pool | FLAT 3x5 | 3925 | 0.58743 | 0.02758 | OK |\n| catboost_top_30 | FLAT 3x5 | 30 | 0.56136 | 0.11250 | OK |\n| lightgbm_top_15 | FLAT 3x5 | 15 | 0.33566 | 0.13990 | OK |\n| lightgbm_viewE_top_60 | FLAT 3x5 | 60 | 0.30611 | 0.08419 | OK |\n| lightgbm_freq_ge_0_50 | FLAT 3x5 | 13 | 0.19166 | 0.02470 | OK |\n| elasticnet_top30 | FLAT 3x5 | 30 | 0.08954 | 0.00449 | OK |\n| logistic_top30 | FLAT 3x5 | 30 | 0.08816 | 0.00454 | OK |\n| lightgbm_viewC_top_15 | FLAT 3x5 | 15 | 0.02949 | 0.01101 | OK |\n| lightgbm_viewD_top_15 | FLAT 3x5 | 15 | 0.02059 | 0.00205 | OK |\n| dummy_prevalence | FLAT 3x5 | 30 | 0.00871 | 0.00000 | OK |\n| catboost | NESTED 3x5x4 | 120 | 0.80653 | 0.00845 | NESTED |\n| histgb | NESTED 3x5x4 | 120 | 0.76735 | 0.02949 | NESTED |\n| xgboost | NESTED 3x5x4 | 120 | 0.75393 | 0.00740 | NESTED |\n| lightgbm | NESTED 3x5x4 | 120 | 0.70046 | 0.02362 | NESTED |\n| extratrees | NESTED 3x5x4 | 120 | 0.54839 | 0.06962 | NESTED |\n| logistic_l1l2 | NESTED 3x5x4 | 120 | 0.16386 | 0.00308 | NESTED |\n| dummy_prevalence | NESTED 3x5x4 | 120 | 0.00910 | 0.00022 | NESTED |\n\n**Arbiter (CHAMPION_CHALLENGED):** under the primary nested protocol the promotion rule selects `catboost`, not the shipped `xgboost_top_120`. Scored on identical rows the gap is 0.05279 PR-AUC, 95% CI [0.02374, 0.08602], 3/3 repeats favouring the challenger. The swap was **not** taken. This file records the finding. Swapping the champion is a decision with a locked-test cost attached and is not taken by a report. Section E therefore describes an artefact that places third of 6 under the protocol this project calls primary.",
     "E. Champion": "```text\nModel: xgboost_top_120 (battery run FLAT:xgboost_top_120)  [operating point and probability quality measured under the FLAT protocol, which is the run that scored this exact bundle; the primary nested figure for family 'xgboost' is the Nested-CV row below]\nFeature set: top_120 of view ALL_ADMISSIBLE\nNumber of features: 120\nNested-CV AP mean: 0.75393 +/- 0.00740 for family 'xgboost' over 3 repeats (NESTED:xgboost) - the nested protocol selects its own feature-set size per fold, so this is the family's figure, not this bundle's\nFLAT-CV AP mean: 0.76904\nAP std: 0.02663 across 3 repeats (a spread, not an interval)\n95% CI: [0.67555, 0.85245] percentile bootstrap over accounts, 2000 draws\nROC-AUC: 0.95771 (secondary - prevalence 0.88% makes ROC flattering)\nAccuracy: 0.99202 at the URGENT_REVIEW threshold\nBalanced Accuracy: 0.91080\nPrecision: 0.53000\nRecall: 0.82812\nF1: 0.64634\nF2: 0.74438\nMCC: 0.65893\nBrier: 0.00313 against 0.00873 for a base-rate predictor (skill 0.642)\nECE: 0.00096 (10 quantile bins), 0.00149 (10 uniform bins)\n```",
     "F. Alert Budget": "```text\nRecall@Top25: 0.3906  (25/64 mules; 95% CI [0.3086, 0.5000])\nPrecision@Top25: 1.0000\nRecall@Top50: 0.6875  (44/64 mules; 95% CI [0.5844, 0.7869])\nPrecision@Top50: 0.8800\nRecall@Top100: 0.8281  (53/64 mules; 95% CI [0.7241, 0.9118])\nPrecision@Top100: 0.5300\nFP/1000 legit: 6.528 at a 100-alert budget; 0.000 at 25\n```",
     "G. Stability": "```text\nPositive-removal stability (NESTED, primary): 0.76780 against a 0.78161 reference, relative drop 0.0177. Paired over 15 outer folds the loss is -0.01381, 95% CI [-0.02130, -0.00631], worse in 14 of 15 (sign p 0.00098). The drop is small and real, not small and deniable.\nFeature stability (NESTED vs FLAT): rank correlation 0.3944 nested against 0.7696 flat. The gap is structural, not noise: the flat run fits feature selection once over pooled development data, so dropping training positives cannot disturb a choice already made, while the nested run re-selects inside every outer fold and the choice moves. Read 0.3944 as the honest figure - when the mules this model learned from change, so does most of what it cites.\nSeed stability: PR-AUC 0.76294 +/- 0.03222 over 5 seeds, spread 0.0905. Any model comparison smaller than this spread on unpaired folds is noise.\nPositive-removal stability (FLAT): 0.72398 +/- 0.03545 over 15 rounds dropping 30.0 positives each; relative drop 0.0337. Worst round 0.6413\nFeature stability (FLAT): rank correlation 0.7696, top-20 overlap 0.6805 - see the nested figure above, which is the one to quote\nRank stability (FLAT): 0.3694 Spearman over all development rows - low because ~99% of rows are negatives whose calibrated scores are near-tied; the analyst-facing number is the top-budget overlap\n```",
-    "H. Generalization": "```text\nAdversarial validation: PENDING - produced by: python -m muleguard.cli.nested_ses --stages shift\nOOD: locked-test drift STABLE - score PSI 0.0000, 0 features at alert level over 1818 rows\nShift-prone features: PENDING - produced by: python -m muleguard.cli.nested_ses --stages shift\nHidden-validation readiness: organiser dry run PASS, 8/8 upload variants invariant\n```",
-    "I. Validation Lab": "```text\nTargetless upload: 8/8 variants accepted with the target column removed (1818 rows)\nTarget-present sealed validation: seal verified: True - predictions sealed 2026-08-13T17:56:09.442357+00:00, labels revealed 2026-08-13T17:56:53.209601+00:00\nRow-order preservation: all_invariant=True, sound=True (a sensitivity control confirms the check can fail)\nCompetition export: batch upload checks 4/4\nNo-retraining assertion: bundle fingerprint afd0dc1d8fc02eb9 -> afd0dc1d8fc02eb9 (unchanged=True)\n```",
-    "J. System": "```text\nBackend: 15/15 checks passed - STALE, recorded before xgboost_top_120\nFrontend metrics: 6/6 checks passed\nOffline: CLEAR - backend serves with the network stack pointed at a dead port\nOllama-off: 16/16 checks passed\nNo MCP: CLEAR - source scan records no MCP or browser-automation dependency\nNo Claude in Chrome: CLEAR - the same scan covers browser automation\n```",
-    "K. Tests": "```text\nPassed: 90/90 QA checks, 93 pytest, 3 vitest\nFailed: 0\nP0: 1 open\nP1: 1 open, 0 approved non-blocking exceptions\n```"
+    "H. Generalization": "```text\nAdversarial validation: PENDING - produced by: python -m muleguard.cli.nested_ses --stages shift\nOOD: locked-test drift STABLE - score PSI 0.0000, 0 features at alert level over 1818 rows\nShift-prone features: PENDING - produced by: python -m muleguard.cli.nested_ses --stages shift\nHidden-validation readiness: organiser dry run PASS, 11/11 upload variants invariant\n```",
+    "I. Validation Lab": "```text\nTargetless upload: 11/11 variants accepted with the target column removed (1818 rows)\nTarget-present sealed validation: seal verified: True - predictions sealed 2026-08-14T08:38:38.092004+00:00, labels revealed 2026-08-14T08:42:03.018116+00:00\nRow-order preservation: all_invariant=True, sound=True (a sensitivity control confirms the check can fail)\nCompetition export: batch upload checks 4/4\nNo-retraining assertion: bundle fingerprint afd0dc1d8fc02eb9 -> afd0dc1d8fc02eb9 (unchanged=True)\n```",
+    "J. System": "```text\nBackend: 15/15 checks passed\nFrontend metrics: 6/6 checks passed\nOffline: CLEAR - backend serves with the network stack pointed at a dead port\nOllama-off: 16/16 checks passed\nNo MCP: CLEAR - source scan records no MCP or browser-automation dependency\nNo Claude in Chrome: CLEAR - the same scan covers browser automation\n```",
+    "K. Tests": "```text\nPassed: 90/90 QA checks, 93 pytest, 3 vitest\nFailed: 0\nP0: 0 open\nP1: 0 open, 0 approved non-blocking exceptions\n```"
   },
   "top_risks": [
-    "Evidence is incomplete: 6 of 20 pass criteria are not met yet (DataSet.xlsx fingerprinted, target verified, semantic registry built, best candidate stability tested, ...). Nothing here can be read as a final PASS until those runs land.",
-    "5 release blockers are cleared only by evidence recorded before xgboost_top_120 was promoted. The QA suites must be re-run against the current bundle before the verdict means anything.",
+    "Evidence is incomplete: 3 of 20 pass criteria are not met yet (semantic registry built, best candidate stability tested, distribution shift reported). Nothing here can be read as a final PASS until those runs land.",
     "64 positives at 0.88% prevalence. One mule is worth 1.6 recall points, so every interval in this report is wide and every fold-level difference is fragile.",
     "Under positive removal the worst round fell to 0.6413 PR-AUC from a 0.7493 reference: the model's ranking depends on which mules it was shown.",
-    "The headline metrics come from the flat protocol, which is not the primary one. Under nested CV the shipped family scores 0.75393 against the flat 0.76904 (-0.01511). On the same rows `catboost` beats it by 0.05279 PR-AUC with a 95% interval excluding zero, and the champion was left in place rather than swapped. Read the headline as what the shipped artefact does, not as the best estimate available."
+    "The headline metrics come from the flat protocol, which is not the primary one. Under nested CV the shipped family scores 0.75393 against the flat 0.76904 (-0.01511). On the same rows `catboost` beats it by 0.05279 PR-AUC with a 95% interval excluding zero, and the champion was left in place rather than swapped. Read the headline as what the shipped artefact does, not as the best estimate available.",
+    "Generation-1 numbers (PR-AUC 0.824 and above) came from a model that could see quarantined columns. They remain in the repository as retired evidence and must never be quoted as current behaviour."
   ],
-  "verdict_scope": "The programme did not clear its own gates. The blocker table below names which, and no headline in this repository should be read as settled until they are cleared."
+  "verdict_scope": "Scope: the evidence is incomplete, so nothing is certified either way yet."
 }
