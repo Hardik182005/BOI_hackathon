@@ -1,12 +1,12 @@
 # Final Release Gate
 
-Generated 2026-08-13T17:55:46.609002+00:00 · commit `f280c6fc576b`
+Generated 2026-08-23T11:20:04.210770+00:00 · commit `7967be068fa5`
 
-## Verdict: **FAIL** (22/23 checks passed)
+## Verdict: **PASS** (23/23 checks passed)
 
 | Check | Result | Detail |
 |---|---|---|
-| no_target_or_f3912_leakage | PASS | 120 bundle features disjoint from 4 quarantined |
+| no_target_or_f3912_leakage | PASS | 120 bundle features disjoint from 13 quarantined |
 | no_split_overlap | PASS | test=1818 dev=7264 overlap=0 |
 | locked_test_single_touch | PASS | touches=3 forced=0 |
 | metrics_trace_to_predictions | PASS | 11 models verified |
@@ -17,7 +17,7 @@ Generated 2026-08-13T17:55:46.609002+00:00 · commit `f280c6fc576b`
 | scoring_survives_ollama_outage | PASS | fallback ok; planted hallucination rejected for 8 reasons |
 | raw_data_unmodified | PASS | SHA-256 verified |
 | no_secrets_committed | PASS | .env not tracked |
-| tests_pass | **FAIL** | 1 failed, 407 passed in 256.77s (0:04:16) |
+| tests_pass | PASS | 799 passed in 354.99s (0:05:54) |
 | probabilities_bounded | PASS | OOF + locked test bounded |
 | artifacts_complete | PASS | 19 artifacts present |
 | addendum_artifacts_complete | PASS | 10 addendum artifacts present |
@@ -28,8 +28,4 @@ Generated 2026-08-13T17:55:46.609002+00:00 · commit `f280c6fc576b`
 | shield_reports_no_leaked_feature | PASS | 54 STABLE / 66 WATCH / 0 SHIFT_PRONE / 0 LEAKAGE |
 | no_forbidden_verdict_vocabulary | PASS | 5 forbidden verdict words absent from shipped source |
 | attack_surface_covered | PASS | 49 security tests collected covering sqli, xss, path_traversal, csv_injection |
-| organiser_dry_run_passed | PASS | 8/8 variants, invariance sound=True, model unchanged=True, locked-test PR-AUC 0.7262714933700882 |
-
-## Blockers
-
-- tests_pass: 1 failed, 407 passed in 256.77s (0:04:16)
+| organiser_dry_run_passed | PASS | 11/11 variants, invariance sound=True, model unchanged=True, locked-test PR-AUC 0.7262714933700882 |
