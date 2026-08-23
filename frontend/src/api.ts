@@ -132,6 +132,14 @@ export const api = {
   graphDiscard: () => request("/v1/graph/edges", { method: "DELETE" }),
   graphAccount: (account: string) =>
     request(`/v1/graph/account/${encodeURIComponent(account)}`),
+
+  // Trinetra Mule-Farm Cohort Radar. Retrieval over a frozen development-only
+  // reference - these routes read the classifier's output and never change it.
+  cohortManifest: () => request("/v1/cohort/manifest"),
+  cohortForCase: (caseId: string, k = 10) =>
+    request(`/v1/cases/${encodeURIComponent(caseId)}/cohort?k=${k}`),
+  cohortSearch: (body: Json) =>
+    request("/v1/cohort/search", { method: "POST", body: JSON.stringify(body) }),
 };
 
 /** The locked-test headline, attributed to the model that actually serves.

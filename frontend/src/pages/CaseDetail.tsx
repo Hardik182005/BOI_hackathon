@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { api, fmtNum, fmtPct } from "../api";
 import { Empty, ErrorState, HumanReviewNotice, Loading, TierBadge, usePoll } from "../components";
+import CohortPanel from "../CohortPanel";
+import ControlAttribution from "../ControlAttribution";
 
 export default function CaseDetail() {
   const { caseId = "" } = useParams();
@@ -130,6 +132,11 @@ export default function CaseDetail() {
             {(score?.reasons ?? []).map((r: string, i: number) => <li key={i}>{r}</li>)}
           </ul>
         </div>
+      </div>
+
+      <div className="grid cols-2" style={{ marginTop: 14 }}>
+        <ControlAttribution card={(data as any).control_attribution} />
+        <CohortPanel caseId={caseId} />
       </div>
 
       <div className="grid cols-2" style={{ marginTop: 14 }}>

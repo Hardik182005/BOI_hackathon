@@ -17,6 +17,8 @@ const NODE_STYLE: Record<string, { fill: string; stroke: string; label: string }
   COUNTERFACTUAL_TWIN: { fill: "#f5f3ff", stroke: "#7c3aed", label: "Counterfactual twin" },
   PATTERN: { fill: "#f3f5f9", stroke: "#5b6675", label: "Behavioural pattern" },
   DECISION: { fill: "#ffffff", stroke: "#111111", label: "Review recommendation" },
+  CONTROL_ATTRIBUTION: { fill: "#fafafa", stroke: "#5b6675",
+                         label: "Limitation — requires human verification" },
 };
 
 // Addendum caps, so the canvas stays readable rather than becoming a spaghetti
@@ -200,6 +202,7 @@ function GraphCanvas({ nodes, edges, showAll }: { nodes: any[]; edges: any[]; sh
   const others = nodes.filter((n) =>
     ["PATTERN", "COUNTERFACTUAL", "COUNTERFACTUAL_TWIN"].includes(n.type));
   const decision = nodes.find((n) => n.type === "DECISION");
+  const control = nodes.find((n) => n.type === "CONTROL_ATTRIBUTION");
 
   const placed: Placed[] = [];
   const stack = (list: any[], x: number, anchor: Placed["anchor"], startY: number) => {
@@ -217,6 +220,14 @@ function GraphCanvas({ nodes, edges, showAll }: { nodes: any[]; edges: any[]; sh
   if (decision) {
     midEnd = Math.max(midEnd, Math.max(leftEnd, rightEnd)) + 14;
     placed.push({ node: decision, x: MID_X, y: midEnd, w: COL_W, h: 52, anchor: "top" });
+    midEnd += 52;
+  }
+  // Section 22: the limitation hangs off the decision, not off the account.
+  // Drawn last and below, because it qualifies what may be done with the
+  // recommendation rather than contributing to it.
+  if (control) {
+    midEnd += 14;
+    placed.push({ node: control, x: MID_X, y: midEnd, w: COL_W, h: 52, anchor: "top" });
     midEnd += 52;
   }
 
@@ -241,7 +252,20 @@ function GraphCanvas({ nodes, edges, showAll }: { nodes: any[]; edges: any[]; sh
              role="img" aria-label="evidence graph" style={{ minWidth: 720, display: "block" }}>
           {edges.map((e, i) => {
             const to = pos.get(e.target);
-            if (!to || e.source !== "account") return null;
+            if (!to) return null;
+            // The one edge that does not originate at the account: the
+            // limitation attached to the decision (REQUIRES_HUMAN_VERIFICATION).
+            if (e.source === "decision" && to.node.type === "CONTROL_ATTRIBUTION") {
+              const from = pos.get("decision");
+              if (!from) return null;
+              return (
+                <line key={`ctl-${i}`}
+                      x1={from.x + from.w / 2} y1={from.y + from.h}
+                      x2={to.x + to.w / 2} y2={to.y}
+                      stroke="#5b6675" strokeWidth={1.2} strokeDasharray="4 3" />
+              );
+            }
+            if (e.source !== "account") return null;
             const a = anchorPoint(to);
             const from = { x: accountBox.x + accountBox.w / 2, y: accountBox.y + accountBox.h };
             const stroke = NODE_STYLE[to.node.type]?.stroke ?? "#94a3b8";
@@ -266,6 +290,7 @@ function GraphCanvas({ nodes, edges, showAll }: { nodes: any[]; edges: any[]; sh
         {placed.length + (account ? 1 : 0)} of {nodes.length} nodes drawn
         {hidden > 0 && !showAll ? ` · ${hidden} lower-weight node(s) hidden — use “Show every node”` : ""}
         {" · "}edges shown: relations from the account node
+        {control ? ", plus the decision's human-verification limitation" : ""}
       </div>
     </>
   );
