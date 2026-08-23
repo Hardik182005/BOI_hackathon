@@ -1,0 +1,266 @@
+{
+  "generated_utc": "2026-08-23T09:44:55.348888+00:00",
+  "git": {
+    "branch": "main",
+    "commit_sha": "33ac429d422b297db7b0a4b0bf184544828e64c1",
+    "is_dirty": "yes"
+  },
+  "radar_version": "1.0",
+  "what_this_is": "Retrieval-quality diagnostic for a post-model similarity layer. These figures describe how often a behaviourally similar reference account shares the query's label. They are not classifier accuracy, they are not used to score anything, and they do not establish common ownership, common control or a shared network.",
+  "protocol": {
+    "repeat": 0,
+    "n_outer_folds": 5,
+    "assignments": "artifacts\\splits\\nested_cv_assignments.parquet",
+    "similarity_fitted_on": "outer-training rows of each fold, separately",
+    "reference_index": "outer-training rows only",
+    "queries": "outer-validation rows only",
+    "labels_used_for_retrieval": false,
+    "labels_used_after_retrieval": true,
+    "locked_test_used": false,
+    "k_values": [
+      5,
+      10,
+      25
+    ],
+    "tie_break": "reference position, so the ranking is total"
+  },
+  "reference_positive_prevalence": {
+    "mean": 0.00881056799152662,
+    "min": 0.008776458440887971,
+    "max": 0.008947006194081212
+  },
+  "pooled": {
+    "positive": {
+      "n_queries": 64,
+      "hit_at_5": 0.890625,
+      "neighbor_positive_prevalence_at_5": 0.734375,
+      "mean_positive_neighbors_at_5": 3.671875,
+      "lift_at_5": 83.34297228506787,
+      "hit_at_10": 0.9375,
+      "neighbor_positive_prevalence_at_10": 0.6828124999999999,
+      "mean_positive_neighbors_at_10": 6.828125,
+      "lift_at_10": 77.47127403846153,
+      "hit_at_25": 0.9375,
+      "neighbor_positive_prevalence_at_25": 0.5775,
+      "mean_positive_neighbors_at_25": 14.4375,
+      "lift_at_25": 65.54175339366516
+    },
+    "legitimate": {
+      "n_queries": 7200,
+      "hit_at_5": 0.05541666666666667,
+      "neighbor_positive_prevalence_at_5": 0.01963888888888889,
+      "mean_positive_neighbors_at_5": 0.09819444444444445,
+      "lift_at_5": 2.2294126445449978,
+      "hit_at_10": 0.08888888888888889,
+      "neighbor_positive_prevalence_at_10": 0.021708333333333336,
+      "mean_positive_neighbors_at_10": 0.21708333333333332,
+      "lift_at_10": 2.464362933634993,
+      "hit_at_25": 0.1638888888888889,
+      "neighbor_positive_prevalence_at_25": 0.024116666666666665,
+      "mean_positive_neighbors_at_25": 0.6029166666666667,
+      "lift_at_25": 2.737649095022624
+    }
+  },
+  "per_fold": [
+    {
+      "n_reference": 5811,
+      "n_queries": 1453,
+      "n_positive_queries": 13,
+      "n_legitimate_queries": 1440,
+      "reference_positive_prevalence": 0.008776458440887971,
+      "by_query_class": {
+        "positive": {
+          "n_queries": 13,
+          "hit_at_5": 0.9230769230769231,
+          "neighbor_positive_prevalence_at_5": 0.7538461538461538,
+          "mean_positive_neighbors_at_5": 3.769230769230769,
+          "lift_at_5": 85.89411764705882,
+          "hit_at_10": 0.9230769230769231,
+          "neighbor_positive_prevalence_at_10": 0.6846153846153846,
+          "mean_positive_neighbors_at_10": 6.846153846153846,
+          "lift_at_10": 78.00588235294117,
+          "hit_at_25": 0.9230769230769231,
+          "neighbor_positive_prevalence_at_25": 0.5415384615384615,
+          "mean_positive_neighbors_at_25": 13.538461538461538,
+          "lift_at_25": 61.703529411764706
+        },
+        "legitimate": {
+          "n_queries": 1440,
+          "hit_at_5": 0.05555555555555555,
+          "neighbor_positive_prevalence_at_5": 0.018472222222222223,
+          "mean_positive_neighbors_at_5": 0.09236111111111112,
+          "lift_at_5": 2.1047467320261437,
+          "hit_at_10": 0.08472222222222223,
+          "neighbor_positive_prevalence_at_10": 0.02034722222222222,
+          "mean_positive_neighbors_at_10": 0.20347222222222222,
+          "lift_at_10": 2.318386437908497,
+          "hit_at_25": 0.15416666666666667,
+          "neighbor_positive_prevalence_at_25": 0.022083333333333333,
+          "mean_positive_neighbors_at_25": 0.5520833333333334,
+          "lift_at_25": 2.516200980392157
+        }
+      },
+      "outer_fold": 0
+    },
+    {
+      "n_reference": 5811,
+      "n_queries": 1453,
+      "n_positive_queries": 13,
+      "n_legitimate_queries": 1440,
+      "reference_positive_prevalence": 0.008776458440887971,
+      "by_query_class": {
+        "positive": {
+          "n_queries": 13,
+          "hit_at_5": 1.0,
+          "neighbor_positive_prevalence_at_5": 0.8615384615384616,
+          "mean_positive_neighbors_at_5": 4.3076923076923075,
+          "lift_at_5": 98.16470588235295,
+          "hit_at_10": 1.0,
+          "neighbor_positive_prevalence_at_10": 0.8153846153846154,
+          "mean_positive_neighbors_at_10": 8.153846153846153,
+          "lift_at_10": 92.90588235294118,
+          "hit_at_25": 1.0,
+          "neighbor_positive_prevalence_at_25": 0.6584615384615384,
+          "mean_positive_neighbors_at_25": 16.46153846153846,
+          "lift_at_25": 75.02588235294117
+        },
+        "legitimate": {
+          "n_queries": 1440,
+          "hit_at_5": 0.049305555555555554,
+          "neighbor_positive_prevalence_at_5": 0.019583333333333335,
+          "mean_positive_neighbors_at_5": 0.09791666666666667,
+          "lift_at_5": 2.2313480392156864,
+          "hit_at_10": 0.08541666666666667,
+          "neighbor_positive_prevalence_at_10": 0.021597222222222223,
+          "mean_positive_neighbors_at_10": 0.21597222222222223,
+          "lift_at_10": 2.460812908496732,
+          "hit_at_25": 0.16805555555555557,
+          "neighbor_positive_prevalence_at_25": 0.024638888888888887,
+          "mean_positive_neighbors_at_25": 0.6159722222222223,
+          "lift_at_25": 2.8073839869281043
+        }
+      },
+      "outer_fold": 1
+    },
+    {
+      "n_reference": 5811,
+      "n_queries": 1453,
+      "n_positive_queries": 13,
+      "n_legitimate_queries": 1440,
+      "reference_positive_prevalence": 0.008776458440887971,
+      "by_query_class": {
+        "positive": {
+          "n_queries": 13,
+          "hit_at_5": 0.9230769230769231,
+          "neighbor_positive_prevalence_at_5": 0.7230769230769231,
+          "mean_positive_neighbors_at_5": 3.6153846153846154,
+          "lift_at_5": 82.38823529411765,
+          "hit_at_10": 1.0,
+          "neighbor_positive_prevalence_at_10": 0.6307692307692307,
+          "mean_positive_neighbors_at_10": 6.3076923076923075,
+          "lift_at_10": 71.87058823529412,
+          "hit_at_25": 1.0,
+          "neighbor_positive_prevalence_at_25": 0.5846153846153846,
+          "mean_positive_neighbors_at_25": 14.615384615384615,
+          "lift_at_25": 66.61176470588235
+        },
+        "legitimate": {
+          "n_queries": 1440,
+          "hit_at_5": 0.05763888888888889,
+          "neighbor_positive_prevalence_at_5": 0.01902777777777778,
+          "mean_positive_neighbors_at_5": 0.09513888888888888,
+          "lift_at_5": 2.1680473856209153,
+          "hit_at_10": 0.09097222222222222,
+          "neighbor_positive_prevalence_at_10": 0.020069444444444445,
+          "mean_positive_neighbors_at_10": 0.20069444444444445,
+          "lift_at_10": 2.2867361111111113,
+          "hit_at_25": 0.1701388888888889,
+          "neighbor_positive_prevalence_at_25": 0.02263888888888889,
+          "mean_positive_neighbors_at_25": 0.5659722222222222,
+          "lift_at_25": 2.579501633986928
+        }
+      },
+      "outer_fold": 2
+    },
+    {
+      "n_reference": 5811,
+      "n_queries": 1453,
+      "n_positive_queries": 13,
+      "n_legitimate_queries": 1440,
+      "reference_positive_prevalence": 0.008776458440887971,
+      "by_query_class": {
+        "positive": {
+          "n_queries": 13,
+          "hit_at_5": 0.6923076923076923,
+          "neighbor_positive_prevalence_at_5": 0.5230769230769231,
+          "mean_positive_neighbors_at_5": 2.6153846153846154,
+          "lift_at_5": 59.6,
+          "hit_at_10": 0.8461538461538461,
+          "neighbor_positive_prevalence_at_10": 0.4846153846153846,
+          "mean_positive_neighbors_at_10": 4.846153846153846,
+          "lift_at_10": 55.21764705882353,
+          "hit_at_25": 0.8461538461538461,
+          "neighbor_positive_prevalence_at_25": 0.4707692307692308,
+          "mean_positive_neighbors_at_25": 11.76923076923077,
+          "lift_at_25": 53.64
+        },
+        "legitimate": {
+          "n_queries": 1440,
+          "hit_at_5": 0.06319444444444444,
+          "neighbor_positive_prevalence_at_5": 0.022083333333333333,
+          "mean_positive_neighbors_at_5": 0.11041666666666666,
+          "lift_at_5": 2.516200980392157,
+          "hit_at_10": 0.09791666666666667,
+          "neighbor_positive_prevalence_at_10": 0.025555555555555557,
+          "mean_positive_neighbors_at_10": 0.25555555555555554,
+          "lift_at_10": 2.911830065359477,
+          "hit_at_25": 0.1701388888888889,
+          "neighbor_positive_prevalence_at_25": 0.027666666666666666,
+          "mean_positive_neighbors_at_25": 0.6916666666666667,
+          "lift_at_25": 3.1523725490196077
+        }
+      },
+      "outer_fold": 3
+    },
+    {
+      "n_reference": 5812,
+      "n_queries": 1452,
+      "n_positive_queries": 12,
+      "n_legitimate_queries": 1440,
+      "reference_positive_prevalence": 0.008947006194081212,
+      "by_query_class": {
+        "positive": {
+          "n_queries": 12,
+          "hit_at_5": 0.9166666666666666,
+          "neighbor_positive_prevalence_at_5": 0.8166666666666667,
+          "mean_positive_neighbors_at_5": 4.083333333333333,
+          "lift_at_5": 91.27820512820513,
+          "hit_at_10": 0.9166666666666666,
+          "neighbor_positive_prevalence_at_10": 0.8083333333333333,
+          "mean_positive_neighbors_at_10": 8.083333333333334,
+          "lift_at_10": 90.34679487179487,
+          "hit_at_25": 0.9166666666666666,
+          "neighbor_positive_prevalence_at_25": 0.6366666666666667,
+          "mean_positive_neighbors_at_25": 15.916666666666666,
+          "lift_at_25": 71.1597435897436
+        },
+        "legitimate": {
+          "n_queries": 1440,
+          "hit_at_5": 0.05138888888888889,
+          "neighbor_positive_prevalence_at_5": 0.01902777777777778,
+          "mean_positive_neighbors_at_5": 0.09513888888888888,
+          "lift_at_5": 2.1267200854700854,
+          "hit_at_10": 0.08541666666666667,
+          "neighbor_positive_prevalence_at_10": 0.020972222222222222,
+          "mean_positive_neighbors_at_10": 0.20972222222222223,
+          "lift_at_10": 2.344049145299145,
+          "hit_at_25": 0.15694444444444444,
+          "neighbor_positive_prevalence_at_25": 0.023555555555555555,
+          "mean_positive_neighbors_at_25": 0.5888888888888889,
+          "lift_at_25": 2.632786324786325
+        }
+      },
+      "outer_fold": 4
+    }
+  ]
+}
