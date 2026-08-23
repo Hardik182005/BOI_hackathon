@@ -34,6 +34,19 @@ fi
 [ -f artifacts/models/final_bundle.joblib ] \
   || fail "model bundle missing (artifacts/models/final_bundle.joblib) - run the training pipeline first (docs/DEPLOYMENT_GUIDE.md)"
 
+# data/interim/ is gitignored, so a fresh clone has the model but not the frame
+# the model reads. ProofGraph, the Validation Lab and the Cohort Radar all call
+# build_model_frame(), so without this a clone boots to a healthy /health/ready
+# and then 500s on the first real request. Convert once, here, rather than
+# leaving the one-command promise true only on the machine that trained it.
+if [ ! -f data/interim/dataset.parquet ]; then
+  [ -f DataSet.xlsx ] || fail "DataSet.xlsx missing from the repository root - place it there (it is never committed), then re-run"
+  log "first run: converting DataSet.xlsx to data/interim/dataset.parquet (one-time, ~1-2 min) ..."
+  "$PY" -c "from muleguard.data import ingest; ingest.ensure_raw_copy(); ingest.convert_to_parquet()" \
+    || fail "dataset conversion failed - run: $PY -m muleguard.cli.audit_data"
+  log "conversion done."
+fi
+
 # ---- 3. port availability ---------------------------------------------------
 if curl -s -o /dev/null --max-time 2 "http://$API_HOST:$API_PORT/health/live"; then
   fail "port $API_PORT already serving something - stop it or set API_PORT"

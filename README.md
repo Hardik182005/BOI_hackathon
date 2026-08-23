@@ -38,7 +38,7 @@
 | Section | Contents |
 |---|---|
 | [1. Problem Context](#1-problem-context) | PS2 scope, dataset, why this is hard |
-| [2. Solution Overview](#2-solution-overview) | The Trinetra three-lens design |
+| [2. Solution Overview](#2-solution-overview) | The Trinetra three-lens design · post-model USP layers · three graphs |
 | [3. System Architecture](#3-system-architecture) | End-to-end architecture diagrams |
 | [4. Results](#4-results) | Locked test · dev OOF · nested CV · leakage story |
 | [5. Repository Structure](#5-repository-structure) | Annotated directory tree |
@@ -50,7 +50,7 @@
 | [11. Pre-registered Experiments](#11-pre-registered-experiments) | Decisions we tested, not asserted |
 | [12. Engineering Guarantees](#12-engineering-guarantees) | Machine-enforced non-negotiables |
 | [13. Known Limits](#13-known-limits) | Stated plainly, not rounded off |
-| [14. Documentation Index](#14-documentation-index) | 86 reports, the ones that matter |
+| [14. Documentation Index](#14-documentation-index) | 91 reports, the ones that matter |
 
 ---
 
@@ -110,6 +110,51 @@ Every account exits through a **deterministic policy engine** that assigns one o
 review tiers. **The system never freezes an account by itself** — a freeze is a
 *recommendation* requiring a named analyst plus a second approver, and the whole chain
 is written to an append-only audit log.
+
+### 2.1 Post-model intelligence — two layers that cannot touch a score
+
+> **Trinetra first scores mule-like behaviour with a frozen leakage-safe model.
+> ProofGraph explains the individual alert from both sides. Cohort Radar then
+> searches for unusually similar behavioural fingerprints across the portfolio
+> without inventing transaction links. Finally, the Account-Control Ambiguity
+> Guardrail reminds analysts that behavioural similarity does not establish
+> intent or account control. None of these post-model intelligence layers is
+> allowed to change the classifier's risk probability.**
+
+Two capabilities sit **after** the policy engine. Neither is an input to anything.
+They exist because the two questions an investigator asks *next* are not questions
+a classifier can answer.
+
+| Layer | Question it answers | Guarantee |
+|---|---|---|
+| **[Mule-Farm Cohort Radar](docs/COHORT_RADAR.md)** | Is this account one of many that became unusual the same way? | Retrieval only. Probabilities identical to `1e-12` before and after. |
+| **[Account-Control Guardrail](docs/ACCOUNT_CONTROL_AMBIGUITY.md)** | Do we know *who operated* this account, or whether they knew? | Reports `NOT_AVAILABLE` / `UNKNOWN`. Attaches to the decision by `REQUIRES_HUMAN_VERIFICATION`, weight `0.0`. |
+
+There is no `final_risk = 0.8 · model + 0.2 · cohort` in this repository, and
+[`configs/cohort_radar.yaml`](configs/cohort_radar.yaml) ships
+`EXPERIMENTAL_COHORT_FEATURES: false` — a switch for a code path that does not
+exist, so that anyone who later builds the forbidden thing has to turn it on
+deliberately and explain themselves in a diff. Proof of bit-identity:
+[`docs/USP_ACCURACY_REGRESSION.md`](docs/USP_ACCURACY_REGRESSION.md).
+
+### 2.2 Three graphs, three different things
+
+This project contains three graph-shaped objects. They are routinely confused, so
+they are defined once, here:
+
+| | **ProofGraph** | **Cohort Radar** | **Transaction graph** |
+|---|---|---|---|
+| **Scope** | one account | many accounts | many accounts |
+| **An edge means** | "this evidence raised this decision" | "these two behave similarly" | "this account sent money to that one" |
+| **Edge label** | `RAISED_BY` | `BEHAVIORALLY_SIMILAR_TO` | `SENT_MONEY_TO` |
+| **In this project?** | **Yes** | **Yes** | **No — the dataset has no counterparty edges** |
+
+The third column is the one that matters. A real transaction graph needs
+sender/receiver pairs; this dataset is account-level aggregates and does not
+contain them. **So MuleGuard does not draw one and does not imply one** — no
+directional arrows, no "connected ring" language. Cohort edges are similarity
+edges, labelled as such in the manifest, the API payload, the graph object and
+the UI.
 
 ---
 
@@ -325,7 +370,7 @@ BOI_hackathon/
 │   ├── submission_format.yaml       organiser output contract
 │   └── ollama.yaml                  optional LLM endpoint + guardrail config
 │
-├── 📁 src/muleguard/              Python package — 13 modules
+├── 📁 src/muleguard/              Python package — 14 modules
 │   ├── data/                        ingest · leakage firewall · profile · split      [5 files]
 │   ├── features/                    fold-safe preprocessing · stability selection    [8 files]
 │   ├── models/                      baselines · tuned cores · calibration · conformal
@@ -338,11 +383,13 @@ BOI_hackathon/
 │   ├── graph/                       counterparty graph adapter (ProofGraph)           [2 files]
 │   ├── llm/                         guarded narrator + hallucination validator
 │   │                                + deterministic fallback                          [6 files]
+│   ├── usp/                         post-model layers — cohort radar · retrieval eval
+│   │                                cohort audit · control attribution · baseline    [6 files]
 │   ├── monitoring/                  PSI / JS drift vs frozen baseline                 [2 files]
 │   ├── api/                         main.py · routes_upload · routes_graph
-│   │                                routes_capacity · routes_proofgraph
-│   │                                routes_validation · append-only SQLite audit      [8 files]
-│   └── cli/                         44 entry points: audit_env → audit_data →
+│   │                                routes_capacity · routes_proofgraph · routes_cohort
+│   │                                routes_validation · append-only SQLite audit      [9 files]
+│   └── cli/                         46 entry points: audit_env → audit_data →
 │                                    make_splits → nested_cv → tournament_v2 →
 │                                    build_lenses_v2 → shield_v2 → evaluate →
 │                                    release_gate → final_report → export_submission
@@ -391,7 +438,7 @@ BOI_hackathon/
 │   ├── interim/ · processed/        parquet intermediates
 │   └── splits/                      ✅ COMMITTED — locked test + CV fold definitions
 │
-├── 📁 docs/                       86 reports — see §14 for the ones that matter
+├── 📁 docs/                       91 reports — see §14 for the ones that matter
 └── 📁 deploy/                     nginx.conf for the container frontend
 ```
 
@@ -417,6 +464,13 @@ cd frontend && npm install && cd ..
 ```
 
 Place `DataSet.xlsx` at the repository root. It is **never modified and never committed**.
+
+On a **fresh clone** the first `./run.sh` converts that workbook to
+`data/interim/dataset.parquet` (one-time, 1-2 minutes) before starting anything.
+`data/interim/` is gitignored, and ProofGraph, the Validation Lab and the Cohort
+Radar all read that frame — without the conversion a clone reaches a healthy
+`/health/ready` and then fails on the first real request, which is a worse
+failure than not starting at all.
 
 ### 6.2 One-command run
 
@@ -612,21 +666,31 @@ Output → [`verify_metrics.json`](artifacts/metrics/verify_metrics.json) ·
 | `./scripts/test_offline.sh` · `make test-offline` | Guardrails with the LLM pointed at a dead port — **offline proof** |
 | `python -m muleguard.cli.release_gate` | 23 ML release blockers (leakage, split overlap, metric trace, determinism, …) |
 | `python -m muleguard.cli.qa_harness all` | All 10 live QA suites → `artifacts/testing/*.json` |
+| `python -m muleguard.cli.usp_baseline --check` | **Zero-regression proof** — 400 accounts re-scored, every probability/tier/metric diffed against the frozen pre-change baseline. Exit code *is* the verdict |
+| `python -m muleguard.cli.cohort_evidence` | Cohort Radar retrieval evaluation + leakage (11), determinism (3) and fairness audits → `artifacts/testing/cohort_radar_*.json` |
 
 ### 8.3 Current status — stated exactly as the artifacts report it
 
 | Check | Result | Evidence |
 |---|---|---|
-| **Metric verification** | ✅ **10/10 PASS** (2026-08-14) | [`verify_metrics.json`](artifacts/metrics/verify_metrics.json) |
+| **Metric verification** | ✅ **10/10 PASS** (2026-08-23) | [`verify_metrics.json`](artifacts/metrics/verify_metrics.json) |
 | **Organiser dry run** | ✅ **11/11 variants**, incl. 2 malformed payloads that must be *refused* | [`ORGANISER_DRY_RUN.md`](docs/ORGANISER_DRY_RUN.md) |
-| **ML release gate** | ⚠️ **22/23** — 22 blockers CLEAR, `tests_pass` reported 1 failure in the last recorded full run | [`FINAL_RELEASE_GATE.md`](docs/FINAL_RELEASE_GATE.md) |
+| **ML release gate** | ✅ **23/23 PASS** (2026-08-23) — all blockers CLEAR, `tests_pass` **799 passed** | [`FINAL_RELEASE_GATE.md`](docs/FINAL_RELEASE_GATE.md) |
+| **Zero-regression proof** | ✅ max absolute probability difference **0.0** over 400 accounts, tolerance `1e-12` | [`usp_accuracy_regression.json`](artifacts/testing/usp_accuracy_regression.json) |
 
-> The release-gate row is amber on purpose. The last recorded full-suite run
-> (2026-08-13) shows every substantive blocker CLEAR — leakage, split overlap,
-> single-touch, determinism, LLM isolation, no-auto-freeze, OOD routing, raw-data
-> integrity — with one failing test inside `tests_pass`. **A green badge over an
-> amber artifact is exactly the failure mode this project exists to avoid**, so the
-> badge reads what the document reads until a clean full run replaces it.
+> This row was amber for most of the project's life: the gate reported 22/23
+> with one failure inside `tests_pass`, and **a green badge over an amber artifact
+> is exactly the failure mode this project exists to avoid**, so the badge read
+> what the document read. It is green now because a clean full run replaced it,
+> not because the threshold moved.
+>
+> One finding from that run is worth recording rather than quietly fixing. The
+> live QA harness checks `dev_server_serves_html`, and it had been failing on
+> every run — because `scripts/release_test.sh` started only the backend, so
+> nothing was serving `:5173` for the check to reach. The check was describing
+> the harness, not the product. The script now starts the Vite dev server for
+> the duration of the harness and stops it afterwards. A check that cannot pass
+> is worse than no check, because it trains you to ignore a red line.
 
 ---
 
@@ -647,6 +711,9 @@ OpenAPI at **`/docs`**.
 | `GET /v1/metrics/summary` | Dashboard numbers **served from artifacts** — the UI can never invent a metric |
 | `GET /v1/drift/status` | PSI drift status vs frozen baseline |
 | `POST /v1/reports/{id}/generate` | Evidence packet — deterministic, or guarded-LLM narrative when Ollama is up |
+| `GET /v1/cases/{id}/cohort` | **Behaviourally similar accounts** — k neighbours with similarity band, shared features and the mandatory disclaimer. Read-only; leaves the case bit-identical |
+| `POST /v1/cohort/search` | The same lookup for an uploaded feature row, without creating a case |
+| `GET /v1/cohort/manifest` | Radar version, fingerprint hash, frozen band thresholds, forbidden-phrase list |
 
 ### 9.1 Hard guarantees
 
@@ -656,6 +723,8 @@ OpenAPI at **`/docs`**.
 | No silent imputation | Missing selected feature → **422 SCHEMA_ERROR**, never a silent zero-fill |
 | Determinism | Identical input → identical output |
 | Immutable audit | Append-only events; SQLite triggers block `UPDATE` and `DELETE` |
+| Post-model isolation | A cohort lookup cannot change `calibrated_risk`, `risk_tier` or `raw_scores` — asserted bit-identical |
+| No escalation by association | `automatic_actions_permitted` is `[]` on every response, at every risk level |
 
 ### 9.2 Merchant legitimacy safeguard — and the guarantee it nearly broke
 
@@ -858,7 +927,7 @@ describes a model that actually exists.** Written up in
 
 ## 14. Documentation Index
 
-86 reports live in [`docs/`](docs/). These are the ones that matter:
+91 reports live in [`docs/`](docs/). These are the ones that matter:
 
 ### 14.1 Results & validation
 
@@ -871,7 +940,17 @@ describes a model that actually exists.** Written up in
 | [`FINAL_ACCURACY_AND_MODEL_SELECTION_REPORT.md`](docs/FINAL_ACCURACY_AND_MODEL_SELECTION_REPORT.md) | Tournament and selection rationale |
 | [`TRINETRA_LENS_REPORT.md`](docs/TRINETRA_LENS_REPORT.md) | The three lenses in depth |
 
-### 14.2 The experiments that tested our own positions
+### 14.2 Post-model USP layers
+
+| Document | Contents |
+|---|---|
+| [`COHORT_RADAR.md`](docs/COHORT_RADAR.md) | The behavioural-similarity layer: fingerprint, bands, retrieval evaluation, and why it never touches a score |
+| [`USP_ACCURACY_REGRESSION.md`](docs/USP_ACCURACY_REGRESSION.md) | Proof the classifier is bit-identical before and after — **Δ probability = 0.000e+00** |
+| [`COHORT_RADAR_FAIRNESS_AUDIT.md`](docs/COHORT_RADAR_FAIRNESS_AUDIT.md) | Cohorts group by behaviour, not by people — occupation concordance at **0.998×** chance |
+| [`ACCOUNT_CONTROL_AMBIGUITY.md`](docs/ACCOUNT_CONTROL_AMBIGUITY.md) | Why "behaves like a mule account" is never converted into "is a mule" |
+| [`USP_PRECHANGE_BASELINE.md`](docs/USP_PRECHANGE_BASELINE.md) | What was frozen before the upgrade, and why each item |
+
+### 14.3 The experiments that tested our own positions
 
 | Document | What it challenges |
 |---|---|
@@ -882,12 +961,12 @@ describes a model that actually exists.** Written up in
 | [`HISTORICAL_METRIC_RECONCILIATION.md`](docs/HISTORICAL_METRIC_RECONCILIATION.md) | Why the most flattering number in this repo was retired |
 | [`TUNING_OVERFIT_HYPOTHESIS.md`](docs/TUNING_OVERFIT_HYPOTHESIS.md) | A hypothesis of ours, tested and rejected |
 
-### 14.3 Operations & demo
+### 14.4 Operations & demo
 
 | Document | Contents |
 |---|---|
-| [`JUDGE_QA.md`](docs/JUDGE_QA.md) | 18 prepared answers |
-| [`DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) | 7-scene, 5–7 minute demo |
+| [`JUDGE_QA.md`](docs/JUDGE_QA.md) | 31 prepared answers |
+| [`DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) | 9-scene, 7–9 minute demo |
 | [`ORGANISER_DRY_RUN.md`](docs/ORGANISER_DRY_RUN.md) | 11 input variants, incl. 2 malformed payloads that must be refused |
 | [`MODEL_CARD.md`](docs/MODEL_CARD.md) | The model card |
 | [`DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md) | Production deployment |

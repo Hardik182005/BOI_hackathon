@@ -6,8 +6,13 @@
 [run]   Backend:    http://127.0.0.1:8001
 [run]   API docs:   http://127.0.0.1:8001/docs
 [run]   Health:     http://127.0.0.1:8001/health/ready
-[run]   Model:      catboost_tuned_top60 v1.0.0
+[run]   Model:      xgboost_top_120 v2.0.0
 [run]   Local LLM:  llama3.2:3b  (scoring never depends on it)
 [run]   Logs:       logs/backend.log  logs/frontend.log
 [run] Press Ctrl+C to stop all services.
 [run] -------------------------------------------------------------
+[verify] bash run.sh - live endpoint checks against the running stack
+[verify] frontend  :5173  HTTP 200
+[verify] health    /health/ready  {"status":"ready","model_version":"2.0.0","winner":"xgboost_top_120","ollama_model":"llama3.2:3b","ollama_required":false}
+[verify] cohort    /v1/cohort/manifest  {"generated_utc":"2026-08-23T09:13:17.074269+00:00","radar_version":"1.0","git":{"branch":"main","commit_sha":"33ac429d422b297db7b0a4b0bf184544828e64c1","is_dirty":"yes"},"transform_path":"artifacts/m
+[verify] recorded 2026-08-23T10:59:50Z

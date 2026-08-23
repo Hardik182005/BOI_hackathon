@@ -156,6 +156,95 @@ timestamps, actor identity, model version and correlation id;
 `audit_events` is append-only (SQLite triggers block UPDATE/DELETE). Evidence
 packets bundle the score, reasons, uncertainty, actions and limitations.
 
+## Cohort Radar and the Account-Control Guardrail
+
+**You show a cohort of similar accounts. Isn't that a mule ring?**
+No, and we will not call it one. Behavioural similarity has innocent
+generators - the same salary cycle, the same merchant category, the same
+product, the same month-end. What we can say is that these accounts behave
+unusually similarly. Who owns them, who operates them and whether they are
+connected is not in this dataset. The panel says so in a mandatory disclaimer,
+and the forbidden phrasings ("criminal network", "same handler", "connected
+mule ring", "controlled by the same person") are enumerated in
+`artifacts/models/cohort_radar_manifest.json` and asserted absent by tests.
+
+**Does cohort membership raise the risk score?**
+No. Zero effect, and it is measured rather than asserted: 400 accounts
+re-scored end-to-end before and after the feature exists give
+**max |delta probability| = 0.000e+00** against a `1e-12` tolerance, zero tier
+changes, zero policy-action changes, and all 20 published metrics identical.
+See `docs/USP_ACCURACY_REGRESSION.md`; reproduce with
+`python -m muleguard.cli.usp_baseline --check`, where the exit code is the
+verdict.
+
+**Why not blend them? `0.8 * model + 0.2 * cohort` would score better.**
+Three reasons. It destroys the calibration - our probabilities are Platt-
+calibrated at Brier 0.0031 and ECE 0.0015, and a blend produces a number that
+is no longer a probability of anything while still being displayed as a
+percentage. It is circular - neighbours are found using the model's own input
+features, so blending re-counts the same evidence and calls the second count
+corroboration. And it escalates by association - a legitimate high-volume
+merchant that resembles a suspicious account would gain risk *because of who
+it resembles*, which is the one mechanism a fraud system must never have.
+
+**Does the Cohort Radar work?**
+For a known mule account, 6.8 of its top 10 behavioural neighbours are also
+mule accounts - a **77.5x lift** over the 0.88% base rate, with Hit@10 = 0.94.
+For a legitimate account the same lookup returns 0.22 positives in 10.
+Evaluated outer-fold-safe on the model's own nested-CV fold map, with the
+similarity transform refit per fold on training rows only and labels read only
+after the neighbours are fixed. Source:
+`artifacts/metrics/cohort_radar_retrieval.json`. The qualifier matters:
+**this is a retrieval-quality diagnostic, not classifier accuracy**, and it
+does not prove common ownership.
+
+**Could a judge's uploaded labels leak into the cohort results?**
+No, and we test it adversarially rather than structurally. Setting `F3924 = 1`
+on the query row leaves the ranking unchanged. Setting all 11 named forbidden
+columns to an extreme value leaves the ranking unchanged. Label-shaped keys
+added to an uploaded row are ignored entirely. The frozen weights and scaling
+statistics are byte-identical after an adversarial query. 11/11 checks in
+`artifacts/testing/cohort_radar_leakage.json`, release-blocking.
+
+**Do the cohorts just group people by age, occupation or locality?**
+Measured, not assumed. Cohort neighbours agree on **occupation 0.998x** as
+often as two random accounts - literally at chance. Area, age-decade and gender
+land between 1.09x and 1.12x, which is a behavioural correlation and not a
+matching effect, because none of those fields is in the fingerprint at all.
+Behavioural features carry **94.04%** of the similarity weight; the only
+profile feature is product name at 0.05%. Full method:
+`docs/COHORT_RADAR_FAIRNESS_AUDIT.md`.
+
+**Why does the system refuse to say whether someone is a mule?**
+Because it cannot know. Three different questions: how unusual the behaviour
+is (our classifier answers this), who operated the account (device, SIM,
+credential and KYC history would - we have none), and whether the holder knew
+(an interview would). We report `ASSESSED`, `NOT_AVAILABLE` and `UNKNOWN`
+respectively. A large share of Indian mule accounts belong to students and gig
+workers who were tricked or paid; the activity is real and the culpability is a
+separate finding. The system will never emit "witting mule", "criminal",
+"victim" or "handler", and will never automatically FREEZE, FILE_STR,
+DECLARE_MULE or CERTIFY_CLEAN. `automatic_actions_permitted` is `[]` on every
+card at every risk level.
+
+**Where is the transaction graph?**
+There isn't one, and that is a data fact rather than a design choice. A
+transaction graph needs sender/receiver pairs; this dataset is account-level
+aggregates. We have two graphs: the **ProofGraph** (one account, edges mean
+"this evidence raised this decision") and the **Cohort Radar** (many accounts,
+edges mean "these two behave similarly", labelled `BEHAVIORALLY_SIMILAR_TO`).
+No directional arrows are drawn anywhere, because an arrow implies money
+movement we cannot evidence.
+
+**Is any of this a neural network, a vector DB or a GNN?**
+No. The retrieval is a weighted Gower distance over 120 columns computed with
+NumPy - no FAISS, no embedding model, no Neo4j, no GNN. That is sufficient at
+this portfolio size and, more importantly, inspectable: we can show an
+investigator *which features* drove a match, which no learned embedding would
+allow.
+
+---
+
 **What is implemented versus roadmap?**
 Implemented: everything in `docs/FINAL_RESULTS.md` and the release gate.
 Roadmap (stated, not claimed): counterparty graph layer, federated/DPIP

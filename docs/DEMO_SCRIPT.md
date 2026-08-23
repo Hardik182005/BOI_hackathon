@@ -1,8 +1,12 @@
-# Demo Script (5–7 minutes)
+# Demo Script (7–9 minutes)
 
 Preparation: API on :8001, dashboard on :5173, `muleguard.cli.demo --via-api`
 already run (populates the queue with the five scenario cases), Ollama
 running with any preferred model (optional — Scene 6 kills it live).
+
+Scenes 7 and 8 are the post-model USP layers. If time is short, cut Scene 5 or
+the hallucination sub-step of Scene 6 — not Scene 8: the refusal to infer intent
+is the part of this system that most needs saying out loud.
 
 All numbers spoken must be read from the screen (they come from
 `artifacts/metrics/`), never from memory.
@@ -66,7 +70,52 @@ All numbers spoken must be read from the screen (they come from
    (`demo_scenarios.json`): invented ₹ amount, guilt claim, tier change —
    all rejected with reasons; fallback used.
 
-## Scene 7 — Bank impact (Executive Overview)  ~45 s
+## Scene 7 — Cohort Radar: is this account one, or one of forty?  ~60 s
+
+On the same high-risk case, open the **Behaviourally similar accounts** panel.
+
+1. Ten neighbours appear, each with a similarity band and **the features that
+   actually drove the match** — say one out loud from the screen (they are
+   amount, velocity and rail features, never demographics).
+2. Read the panel disclaimer aloud, verbatim. It is the point of the scene:
+
+   > "Behavioural similarity is not proof of a shared owner, handler, or
+   > criminal network."
+
+3. "There are no arrows on this panel. A transaction graph needs sender and
+   receiver pairs; this dataset is account-level aggregates and doesn't have
+   them. So we don't draw one, and we don't imply one."
+4. Point at the neighbours' own risk tiers — **unchanged**. "Being in this
+   cohort did not raise anyone's score. Not by a little. The probabilities are
+   identical to twelve decimal places before and after this panel exists —
+   `docs/USP_ACCURACY_REGRESSION.md`, and the measured difference is zero."
+
+If a judge asks *"does it work?"*: for a known mule account, 6.8 of the top 10
+behavioural neighbours are also mule accounts — a **77× lift** over the 0.88 %
+base rate. For a legitimate account the same lookup returns 0.22 in 10. Read it
+from `artifacts/metrics/cohort_radar_retrieval.json`. Say the qualifier too:
+**this is a retrieval diagnostic, not classifier accuracy.**
+
+## Scene 8 — What we refuse to conclude (Account-Control card)  ~45 s
+
+Scroll to the **Account control and intent** card under the ProofGraph.
+
+1. Three rows: behavioural mule risk `ASSESSED` · account-control evidence
+   `NOT_AVAILABLE` · intent attribution `UNKNOWN`.
+2. "Our model can tell you this account behaves like a mule account. It cannot
+   tell you who was operating it, or whether the person whose name is on it
+   knew. In India a large share of mule accounts belong to students and gig
+   workers who were tricked or paid. The activity is real; the culpability is a
+   separate finding, and an investigator makes it — not a gradient-boosted tree."
+3. Show the seven-item verification checklist — device history, SIM change,
+   credential resets, KYC changes, counterparties, customer interview, raw
+   trail — all marked `NOT_IN_THIS_DATASET`. "This is what to go and get. We are
+   not pretending we already have it."
+4. "This card connects to the decision by `REQUIRES_HUMAN_VERIFICATION`, with
+   weight zero. Never by `RAISED_BY` — an edge pointing the other way would make
+   a limitation look like evidence."
+
+## Scene 9 — Bank impact (Executive Overview)  ~45 s
 
 - Recall at top-25/50/100 alert budgets, read from the **out-of-fold**
   numbers in `artifacts/metrics/lens_stack_oof_v2.json` (0.391 / 0.688 /
