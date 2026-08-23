@@ -43,6 +43,8 @@ from typing import Any, Sequence
 import numpy as np
 
 from muleguard.logging import get_logger
+from muleguard.usp.control_attribution import (
+    RELATION as CONTROL_RELATION, control_attribution, proofgraph_node)
 
 log = get_logger("explain.proofgraph")
 
@@ -59,6 +61,7 @@ NODE_UNCERTAINTY = "UNCERTAINTY"
 NODE_COUNTERFACTUAL = "COUNTERFACTUAL"
 NODE_TWIN = "COUNTERFACTUAL_TWIN"
 NODE_DECISION = "DECISION"
+NODE_CONTROL = "CONTROL_ATTRIBUTION"
 
 # Terms the system must never emit. A behavioural model ranks accounts for
 # human review; it does not establish criminality and cannot certify innocence.
@@ -534,6 +537,22 @@ def build_proofgraph(
     ))
     edges.append(Edge("account", "decision", "RESULTS_IN", risk))
 
+    # Account-control ambiguity (section 22). The edge runs decision ->
+    # limitation by REQUIRES_HUMAN_VERIFICATION, not account -> limitation by
+    # RAISED_BY: this node is not evidence that raised the score, it is a
+    # condition on acting on the decision. It carries weight 0.0 and is excluded
+    # from the courtroom tallies, so it cannot move a probability or a tier.
+    control_card = control_attribution(
+        risk_probability=risk, risk_tier=str(tier))
+    control_node = proofgraph_node(control_card)
+    nodes.append(Node(
+        id=control_node["id"], type=control_node["type"],
+        label=control_node["label"], source=control_node["source"],
+        detail=control_node["detail"], weight=0.0,
+        value=control_node["value"], extra=control_node["extra"]))
+    edges.append(Edge("decision", control_node["id"],
+                      CONTROL_RELATION, 0.0))
+
     graph = {
         "generated_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
         "account_reference": account_reference,
@@ -549,6 +568,7 @@ def build_proofgraph(
             "defence": len(against_nodes) + len(struct_against),
             "uncertainty": len(struct_doubt),
         },
+        "control_attribution": control_card,
         "provenance_statement": (
             "Every node in this graph is derived from a named dataset column or "
             "a named pipeline metric. No relationship, counterparty or value "

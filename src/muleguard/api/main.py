@@ -40,6 +40,7 @@ from muleguard.api import database as db
 from muleguard.llm.ollama_client import OllamaNarrator
 from muleguard.llm.schemas import NarratorInput, ReasonFact
 from muleguard.logging import get_logger
+from muleguard.usp.control_attribution import control_attribution
 from muleguard.models.scoring import SchemaError, load_bundle, score_rows
 from muleguard.utils import load_json
 
@@ -59,6 +60,7 @@ app.add_middleware(
 )
 
 from muleguard.api.routes_capacity import router as capacity_router  # noqa: E402
+from muleguard.api.routes_cohort import router as cohort_router  # noqa: E402
 from muleguard.api.routes_graph import router as graph_router  # noqa: E402
 from muleguard.api.routes_proofgraph import router as proofgraph_router  # noqa: E402
 from muleguard.api.routes_upload import router as upload_router  # noqa: E402
@@ -69,6 +71,7 @@ app.include_router(proofgraph_router)
 app.include_router(validation_router)
 app.include_router(graph_router)
 app.include_router(capacity_router)
+app.include_router(cohort_router)
 
 
 @app.post("/v1/validate/upload", tags=["validation"])
@@ -232,6 +235,25 @@ def _validate_ref(ref: str) -> str:
     return ref
 
 
+def _persist_fingerprint(request_id: str, account_reference: str,
+                         features: dict[str, Any]) -> None:
+    """Keep the admitted feature values so a cohort lookup can be answered later.
+
+    Best-effort by design. The score has already been recorded and returned by
+    the time this runs; a retrieval layer being unavailable is not a reason for
+    a scoring request to fail, so every failure here is logged and swallowed.
+    """
+    try:
+        from muleguard.usp import cohort_radar
+        enriched = cohort_radar.with_derived_meta(features)
+        wanted = (cohort_radar.fingerprint_features()
+                  + cohort_radar.pattern_feature_names())
+        kept = {k: enriched[k] for k in dict.fromkeys(wanted) if k in enriched}
+        db.record_fingerprint(request_id, account_reference, kept)
+    except Exception as exc:                                  # noqa: BLE001
+        log.warning("fingerprint not stored for %s: %s", request_id, exc)
+
+
 def _score_one(req: ScoreRequest, correlation_id: str) -> dict[str, Any]:
     _validate_ref(req.account_reference)
     if settings.TARGET_COLUMN in req.features:
@@ -246,6 +268,7 @@ def _score_one(req: ScoreRequest, correlation_id: str) -> dict[str, Any]:
     request_id, score_id, case_id = db.record_score(
         req.account_reference, result, correlation_id
     )
+    _persist_fingerprint(request_id, req.account_reference, req.features)
     return {
         "request_id": request_id,
         "correlation_id": correlation_id,
@@ -342,11 +365,17 @@ def case_detail(case_id: str) -> dict:
             "SELECT * FROM case_actions WHERE case_id=? ORDER BY id", (case_id,))]
         feedback = [dict(r) for r in c.execute(
             "SELECT * FROM analyst_feedback WHERE case_id=? ORDER BY id", (case_id,))]
+    # Section 21. Derived from the tier the policy already set - it reads the
+    # decision and adds nothing to it.
+    control = control_attribution(
+        risk_probability=float(case["calibrated_risk"]),
+        risk_tier=str(case["risk_tier"]))
     return {
         "case": dict(case),
         "score": json.loads(score["payload_json"]) if score else None,
         "actions": actions,
         "feedback": feedback,
+        "control_attribution": control,
     }
 
 

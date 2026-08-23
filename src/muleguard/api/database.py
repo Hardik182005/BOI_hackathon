@@ -8,6 +8,7 @@ PostgreSQL support = swap the connection string via MULEGUARD_DB env var
 from __future__ import annotations
 
 import datetime as dt
+import hashlib
 import json
 import os
 import sqlite3
@@ -50,6 +51,13 @@ CREATE TABLE IF NOT EXISTS scores (
     ood_status TEXT,
     anomaly_percentile REAL,
     payload_json TEXT NOT NULL,
+    created_utc TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS score_fingerprints (
+    request_id TEXT PRIMARY KEY REFERENCES scoring_requests(request_id),
+    account_reference TEXT NOT NULL,
+    feature_hash TEXT NOT NULL,
+    features_json TEXT NOT NULL,
     created_utc TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS cases (
@@ -190,3 +198,42 @@ def record_score(account_reference: str, result: dict[str, Any],
                  "risk": result["calibrated_risk"], "case_id": case_id},
           model_version=result["model_version"])
     return request_id, score_id, case_id
+
+
+def record_fingerprint(request_id: str, account_reference: str,
+                       features: dict[str, Any]) -> None:
+    """Store the cohort fingerprint of a scored request.
+
+    Separate from :func:`record_score` on purpose. Scoring is the frozen path;
+    it does not gain a write, a dependency or a failure mode because a
+    post-model retrieval layer would like to look something up later. Nothing
+    here is read back by the classifier.
+
+    Only the champion's own fingerprint columns are kept - the values that
+    already passed the leakage firewall to become model inputs. The target and
+    every quarantined column are dropped rather than stored, so the table cannot
+    become a back door to a field the firewall excluded.
+    """
+    if not features:
+        return
+    payload = json.dumps(features, sort_keys=True, default=str)
+    digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+    with connect() as c:
+        c.execute(
+            "INSERT OR REPLACE INTO score_fingerprints (request_id,"
+            " account_reference, feature_hash, features_json, created_utc)"
+            " VALUES (?,?,?,?,?)",
+            (request_id, account_reference, digest, payload, utcnow()),
+        )
+
+
+def fingerprint_for_case(case_id: str) -> dict[str, Any] | None:
+    """The stored fingerprint behind a case, or None if it predates the table."""
+    with connect() as c:
+        row = c.execute(
+            "SELECT f.features_json FROM score_fingerprints f"
+            " JOIN scores s ON s.request_id = f.request_id"
+            " JOIN cases k ON k.score_id = s.id WHERE k.case_id = ?",
+            (case_id,),
+        ).fetchone()
+    return json.loads(row["features_json"]) if row else None

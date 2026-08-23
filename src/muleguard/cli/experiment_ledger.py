@@ -550,6 +550,30 @@ def _mirror(origin: str, what: str) -> Callable[[Any], list[Row]]:
     return fn
 
 
+def _cohort_retrieval(d: Any) -> list[Row]:
+    """The Cohort Radar's outer-fold-safe retrieval diagnostic.
+
+    Registered as DIAGNOSTIC and never as an accuracy result. The number is a
+    property of a *retrieval layer* - how often a behaviourally similar account
+    shares the query's label - and the layer cannot reach the classifier. Filing
+    it beside the model rows would invite exactly the misreading the spec
+    forbids, so the reason column says what it is not.
+    """
+    pooled = (d or {}).get("pooled", {}).get("positive", {})
+    return [{
+        "model": "cohort radar 1.0 (retrieval, post-model)",
+        "feature_set": "120 champion features, SHAP-weighted Gower",
+        "cv_scheme": "outer-fold-safe: similarity fitted on outer-training rows "
+                     "only, queries from outer-validation rows only",
+        "primary_metric": "lift@10 over base prevalence (positive queries)",
+        "metric_value": pooled.get("lift_at_10"),
+        "status": "DIAGNOSTIC",
+        "reason": "retrieval quality of a post-model similarity layer, not "
+                  "classifier accuracy and not evidence of common ownership; "
+                  "changes no probability, tier or threshold",
+    }]
+
+
 def _none(reason: str) -> Callable[[Any], list[Row]]:
     """A file that is not an experiment - claimed, with the reason recorded."""
     def fn(_: Any) -> list[Row]:
@@ -622,6 +646,10 @@ SOURCES: list[Source] = [
     Source(f"{M}/tabpfn_latency.json",
            _none("operational timing measurement, not a model comparison"),
            kind="NOT_AN_EXPERIMENT"),
+    Source(f"{M}/cohort_radar_performance.json",
+           _none("operational timing of the similarity index (build, query p50/"
+                 "p95, explanation overhead), not a model comparison"),
+           kind="NOT_AN_EXPERIMENT"),
     Source(f"{M}/final_accuracy_table.json",
            _none("section 55's presentation of results already recorded here; "
                  "it re-derives 27 columns from the saved OOF predictions and "
@@ -632,6 +660,7 @@ SOURCES: list[Source] = [
                  "agree with the predictions behind them. A pass is evidence "
                  "about the ledger, not a new entry in it"),
            kind="NOT_AN_EXPERIMENT"),
+    Source(f"{M}/cohort_radar_retrieval.json", _cohort_retrieval),
     Source(f"{M}/global_shap_importance.json", _global_shap),
     Source(f"{M}/tuning_overfit_test.json", _tuning_overfit),
     Source(f"{M}/nested_promotion_decision.json",
