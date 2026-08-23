@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-08-13T17:49:47.271953+00:00",
+  "generated_utc": "2026-08-23T11:13:07.559885+00:00",
   "backend": "http://127.0.0.1:8001",
   "n_checks": 7,
   "n_passed": 7,
@@ -8,12 +8,12 @@
     {
       "check": "p50_under_2s",
       "passed": true,
-      "detail": "p50=0.466s"
+      "detail": "p50=0.689s"
     },
     {
       "check": "p95_under_5s",
       "passed": true,
-      "detail": "p95=0.558s"
+      "detail": "p95=0.876s"
     },
     {
       "check": "concurrent_5_all_200",
@@ -38,13 +38,13 @@
     {
       "check": "memory_headroom",
       "passed": true,
-      "detail": "1.4 GB free (optional local LLM may hold several GB; scoring itself needs <1 GB and is unaffected)"
+      "detail": "1.7 GB free (optional local LLM may hold several GB; scoring itself needs <1 GB and is unaffected)"
     }
   ],
   "latency_seconds": {
-    "p50": 0.4661517000058666,
-    "p95": 0.5583929000422359,
-    "mean": 0.47845769999936844,
+    "p50": 0.689428900135681,
+    "p95": 0.876412799814716,
+    "mean": 0.7164616666423778,
     "n": 15
   },
   "batch_rows_per_second_locked_test": 687.7,
