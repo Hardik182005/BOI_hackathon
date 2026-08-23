@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, fmtNum } from "../api";
 import { Empty, ErrorState, Loading, TierBadge, usePoll } from "../components";
+import CohortPanel from "../CohortPanel";
 
 // Graph Lab. The transaction-graph adapter takes an OPTIONAL edge file. This
 // page does not assume one exists: it asks the running backend which routes it
@@ -12,7 +13,7 @@ import { Empty, ErrorState, Loading, TierBadge, usePoll } from "../components";
 const EDGE_REQUIREMENTS = ["sender", "receiver", "amount", "timestamp"];
 
 export default function GraphLab() {
-  const [tab, setTab] = useState<"evidence" | "transaction">("transaction");
+  const [tab, setTab] = useState<"evidence" | "transaction" | "cohort">("transaction");
   const spec = usePoll(() => api.openapi(), []);
   const cases = usePoll(() => api.cases("?limit=25"), []);
 
@@ -38,10 +39,16 @@ export default function GraphLab() {
                 onClick={() => setTab("evidence")}>
           ProofGraph (evidence graph)
         </button>
+        <button className={tab === "cohort" ? "active" : ""}
+                onClick={() => setTab("cohort")}>
+          Behavioural Cohort Radar
+        </button>
       </div>
 
       {tab === "transaction" ? (
         <TransactionTab spec={spec} graphRoutes={graphRoutes} />
+      ) : tab === "cohort" ? (
+        <CohortTab cases={cases} />
       ) : (
         <EvidenceTab cases={cases} proofRoutes={proofRoutes} />
       )}
@@ -357,6 +364,48 @@ function EvidenceTab({ cases, proofRoutes }: { cases: any; proofRoutes: string[]
           </table>
         )}
       </div>
+    </>
+  );
+}
+
+// Behavioural Cohort Radar. The third graph on this page, and the only one of
+// the three whose edges the dataset actually supports: not who paid whom, but
+// which accounts behave unusually alike. The edge label says exactly that and
+// nothing more.
+function CohortTab({ cases }: { cases: any }) {
+  const [selected, setSelected] = useState<string>("");
+  const rows: any[] = cases.data?.cases ?? [];
+
+  return (
+    <>
+      <div className="card">
+        <h3>Pick a case</h3>
+        <p className="stat-sub">
+          The radar retrieves behaviourally similar accounts from a frozen
+          development-only reference partition. It does not score, re-score or
+          re-rank anything — the risk shown against each neighbour is the one
+          the classifier already produced.
+        </p>
+        {cases.loading ? <Loading what="cases" /> : rows.length === 0 ? (
+          <Empty msg="No cases yet — score an account first." />
+        ) : (
+          <select value={selected} onChange={(e) => setSelected(e.target.value)}
+                  style={{ minWidth: 320 }}>
+            <option value="">— select a case —</option>
+            {rows.map((c: any) => (
+              <option key={c.case_id} value={c.case_id}>
+                {c.case_id} · {c.risk_tier} · {fmtNum(c.calibrated_risk)}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+
+      {selected && (
+        <div style={{ marginTop: 14 }}>
+          <CohortPanel caseId={selected} title="Behaviourally similar accounts" />
+        </div>
+      )}
     </>
   );
 }
