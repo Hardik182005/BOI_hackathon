@@ -1,0 +1,58 @@
+# Trinetra Mule-Farm Cohort Radar - post-model retrieval, never a classifier input.
+#
+# This layer answers one question: "which other accounts in this portfolio behave
+# unusually similarly to the one I am looking at?" It reads a score that has
+# already been produced and never feeds anything back. Nothing in this file can
+# change a risk probability, a tier, a threshold or a calibration constant.
+radar_version: "1.0"
+
+fingerprint:
+  # The fingerprint reuses the champion's own selected feature list. Those 120
+  # columns already passed the leakage firewall to become model inputs, and
+  # reusing them means the radar cannot see anything the classifier could not.
+  # They are re-checked through firewall.assert_clean() at build and query time
+  # anyway: "it was admitted once" is a claim, and the firewall is the check.
+  source: champion_selected_features
+  include_meta_features: true    # the MG_* domain features already inside that list
+
+weights:
+  # Section 10 order: global SHAP first, stability selection second, equal last.
+  # SHAP ranks only the top 30 of the 120, holding 47.14% of total |SHAP| mass,
+  # so it fixes those 30 weights and the size of the remaining tail; the tail is
+  # split across the other 90 by their stability-selection gain share. No weight
+  # here is hand-chosen.
+  primary: global_shap_importance
+  tail: selection_frequency_gain_share
+  fallback: equal
+
+similarity:
+  # Weighted Gower over mixed and missing data. Numeric scale is 4*IQR from the
+  # development partition; a feature whose IQR is degenerate falls back to the
+  # documented training range rather than to an invented constant.
+  numeric_scale_iqr_multiplier: 4.0
+  epsilon: 1.0e-12
+  clip_quantiles: [0.01, 0.99]
+
+null_distribution:
+  # Empirical null used to turn a raw similarity into a percentile. Sampled from
+  # random development pairs WITHOUT reading any label - see docs/COHORT_RADAR.md.
+  n_pairs: 200000
+  seed: 42
+
+bands:
+  # Percentiles of the null, not hardcoded similarity values. The numbers the
+  # radar actually uses are the empirical similarities at these percentiles and
+  # are frozen into artifacts/models/cohort_radar_manifest.json.
+  very_high: 99.5
+  high: 99.0
+  moderate: 95.0
+
+neighbors:
+  default_k: 10
+  max_k: 25
+  mutual_knn_k: 10        # section 13: an edge needs agreement in both directions
+
+# Section 27: the experimental path that would let cohort structure reach the
+# classifier. It does not exist as a code path; this flag is the switch that
+# would have to be turned on first, and it stays off.
+EXPERIMENTAL_COHORT_FEATURES: false
