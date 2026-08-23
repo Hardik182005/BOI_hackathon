@@ -58,6 +58,10 @@ artifacts/models/*.joblib
 # and verified against their registry SHA-256 at gate time.
 !artifacts/models/final_bundle.joblib
 !artifacts/models/merchant_verifier.joblib
+# The Cohort Radar transform is 89 KB and is a frozen artifact: rebuilding it
+# on a fresh clone would refit the similarity scaling, so the committed file
+# is what the manifest hash and the leakage audit actually refer to.
+!artifacts/models/cohort_radar_transform.joblib
 artifacts/tabpfn_cache/
 artifacts/predictions/
 
@@ -85,3 +89,12 @@ MuleGuard_Trinetra_Master_Claude_Code_Prompt.md
 MuleGuard_Trinetra_PS2_Submission.pdf
 updates.md
 updates1.md
+
+# Excel lock files
+~$*.xlsx
+~$*.xls
+
+# Transient boot logs the release suite writes while it stands the backend and
+# the Vite dev server up for the live QA harness.
+artifacts/testing/harness_backend_start.log
+artifacts/testing/harness_frontend_start.log
