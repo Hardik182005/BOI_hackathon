@@ -1,0 +1,132 @@
+{
+  "generated_utc": "2026-08-23T09:56:55.859167+00:00",
+  "git": {
+    "branch": "main",
+    "commit_sha": "33ac429d422b297db7b0a4b0bf184544828e64c1",
+    "is_dirty": "yes"
+  },
+  "radar_version": "1.0",
+  "n_fingerprint_features": 120,
+  "firewall_policy_version": "2.0",
+  "checks": [
+    {
+      "check": "target_never_in_fingerprint",
+      "status": "PASS",
+      "detail": "F3924 is not one of the 120 fingerprint features",
+      "target_column": "F3924"
+    },
+    {
+      "check": "no_quarantined_feature_in_fingerprint",
+      "status": "PASS",
+      "detail": "the live firewall quarantines 13 columns; 0 of them are in the fingerprint",
+      "policy_version": "2.0",
+      "n_quarantined": 13,
+      "offenders": []
+    },
+    {
+      "check": "no_named_forbidden_column",
+      "status": "PASS",
+      "detail": "the columns section 4 names explicitly are absent from the fingerprint",
+      "columns_checked": [
+        "F3924",
+        "F3912",
+        "F3913",
+        "F3914",
+        "F3915",
+        "F3916",
+        "F3917",
+        "F3918",
+        "F3898",
+        "F3899",
+        "F2230"
+      ],
+      "offenders": []
+    },
+    {
+      "check": "no_sensitive_or_fairness_excluded_field",
+      "status": "PASS",
+      "detail": "none of the 1 fairness-excluded attributes contributes to similarity",
+      "fairness_excluded": [
+        "F3892"
+      ]
+    },
+    {
+      "check": "fingerprint_matches_the_live_firewall_policy",
+      "status": "PASS",
+      "detail": "the quarantine hash recorded at fit time still matches the live one",
+      "quarantine_hash_at_fit": "877858d2c8cbe6d9d91d033a2654fcbba65475aa333a759c41ee7e55f2c4e764",
+      "quarantine_hash_now": "877858d2c8cbe6d9d91d033a2654fcbba65475aa333a759c41ee7e55f2c4e764"
+    },
+    {
+      "check": "transform_fitted_on_development_rows_only",
+      "status": "PASS",
+      "detail": "the reference partition holds 7264 rows and shares none of the 1818 locked-test rows",
+      "n_reference_rows": 7264,
+      "n_locked_test_rows": 1818
+    },
+    {
+      "check": "null_distribution_carries_no_label",
+      "status": "PASS",
+      "detail": "the empirical null was built from unlabelled random pairs",
+      "n_null_pairs": 199971
+    },
+    {
+      "check": "uploaded_target_does_not_change_retrieval",
+      "status": "PASS",
+      "detail": "setting F3924=1 on the query leaves the ranking unchanged, because the fingerprint never reads it",
+      "neighbors": [
+        "RV-0",
+        "RV-253",
+        "RV-1289",
+        "RV-375",
+        "RV-8300",
+        "RV-1305",
+        "RV-1560",
+        "RV-2351",
+        "RV-1365",
+        "RV-3310"
+      ]
+    },
+    {
+      "check": "forbidden_columns_cannot_move_retrieval",
+      "status": "PASS",
+      "detail": "setting 11 forbidden columns to an extreme value leaves the ranking unchanged",
+      "columns_changed": [
+        "F3924",
+        "F3912",
+        "F3913",
+        "F3914",
+        "F3915",
+        "F3916",
+        "F3917",
+        "F3918",
+        "F3898",
+        "F3899",
+        "F2230"
+      ]
+    },
+    {
+      "check": "judge_supplied_labels_are_inert",
+      "status": "PASS",
+      "detail": "label-shaped keys added to an uploaded row are ignored entirely",
+      "keys_added": [
+        "label",
+        "is_mule",
+        "judge_label",
+        "y_true"
+      ]
+    },
+    {
+      "check": "a_query_cannot_modify_the_frozen_transform",
+      "status": "PASS",
+      "detail": "the weights and scaling statistics are byte-identical after scoring an adversarial query",
+      "weights_hash": "ada180a46d42974b8eae6bffe5522cde2b1fe3af5baa98a20e0ec1e602d01a44",
+      "scaling_hash": "b154026e7b3b66716d18da469b8130bcba7c71e078118c994782930d8bdfd89f"
+    }
+  ],
+  "n_checks": 11,
+  "n_failed": 0,
+  "failed": [],
+  "verdict": "PASS",
+  "release_blocking": true
+}

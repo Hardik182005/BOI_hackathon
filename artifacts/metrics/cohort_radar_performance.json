@@ -1,0 +1,23 @@
+{
+  "n_reference_rows": 7264,
+  "n_fingerprint_features": 120,
+  "index_build_seconds": 11.444,
+  "index_memory_mb": 6.94,
+  "method": "200 seeded queries, k=10, the two arms interleaved per query so drift hits both equally",
+  "query_ms_with_explanations": {
+    "p50": 174.94,
+    "p95": 224.93,
+    "p99": 248.26,
+    "max": 268.56
+  },
+  "query_ms_similarity_only": {
+    "p50": 172.56,
+    "p95": 211.55,
+    "p99": 228.9,
+    "max": 276.79
+  },
+  "explanation_overhead_ms_p50": 2.38,
+  "batch_50_queries_ms": 8909.1,
+  "batch_per_query_ms": 178.18,
+  "backend": "numpy vectorised weighted Gower - no FAISS, no vector DB, no GNN, no Neo4j"
+}
