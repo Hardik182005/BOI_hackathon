@@ -1,8 +1,8 @@
 {
-  "generated_utc": "2026-08-23T11:20:04.352930+00:00",
+  "generated_utc": "2026-08-26T11:07:00.111339+00:00",
   "git": {
     "branch": "main",
-    "commit_sha": "7967be068fa5d10b7975751b63675cb710ff5897",
+    "commit_sha": "fcbdafc9e4bb9c08b51559cc32171ff22e7159dc",
     "is_dirty": "yes"
   },
   "verdict": "PASS",
@@ -64,7 +64,7 @@
     },
     "tests_pass": {
       "passed": true,
-      "detail": "799 passed in 354.99s (0:05:54)",
+      "detail": "816 passed in 473.95s (0:07:53)",
       "description": "full pytest suite green"
     },
     "probabilities_bounded": {
@@ -121,6 +121,11 @@
       "passed": true,
       "detail": "11/11 variants, invariance sound=True, model unchanged=True, locked-test PR-AUC 0.7262714933700882",
       "description": "the section 42 rehearsal scored every malformed export without moving the model"
+    },
+    "no_quarantined_feature_can_be_served_as_current_evidence": {
+      "passed": true,
+      "detail": "624 row(s) stamped with model_version '2.0.0' carry no quarantined column; 1 champion recorded, matching the shipped bundle's sha256; all 13 firewall columns still refused",
+      "description": "no scores row stamped with the live model_version names a quarantined column; exactly one champion is recorded and it matches the shipped bundle (U-2026-08-26 evidence incident)"
     }
   },
   "model_manifest": {
