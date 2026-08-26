@@ -3,12 +3,32 @@
     GET /v1/proofgraph/{case_id}   full graph: evidence for, against, doubt
     GET /v1/courtroom/{case_id}    just the prosecution/defence/verdict panel
     GET /v1/proofgraph/{case_id}/twin   nearest legitimate account, if indexed
+    GET /v1/proofgraph/{case_id}/provenance   what a refused case was built from
 
 Every node returned here names the artifact it came from. Nothing is generated
 by a language model: the LLM narrator reads this graph, it never writes to it.
 The endpoints run the traceability and language assertions before returning, so
 an untraceable or unsafely-worded node fails the request rather than reaching a
 reviewer's screen.
+
+Two further gates were added on 2026-08-26, after a ProofGraph was observed
+serving ``F3898 = MIN_RESOLVE_DAYS`` and ``F3914 = FALSE_POSITIVE`` as
+prosecution evidence:
+
+* **Provenance.** These routes render whatever the ``scores`` row stored, and
+  stored scores outlive the model that wrote them. 77 payloads in this database
+  were produced on 2026-07-10 by model_version 1.0.0 - a CatBoost bundle built
+  before the Feature Availability Firewall existed, whose top-60 feature list
+  included post-resolution columns. Reading a row and rendering it says nothing
+  about which model wrote it, so :func:`_provenance` compares the payload's
+  ``model_version`` against the loaded bundle's and refuses to present a
+  retired score as current evidence.
+* **Admissibility.** Independently of provenance, no quarantined column may
+  leave here on either side of the graph.
+
+Neither gate deletes anything. A refused case keeps its stored payload, and
+``/provenance`` explains in full what it was built from and why it is no longer
+admissible - the audit trail is the reason to keep it, and is not evidence.
 """
 from __future__ import annotations
 
@@ -18,8 +38,10 @@ import numpy as np
 from fastapi import APIRouter, HTTPException
 
 from muleguard.api import database as db
+from muleguard.api import evidence_guard
 from muleguard.explain import proofgraph as pg
 from muleguard.explain.pattern_cards import match_patterns
+from muleguard.features import dictionary as fd, firewall
 from muleguard.logging import get_logger
 from muleguard.models.scoring import load_bundle
 
@@ -85,6 +107,13 @@ def _twin_index() -> pg.TwinIndex | None:
     return _TWIN
 
 
+#: Re-exported so the existing route code and its tests keep one spelling of
+#: these two words. The definitions live in the guard because three routes now
+#: depend on them, not one.
+PROVENANCE_CURRENT = evidence_guard.PROVENANCE_CURRENT
+PROVENANCE_RETIRED = evidence_guard.PROVENANCE_RETIRED
+
+
 def _load_case(case_id: str) -> tuple[dict, dict]:
     with db.connect() as c:
         case = c.execute("SELECT * FROM cases WHERE case_id=?",
@@ -100,13 +129,17 @@ def _load_case(case_id: str) -> tuple[dict, dict]:
 
 def _build(case_id: str, with_twin: bool) -> dict:
     case, score = _load_case(case_id)
+    registry = _registry()
+    # Provenance first, then admissibility, both from the shared guard: a
+    # retired payload is refused whatever its columns are, and a current payload
+    # naming a quarantined column is refused whatever its provenance is.
+    prov = evidence_guard.assert_servable_as_current_evidence(
+        case_id, score, registry=registry)
     reasons = score.get("top_reasons") or []
     if not reasons:
         raise HTTPException(
             409, "this score was stored without explanations, so no evidence "
                  "graph can be built for it; rescore with explanations enabled")
-
-    registry = _registry()
 
     twin_payload = None
     if with_twin:
@@ -145,7 +178,23 @@ def _build(case_id: str, with_twin: bool) -> dict:
     )
     pg.assert_evidence_traceable(graph)
     pg.assert_language_safe(graph)
+    # Provenance says this came from the current model; admissibility says the
+    # current model's evidence is clean. Both, because they answer different
+    # questions and a regression in either one is a leak.
+    try:
+        pg.assert_evidence_admissible(graph, registry=registry)
+    except pg.InadmissibleEvidence as exc:
+        log.error("quarantined evidence blocked for case %s: %s", case_id, exc)
+        raise HTTPException(409, {
+            "error": "INADMISSIBLE_EVIDENCE",
+            "case_id": case_id,
+            **prov,
+            "message": (
+                "A quarantined feature reached this evidence graph and it was "
+                f"refused rather than shown: {exc}"),
+        }) from exc
     graph["case_id"] = case_id
+    graph["provenance"] = prov
     return graph
 
 
@@ -195,6 +244,56 @@ def courtroom(case_id: str) -> dict:
         "evidence_counts": g["evidence_counts"],
         "note": ("Prosecution and defence are drawn from the same verified "
                  "evidence graph. No language model contributed a fact here."),
+    }
+
+
+@router.get("/v1/proofgraph/{case_id}/provenance")
+def provenance(case_id: str) -> dict:
+    """What a case was scored by, and - if refused - exactly why.
+
+    Deliberately never returns a graph. A retired payload is still worth
+    keeping and still worth reading: it is the record of what the system said
+    on the day it said it, and deleting it would destroy the only trail back to
+    an incident like the one that prompted this endpoint. But an audit record
+    and current evidence are different objects, and the fastest way to
+    re-create the bug would be to let one route return both. So this returns
+    metadata plus a named list of the quarantined columns the stored
+    explanation used - enough to reconstruct what happened, in a shape no
+    reviewer can mistake for a case against an account.
+    """
+    case, score = _load_case(case_id)
+    prov = evidence_guard.provenance(score)
+    reasons = score.get("top_reasons") or []
+
+    inadmissible = []
+    for r in reasons:
+        col = r.get("feature")
+        if not col:
+            continue
+        try:
+            firewall.assert_clean([str(col)], context="provenance audit",
+                                  registry=_registry())
+        except firewall.LeakageViolation:
+            rec = fd.describe(str(col), _registry())
+            inadmissible.append({
+                "feature": col,
+                "variable_name": rec.get("variable_name"),
+                "availability_class": rec.get("availability_class"),
+            })
+
+    return {
+        "case_id": case_id,
+        "account_reference": case["account_reference"],
+        "scored_utc": score.get("scored_utc") or case["created_utc"],
+        "provenance": prov,
+        "admissible_as_current_evidence": (
+            prov["status"] == PROVENANCE_CURRENT and not inadmissible),
+        "stored_reason_count": len(reasons),
+        "quarantined_features_used": inadmissible,
+        "note": (
+            "This is an audit record of a stored score, not evidence about an "
+            "account. It is retained for provenance and is not shown as a "
+            "current finding."),
     }
 
 

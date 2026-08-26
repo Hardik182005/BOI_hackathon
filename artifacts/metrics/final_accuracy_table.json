@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-08-23T10:24:56.164481+00:00",
+  "generated_utc": "2026-08-23T13:54:45.854927+00:00",
   "spec": "section 55 - the definitive accuracy / performance table",
   "csv": "artifacts\\metrics\\final_accuracy_table.csv",
   "n_models": 32,
@@ -459,7 +459,7 @@
       "fp_per_1000_legit": 6.944,
       "brier": 0.004202,
       "ece": 0.00644,
-      "latency_ms": 466.2,
+      "latency_ms": 689.4,
       "model_size_mb": 3.465,
       "status": "CHAMPION"
     },

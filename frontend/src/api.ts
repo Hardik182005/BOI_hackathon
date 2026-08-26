@@ -3,18 +3,41 @@
 export type Json = Record<string, any>;
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  // `detail` is the raw FastAPI error body (string, for most routes, or a
+  // structured object for the ProofGraph retired/inadmissible 409s) - kept
+  // alongside the human `message` so a caller that needs the structure
+  // (error code, stored vs current model_version, ...) doesn't have to
+  // re-parse text this class already parsed once.
+  constructor(public status: number, message: string, public detail?: unknown) {
     super(message);
+  }
+}
+
+// FastAPI's `detail` is usually a plain string, but a few routes (the
+// retired-evidence 409) send an object with a `message` field for humans and
+// the rest for callers that want the structure. `String(detail)` on an
+// object renders the literal text "[object Object]"; this picks the human
+// sentence out of it instead, and falls back to the raw JSON only for an
+// object shape nobody has written a `message` for yet.
+function describeDetail(detail: unknown, fallback: string): string {
+  if (typeof detail === "string") return detail;
+  if (detail && typeof detail === "object" && typeof (detail as any).message === "string") {
+    return (detail as any).message;
+  }
+  try {
+    return detail == null ? fallback : JSON.stringify(detail);
+  } catch {
+    return fallback;
   }
 }
 
 async function unwrap(res: Response): Promise<Json> {
   if (!res.ok) {
-    let detail = res.statusText;
+    let detail: unknown = res.statusText;
     try {
       detail = (await res.json()).detail ?? detail;
     } catch { /* keep statusText */ }
-    throw new ApiError(res.status, String(detail));
+    throw new ApiError(res.status, describeDetail(detail, res.statusText), detail);
   }
   try {
     return await res.json();
@@ -50,11 +73,11 @@ async function requestText(path: string): Promise<string> {
   }
   const body = await res.text();
   if (!res.ok) {
-    let detail = res.statusText;
+    let detail: unknown = res.statusText;
     try {
       detail = JSON.parse(body).detail ?? detail;
     } catch { /* keep statusText */ }
-    throw new ApiError(res.status, String(detail));
+    throw new ApiError(res.status, describeDetail(detail, res.statusText), detail);
   }
   return body;
 }

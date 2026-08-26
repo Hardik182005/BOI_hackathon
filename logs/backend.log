@@ -1,294 +1,359 @@
-INFO:     Started server process [14744]
+INFO:     Started server process [14288]
 INFO:     Waiting for application startup.
-2026-08-23 16:41:58,752 INFO    muleguard.models.scoring | bundle loaded: winner=xgboost_top_120 sha-fp=7d1be90fe23b
-2026-08-23 16:41:58,756 INFO    muleguard.api.main | model integrity verified: final_bundle.joblib sha256=d12914de5abee99a
-2026-08-23 16:41:58,757 INFO    muleguard.api.main | startup complete, model warm
+2026-08-26 14:01:37,877 INFO    muleguard.models.scoring | bundle loaded: winner=xgboost_top_120 sha-fp=7d1be90fe23b
+2026-08-26 14:01:37,886 INFO    muleguard.api.main | model integrity verified: final_bundle.joblib sha256=d12914de5abee99a
+2026-08-26 14:01:37,889 INFO    muleguard.api.main | startup complete, model warm
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8001 (Press CTRL+C to quit)
-INFO:     127.0.0.1:10528 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     127.0.0.1:10532 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     127.0.0.1:10535 - "GET /health/ready HTTP/1.1" 200 OK
-INFO:     127.0.0.1:10540 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     127.0.0.1:10541 - "GET /health/ready HTTP/1.1" 200 OK
-2026-08-23 16:42:04,514 INFO    muleguard.api.main | model integrity verified: final_bundle.joblib sha256=d12914de5abee99a
-INFO:     127.0.0.1:10542 - "GET /v1/model HTTP/1.1" 200 OK
-2026-08-23 16:42:04,908 INFO    muleguard.features.frame | model frame: 3925 raw columns + 13 meta-features
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:10543 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:10544 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:10545 - "POST /v1/score/batch HTTP/1.1" 200 OK
-INFO:     127.0.0.1:10546 - "GET /v1/cases?limit=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:10547 - "GET /v1/cases/CASE-2BEDFA0645 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:10548 - "POST /v1/reports/CASE-2BEDFA0645/generate?use_llm=false HTTP/1.1" 200 OK
-INFO:     127.0.0.1:10549 - "POST /v1/score HTTP/1.1" 422 Unprocessable Content
-INFO:     127.0.0.1:10550 - "POST /v1/score HTTP/1.1" 422 Unprocessable Content
-INFO:     127.0.0.1:10551 - "POST /v1/score HTTP/1.1" 422 Unprocessable Content
-INFO:     127.0.0.1:10552 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:10553 - "GET /v1/drift/status HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8319 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8320 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8321 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8322 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8323 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8324 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8325 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8326 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8327 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8328 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8329 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8330 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8331 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8332 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8333 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8336 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8337 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8335 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8334 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8338 - "POST /v1/score HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8342 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8348 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8343 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8345 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8347 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8339 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8341 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8344 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8340 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8346 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8350 - "POST /v1/score/file HTTP/1.1" 422 Unprocessable Content
-INFO:     127.0.0.1:8351 - "GET /health/live HTTP/1.1" 200 OK
-2026-08-23 16:43:08,472 INFO    muleguard.api.main | model integrity verified: final_bundle.joblib sha256=d12914de5abee99a
-INFO:     127.0.0.1:8352 - "GET /v1/model HTTP/1.1" 200 OK
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:8353 - "POST /v1/score HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8354 - "POST /v1/cases/CASE-A058C3C579/decision HTTP/1.1" 422 Unprocessable Content
-INFO:     127.0.0.1:8355 - "POST /v1/cases/CASE-A058C3C579/decision HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8356 - "GET /v1/drift/status HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8357 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
-2026-08-23 16:43:10,389 INFO    muleguard.api.main | model integrity verified: final_bundle.joblib sha256=d12914de5abee99a
-INFO:     127.0.0.1:8358 - "GET /v1/model HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8359 - "GET /v1/cases?limit=3 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8360 - "GET /v1/cases/CASE-18A744455E HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8361 - "GET /v1/cases/CASE-1D16D2774B HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8362 - "GET /v1/cases/CASE-FDC57EB161 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8451 - "GET /v1/cases/CASE-X%27%3B%20DROP%20TABLE%20cases%3B-- HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:8452 - "GET /health/live HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8453 - "GET /v1/cases?limit=1 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8454 - "POST /v1/cases/CASE-18A744455E/decision HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8455 - "GET /v1/cases/CASE-18A744455E HTTP/1.1" 200 OK
-INFO:     127.0.0.1:8456 - "GET /v1/validation/seals/../../config HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:8457 - "POST /v1/score HTTP/1.1" 422 Unprocessable Content
-INFO:     127.0.0.1:8458 - "POST /v1/score/file HTTP/1.1" 413 Content Too Large
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-E:\BOI\BOI_hackathon\.venv\Lib\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
-  warnings.warn(
-INFO:     127.0.0.1:36101 - "POST /v1/score/file HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13406 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13410 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13412 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13414 - "GET /v1/cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13416 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44892 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44893 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4922 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4923 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13750 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13751 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10351 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:10352 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9457 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9458 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62227 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62228 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60180 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60181 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55892 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55893 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1839 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1840 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63965 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63966 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59156 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59157 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65509 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54995 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33183 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33184 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:16879 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:16880 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37120 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37121 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:17886 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:17887 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:21395 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:21396 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58195 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58196 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57335 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57334 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11266 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11267 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:23390 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:23391 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1088 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1089 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35211 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35212 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11746 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35209 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52179 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35210 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:18391 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:17244 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54575 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54577 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54574 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:16446 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54576 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14810 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13143 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:20945 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36038 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36039 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:18528 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:18529 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:26863 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:26864 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:17840 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:17841 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45061 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45062 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33798 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33799 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43759 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43760 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56089 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35579 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35580 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51166 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51167 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35954 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35955 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:21656 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:21657 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47646 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47647 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64837 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64838 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51112 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12501 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12512 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5716 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5717 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:15327 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:15328 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53027 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53028 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5256 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5257 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:23074 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:23075 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1736 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1737 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45519 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45520 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45521 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52018 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:20047 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41180 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45522 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44867 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:15681 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:15682 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59299 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:25201 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:25200 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14890 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59298 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56606 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:29149 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47049 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47397 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:17597 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37121 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:19670 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37120 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63450 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39103 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49286 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63744 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63745 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60454 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60456 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60078 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37423 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:26091 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60455 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62599 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45545 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:31157 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:31158 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6933 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6934 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:20189 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:20190 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:19424 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:19423 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37891 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37889 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37890 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38569 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37892 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13858 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:17083 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:17084 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1630 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1632 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43702 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:5762 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1631 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52542 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51221 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35304 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:15399 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:15400 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4371 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4373 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60857 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14327 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22701 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4372 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59897 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8531 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:19812 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:19814 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12628 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:19811 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:19813 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57824 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48641 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55467 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11204 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11205 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:18999 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:19000 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:16577 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:21871 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:16576 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55153 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:16578 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1280 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42682 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41668 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3127 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43778 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3129 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3128 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:28260 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:20345 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60115 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60114 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:21446 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:21445 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38126 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52102 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:27090 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9399 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9398 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58761 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:29950 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:29954 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:29953 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:29952 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:29955 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:29951 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39211 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12509 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62602 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62603 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1569 - "GET /v1/cases?status=OPEN&limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11986 - "GET /v1/cases?status=OPEN&limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61979 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63579 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48849 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34554 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52498 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52499 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8514 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:23508 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:17097 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+2026-08-26 14:58:35,304 INFO    muleguard.api.main | model integrity verified: final_bundle.joblib sha256=d12914de5abee99a
+INFO:     127.0.0.1:17096 - "GET /v1/model HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7451 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+2026-08-26 14:58:35,325 INFO    muleguard.api.main | model integrity verified: final_bundle.joblib sha256=d12914de5abee99a
+INFO:     127.0.0.1:34067 - "GET /v1/model HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56123 - "GET /v1/validation/seals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:9885 - "GET /v1/validation/seals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1799 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4192 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56625 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56627 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3292 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13769 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56626 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:17060 - "GET /v1/drift/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:17061 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:17063 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59202 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59203 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:26247 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:26248 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:17883 - "GET /v1/cases?status=OPEN&limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:20386 - "GET /v1/cases?status=OPEN&limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56004 - "GET /v1/cases/CASE-1D16D2774B HTTP/1.1" 200 OK
+INFO:     127.0.0.1:28187 - "GET /v1/cases/CASE-1D16D2774B HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56620 - "GET /v1/cases/CASE-1D16D2774B/cohort?k=10 HTTP/1.1" 409 Conflict
+INFO:     127.0.0.1:43408 - "POST /v1/reports/CASE-1D16D2774B/generate?use_llm=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52569 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48010 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11352 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2691 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53512 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53513 - "GET /v1/cases?limit=25 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:25838 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59882 - "GET /v1/cases?limit=25 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38241 - "GET /v1/graph/status HTTP/1.1" 200 OK
+2026-08-26 15:00:38,598 INFO    muleguard.features.frame | model frame: 3925 raw columns + 13 meta-features
+2026-08-26 15:00:39,822 INFO    muleguard.api.proofgraph | twin index built over 4000 legitimate rows
+INFO:     127.0.0.1:64043 - "GET /v1/proofgraph/CASE-18A744455E?twin=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62637 - "GET /v1/proofgraph/CASE-18A744455E?twin=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12708 - "POST /v1/reports/CASE-1D16D2774B/generate?use_llm=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:23253 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:23254 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60260 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60261 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:27922 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:27923 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:31003 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:31004 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:15579 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:15580 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7777 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:7778 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51177 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51178 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:17862 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:17863 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52909 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52910 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:18665 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:18666 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:28811 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:28812 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45882 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45883 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6651 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6650 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:32546 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:32547 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55625 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55626 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46010 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46011 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:29392 - "GET /health/ready HTTP/1.1" 200 OK
+INFO:     127.0.0.1:29393 - "GET /v1/cases?limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47496 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34658 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34658 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:16093 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:32688 - "GET /v1/cases?status=OPEN&limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43649 - "GET /v1/cases?status=OPEN&limit=500 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:29332 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+2026-08-26 15:17:48,543 INFO    muleguard.api.main | model integrity verified: final_bundle.joblib sha256=d12914de5abee99a
+INFO:     127.0.0.1:29333 - "GET /v1/model HTTP/1.1" 200 OK
+INFO:     127.0.0.1:14571 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+2026-08-26 15:17:48,574 INFO    muleguard.api.main | model integrity verified: final_bundle.joblib sha256=d12914de5abee99a
+INFO:     127.0.0.1:7232 - "GET /v1/model HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65490 - "GET /v1/validation/seals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:18623 - "GET /v1/validation/seals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41841 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:11131 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63680 - "GET /v1/validation/seals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2081 - "GET /v1/validation/seals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:30664 - "GET /v1/validation/seals/seal-20260823T135741-07d3186d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60439 - "GET /v1/validation/seals/seal-20260823T135736-4cd34d27 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63082 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:26355 - "GET /v1/metrics/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22870 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:22871 - "GET /v1/cases?limit=25 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:26672 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:26278 - "GET /v1/cases?limit=25 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:25269 - "GET /v1/graph/status HTTP/1.1" 200 OK
+2026-08-26 15:19:33,503 INFO    muleguard.api.capacity | capacity curve loaded: 433 points, champion=xgboost_top_120
+INFO:     127.0.0.1:1705 - "GET /v1/capacity/curve HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53267 - "GET /v1/capacity/curve HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36393 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:4970 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36394 - "GET /v1/cases?limit=25 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8988 - "GET /v1/cases?limit=25 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:31003 - "GET /v1/graph/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61190 - "GET /v1/capacity/curve HTTP/1.1" 200 OK
+INFO:     127.0.0.1:12677 - "GET /v1/capacity/curve HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39953 - "GET /v1/proofgraph/CASE-18A744455E?twin=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39954 - "GET /v1/proofgraph/CASE-18A744455E?twin=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13180 - "GET /v1/proofgraph/CASE-18A744455E?twin=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13181 - "GET /v1/proofgraph/CASE-18A744455E?twin=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47028 - "GET /v1/proofgraph/CASE-18A744455E?twin=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47029 - "GET /v1/proofgraph/CASE-18A744455E?twin=true HTTP/1.1" 200 OK

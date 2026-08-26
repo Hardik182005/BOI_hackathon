@@ -32,6 +32,14 @@ Rules this module enforces mechanically, not by convention:
    (UPDATE 6).
 4. **No verdict language.** ``assert_language_safe`` rejects accusatory or
    absolute terms anywhere in the serialised graph.
+5. **No quarantined column, on either side.** A feature the Feature
+   Availability Firewall has quarantined is not admissible evidence, and being
+   traceable does not make it admissible - a post-resolution column like
+   ``MIN_RESOLVE_DAYS`` traces perfectly to a real dataset field and is still a
+   fact about the investigation rather than about the account.
+   :func:`assert_evidence_admissible` runs the firewall over every token the
+   graph names, so the quarantine list and the evidence boundary refuse the
+   same set by construction rather than by two lists agreeing.
 """
 from __future__ import annotations
 
@@ -42,6 +50,7 @@ from typing import Any, Sequence
 
 import numpy as np
 
+from muleguard.features import firewall
 from muleguard.logging import get_logger
 from muleguard.usp.control_attribution import (
     RELATION as CONTROL_RELATION, control_attribution, proofgraph_node)
@@ -86,6 +95,10 @@ class UntraceableEvidence(RuntimeError):
 
 class UnsafeLanguage(RuntimeError):
     """Raised when a forbidden term reaches the serialised graph."""
+
+
+class InadmissibleEvidence(RuntimeError):
+    """Raised when a quarantined column reaches either side of the graph."""
 
 
 # --------------------------------------------------------------------------
@@ -576,6 +589,12 @@ def build_proofgraph(
         ),
     }
     assert_evidence_traceable(graph)
+    # Admissibility is asserted here, at the point of construction, and not only
+    # at the point of serving. A graph is refused before it can be stored,
+    # cached, exported or handed to a report writer - the 2026-08-26 incident
+    # was a graph that had been built once and rendered for weeks afterwards, so
+    # a check that only runs on the way out is a check that runs too late.
+    assert_evidence_admissible(graph, registry)
     assert_language_safe(graph)
     return graph
 
@@ -674,6 +693,60 @@ def assert_evidence_traceable(graph: dict[str, Any]) -> None:
         if e["source"] not in ids or e["target"] not in ids:
             raise UntraceableEvidence(
                 f"edge {e['source']} -> {e['target']} references a missing node")
+
+
+def evidence_feature_tokens(graph: dict[str, Any]) -> list[str]:
+    """Every dataset column this graph names, from every slot that can name one.
+
+    A node's ``source`` is its primary claim of origin, but it is not the only
+    place a raw column token lands. The SHAP column is stashed on
+    ``extra["column"]``, a counterfactual twin lists one per row of
+    ``extra["differences"]``, and a counterfactual node names the feature it
+    would move. A quarantine check that reads only ``source`` is a check with
+    three back doors, so collect all four.
+
+    Tokens that are pipeline metrics rather than dataset columns
+    (``model_agreement``, ``conformal_status``, ``MG_PASSTHROUGH_7D`` ...) are
+    returned too. They are safe to return: the firewall resolves an unknown
+    token to ``UNKNOWN_REVIEW``, which is not a forbidden class, so they pass
+    without needing a hand-maintained allowlist here - and a hand-maintained
+    allowlist is exactly the thing that would rot into a back door.
+    """
+    tokens: list[str] = []
+    for n in graph.get("nodes") or []:
+        if n.get("source"):
+            tokens.append(str(n["source"]))
+        extra = n.get("extra") or {}
+        if not isinstance(extra, dict):
+            continue
+        if extra.get("column"):
+            tokens.append(str(extra["column"]))
+        if extra.get("feature"):
+            tokens.append(str(extra["feature"]))
+        for d in extra.get("differences") or []:
+            if isinstance(d, dict) and d.get("feature"):
+                tokens.append(str(d["feature"]))
+    seen, out = set(), []
+    for t in tokens:
+        if t not in seen:
+            seen.add(t)
+            out.append(t)
+    return out
+
+
+def assert_evidence_admissible(graph: dict[str, Any],
+                               registry: dict[str, Any] | None = None) -> None:
+    """No quarantined column may stand as prosecution or defence evidence.
+
+    Delegates to :func:`muleguard.features.firewall.assert_clean` rather than
+    re-stating the ban, so this boundary can never drift out of step with the
+    quarantine manifest the release gate enforces.
+    """
+    try:
+        firewall.assert_clean(evidence_feature_tokens(graph),
+                              context="proofgraph evidence", registry=registry)
+    except firewall.LeakageViolation as exc:
+        raise InadmissibleEvidence(str(exc)) from exc
 
 
 def assert_language_safe(payload: Any) -> None:

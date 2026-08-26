@@ -36,10 +36,10 @@ const RESOLUTIONS: [number, number][] = [
   [1280, 720], [1366, 768], [1440, 900], [1920, 1080],
 ];
 
-// From styles.css: .sidebar is 220px and .main pads 24px on each side. The
+// From styles.css: .sidebar is 256px and .main pads 24px on each side. The
 // content column at the narrowest supported width is what every fixed
 // dimension in the app has to fit inside.
-const SIDEBAR_PX = 220;
+const SIDEBAR_PX = 256;
 const MAIN_PADDING_PX = 48;
 const NARROWEST_CONTENT_PX = Math.min(...RESOLUTIONS.map(([w]) => w))
   - SIDEBAR_PX - MAIN_PADDING_PX;
@@ -72,7 +72,7 @@ const stub = () =>
 // the only one - and hand-writing that payload to reach a title would make the
 // assertion about the fixture rather than about the page.
 const ROUTES: { hash: string; heading: RegExp | null }[] = [
-  { hash: "#/", heading: /Executive Overview/ },
+  { hash: "#/overview", heading: /Executive Overview/ },
   { hash: "#/queue", heading: /Alert Queue/ },
   { hash: "#/performance", heading: /Model Performance/ },
   { hash: "#/features", heading: /Feature Intelligence/ },

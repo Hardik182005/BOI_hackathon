@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { api, fmtNum } from "../api";
+import { ApiError, api, fmtNum } from "../api";
 import { Empty, ErrorState, HumanReviewNotice, Loading, TierBadge, usePoll } from "../components";
 
 // Dual-evidence ProofGraph. Everything on this page is a re-presentation of
@@ -34,7 +34,20 @@ export default function ProofGraph() {
   const { caseId = "" } = useParams();
   const [showAll, setShowAll] = useState(false);
   const [saveErr, setSaveErr] = useState<string | null>(null);
-  const { data, error, loading } = usePoll(() => api.proofgraph(caseId), [caseId]);
+  // usePoll only surfaces the human message string; a retired/inadmissible
+  // case answers with a 409 whose `detail` is a structured object (see
+  // api.ts) that this page needs in order to tell RETIRED_EVIDENCE apart
+  // from every other failure. Stashing the raw object in a ref alongside the
+  // poll - rather than widening usePoll's return for every page - keeps that
+  // shape local to the one page that reads it.
+  const errDetailRef = useRef<any>(null);
+  const { data, error, loading } = usePoll(() => {
+    errDetailRef.current = null;
+    return api.proofgraph(caseId).catch((e) => {
+      errDetailRef.current = e instanceof ApiError ? e.detail : null;
+      throw e;
+    });
+  }, [caseId]);
 
   // The file is the endpoint's response, byte for byte - not this component's
   // parsed copy of it re-serialised. A reviewer who keeps the JSON can hand it
@@ -55,7 +68,14 @@ export default function ProofGraph() {
   };
 
   if (loading) return <Loading what={`evidence graph for ${caseId}`} />;
-  if (error) return <ErrorState msg={error} />;
+  if (error) {
+    const detail = errDetailRef.current;
+    if (detail && typeof detail === "object" &&
+        (detail.error === "RETIRED_EVIDENCE" || detail.error === "INADMISSIBLE_EVIDENCE")) {
+      return <RetiredProofGraphNotice caseId={caseId} detail={detail} />;
+    }
+    return <ErrorState msg={error} />;
+  }
   if (!data) return <Empty msg="No evidence graph returned for this case." />;
 
   const nodes: any[] = data.nodes ?? [];
@@ -345,6 +365,36 @@ function ArgumentSide({ title, subtitle, weight, items, accent }: {
         </div>
       ))}
     </div>
+  );
+}
+
+// The ProofGraph endpoint refuses outright (409) for a case scored by a
+// retired or otherwise inadmissible model, rather than drawing a graph
+// half-built from nodes the backend has withheld. This mirrors that refusal
+// with the same RETIRED/STALE framing CaseDetail uses, instead of forcing it
+// through the generic ErrorState - which would just print the raw JSON
+// detail as "[object Object]" before api.ts's describeDetail fix, and would
+// still read as a generic failure rather than a labelled audit boundary after it.
+function RetiredProofGraphNotice({ caseId, detail }: { caseId: string; detail: any }) {
+  return (
+    <>
+      <h2 className="page-title">ProofGraph · {caseId}</h2>
+      <p className="page-sub"><a href={`#/cases/${caseId}`}>back to the case file</a></p>
+      <div className="notice" style={{ borderColor: "#dc2626" }}>
+        <b>RETIRED / STALE EVIDENCE:</b> this ProofGraph cannot be built as
+        current evidence against the account.
+        <p style={{ margin: "8px 0 0" }}>{detail.message}</p>
+        <div className="stat-sub" style={{ marginTop: 8 }}>
+          Scored by model_version <code>{detail.stored_model_version ?? "–"}</code>,
+          current production model_version <code>{detail.current_model_version ?? "–"}</code>.
+        </div>
+        <div className="stat-sub" style={{ marginTop: 4 }}>
+          The labelled audit record this case was built from is retained at{" "}
+          <code>/v1/proofgraph/{caseId}/provenance</code> — it documents what
+          the retired model produced, not a case against the account.
+        </div>
+      </div>
+    </>
   );
 }
 

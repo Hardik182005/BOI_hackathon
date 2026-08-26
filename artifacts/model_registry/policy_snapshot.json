@@ -4,5 +4,7 @@
   "standard_risk": 0.017246147513913988,
   "anomaly_escalation_pct": 99.0,
   "policy_version": "1.0",
-  "derived_from": "dev OOF calibrated distribution"
+  "derived_from": "dev OOF calibrated distribution",
+  "provenance_note": "RETIRED PROVENANCE - these are the decision thresholds of the catboost_tuned_top60 bundle (sha 04fafaee...), frozen 2026-07-10 and superseded by xgboost_top_120 (sha d12914de...). They are NOT the production thresholds. Production thresholds live in artifacts/models/final_bundle.joblib:policy_thresholds and are read from there by the scorer and, since 2026-08-26, by the Validation Lab export path as well. Kept because it is the record of what the policy was at that freeze; do not read it for a live cutoff.",
+  "superseded_by": "artifacts/models/final_bundle.joblib:policy_thresholds"
 }

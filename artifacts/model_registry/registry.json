@@ -62,9 +62,10 @@
         "description_sha256": "7d30652b72d4b79b3feeb3e14ebe67177988b3155912ea33f284f140e8774b20",
         "description_sha256_source": "artifacts/features/feature_dictionary.json",
         "feature_set_version": {
-          "source": "artifacts/features/final_selected_features.json",
-          "sha256": "b55dbf1e34689b277f40cdd275db1f16d078bc2d33918415bc080a570d69b58d",
-          "n_features": 6
+          "source": "artifacts/models/final_bundle.joblib:feature_list_kept",
+          "bundle_sha256": "d12914de5abee99aa18b80e3d41ae2da800dbf9355b53f3a9c0e06806921efc5",
+          "feature_list_sha256": "daed5969411c331693d5d17fc68e8175eafed2ea0ccbdcf16bf3659790db87fb",
+          "n_features": 120
         },
         "availability_classes": [
           "ALERT_CONTEXT",
@@ -78,10 +79,19 @@
         "quarantined_features": [
           "F3924",
           "F3912",
+          "F3913",
+          "F3914",
+          "F3915",
+          "F3898",
+          "F3899",
           "F2230",
-          "__UNNAMED__0"
+          "__UNNAMED__0",
+          "F3916",
+          "F3917",
+          "F3918",
+          "F3892"
         ],
-        "n_quarantined": 4,
+        "n_quarantined": 13,
         "cv_scheme": {
           "outer": "5x5 repeated stratified k-fold",
           "n_splits": 5,
@@ -103,7 +113,7 @@
           "brier": 0.002582859419789497,
           "ece": null
         },
-        "enriched_utc": "2026-08-14T07:35:15.862164+00:00",
+        "enriched_utc": "2026-08-26T10:17:59.969831+00:00",
         "note": "every field above is read from a frozen artifact; nothing was recomputed and no model was touched"
       }
     }

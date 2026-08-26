@@ -409,11 +409,25 @@ def download_submission(seal_id: str, format: str = "minimal") -> FileResponse:
 
 
 def _policy_standard_threshold() -> float | None:
-    """The frozen standard-review cutoff, or None if the snapshot is absent."""
-    try:
-        snap = settings.REGISTRY_DIR / "policy_snapshot.json"
-        import json
+    """The standard-review cutoff of the model that actually produced the scores.
 
-        return float(json.loads(snap.read_text(encoding="utf-8"))["standard_risk"])
-    except Exception:  # noqa: BLE001 - absent snapshot must not break scoring
+    Read from the loaded bundle, not from
+    ``artifacts/model_registry/policy_snapshot.json``. That file was written at
+    the 2026-07-10 freeze and still holds the **retired** CatBoost bundle's
+    cutoffs (standard_risk 0.017246), while the champion's is 0.013183 - so
+    every binary submission exported through the Validation Lab was being cut
+    at a threshold derived from a different model's calibrated distribution
+    than the one that produced the probabilities being cut. That is not a
+    threshold change: the production thresholds are and remain the bundle's,
+    and this makes the export use them instead of a superseded model's.
+
+    Returns None if the bundle has no policy block, which leaves
+    ``SubmissionFormat.binary_threshold`` on its declared default rather than
+    silently substituting a number from somewhere else.
+    """
+    try:
+        pol = load_bundle().get("policy_thresholds") or {}
+        val = pol.get("standard_risk")
+        return None if val is None else float(val)
+    except Exception:  # noqa: BLE001 - export must not break on a bundle read
         return None

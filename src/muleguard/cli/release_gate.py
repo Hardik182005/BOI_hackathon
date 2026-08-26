@@ -7,7 +7,9 @@ Writes docs/FINAL_RELEASE_GATE.md and artifacts/release_manifest.json.
 from __future__ import annotations
 
 import datetime as dt
+import json
 import re
+import sqlite3
 import subprocess
 from typing import Callable
 
@@ -398,6 +400,105 @@ def c23():
                 f"{inv.get('sound')}, model unchanged="
                 f"{d.get('accepted_model_unchanged')}, locked-test PR-AUC "
                 f"{(d.get('offline_label_comparison', {}).get('metrics') or {}).get('pr_auc')}")
+
+
+@check("no_quarantined_feature_can_be_served_as_current_evidence",
+       "no scores row stamped with the live model_version names a quarantined "
+       "column; exactly one champion is recorded and it matches the shipped "
+       "bundle (U-2026-08-26 evidence incident)")
+def c24():
+    """The fix for the retired-evidence incident, checked against what is served.
+
+    ``no_target_or_f3912_leakage`` (c1) proves the *bundle* never trained on a
+    quarantined column. It says nothing about ``artifacts/muleguard.db``, which
+    is exactly where the incident lived: 77 rows written on 2026-07-10 by a
+    retired CatBoost model (model_version 1.0.0) carry ``F3898`` and ``F3914``
+    in ``top_reasons``, and a route that read the payload without checking its
+    provenance served them as prosecution evidence. Three facts have to hold
+    for that not to recur, all read from the database rather than trusted from
+    the fix's own description:
+
+    1. No row whose ``model_version`` matches the *currently loaded* bundle
+       names a quarantined column. Retired rows are expected to fail this on
+       their own terms - they are the audit record, not a bug - so only rows
+       stamped with today's champion are checked. A row for a version that no
+       longer exists cannot be "current" no matter what it contains.
+    2. ``model_versions`` names exactly one champion, and its
+       ``bundle_sha256`` is the bundle actually on disk. Two champions is how
+       ``evidence_guard.provenance`` loses the ability to say which model
+       wrote a row - the question the whole incident turned on.
+    3. ``muleguard.action.submission._quarantined_features`` still returns all
+       13 firewall columns. It used to read a 4-entry legacy file; a
+       regression back to that file would silently widen what an export - and
+       by the same logic, what evidence tooling built against it - treats as
+       safe.
+
+    Opens the database read-only: this check observes what was served, it
+    must never be able to write to the incident record it is auditing.
+    """
+    db_path = settings.ARTIFACTS_DIR / "muleguard.db"
+    if not db_path.exists():
+        return True, ("SKIP: artifacts/muleguard.db does not exist yet - "
+                      "nothing has been served, so there is nothing to audit")
+
+    from muleguard.action.submission import _quarantined_features
+    from muleguard.models.scoring import load_bundle
+
+    required = {"F3924", "F3912", "F3913", "F3914", "F3915", "F3898", "F3899",
+                "F2230", "__UNNAMED__0", "F3916", "F3917", "F3918", "F3892"}
+    quarantined = _quarantined_features()
+    missing = required - quarantined
+    if missing:
+        return False, (
+            f"_quarantined_features() is missing {sorted(missing)} from the "
+            "13-column firewall manifest - this is the 4-entry legacy-list "
+            "regression that let nine quarantined columns, including F3898 "
+            "and F3914, reach exports")
+
+    b = load_bundle()
+    current_version = str(b["version"])
+    manifest = load_json(settings.MODELS_DIR / "model_manifest.json")
+    current_sha = str(manifest.get("bundle_sha256", ""))
+
+    conn = sqlite3.connect(f"file:{db_path.as_posix()}?mode=ro", uri=True)
+    conn.row_factory = sqlite3.Row
+    try:
+        breaches = []
+        checked = 0
+        for row in conn.execute("SELECT id, payload_json FROM scores"):
+            payload = json.loads(row["payload_json"])
+            if str(payload.get("model_version")) != current_version:
+                continue  # retired row: quarantined columns here are the audit trail, not a leak
+            checked += 1
+            cols = {r.get("feature") for r in (payload.get("top_reasons") or [])}
+            hit = sorted(cols & quarantined)
+            if hit:
+                breaches.append((row["id"], hit))
+        champions = [dict(r) for r in conn.execute(
+            "SELECT id, version, bundle_sha256 FROM model_versions"
+            " WHERE status='champion'")]
+    finally:
+        conn.close()
+
+    if breaches:
+        return False, (
+            f"{len(breaches)} of {checked} scores row(s) stamped with the "
+            f"live model_version {current_version!r} still name a quarantined "
+            f"column in top_reasons: {breaches[:5]}")
+    if len(champions) != 1:
+        return False, (
+            f"model_versions names {len(champions)} champion(s), expected "
+            f"exactly one: {champions}")
+    if champions[0]["bundle_sha256"] != current_sha:
+        return False, (
+            "the sole champion row points at bundle_sha256="
+            f"{champions[0]['bundle_sha256'][:16]}... but the bundle on disk "
+            f"hashes to {current_sha[:16]}... - the champion row was never "
+            "reconciled against what is actually loaded")
+    return True, (
+        f"{checked} row(s) stamped with model_version {current_version!r} "
+        "carry no quarantined column; 1 champion recorded, matching the "
+        "shipped bundle's sha256; all 13 firewall columns still refused")
 
 
 def main() -> None:

@@ -20,6 +20,7 @@ from typing import Any, Iterable, Sequence
 
 import polars as pl
 
+from ..features import firewall
 from ..settings import TARGET_COLUMN, load_config
 from ..utils import sha256_file
 
@@ -39,12 +40,26 @@ class ExportValidationError(ValueError):
 
 
 def _quarantined_features() -> set[str]:
-    """Feature names that may never appear in an export."""
+    """Feature names that may never appear in an export.
+
+    Read from the Feature Availability Firewall, not from
+    ``configs/leakage_quarantine.yaml``. That file predates the firewall and
+    still lists **4** columns; the firewall quarantines **13**. An export built
+    against the short list could therefore have carried nine quarantined
+    columns - including ``F3898 MIN_RESOLVE_DAYS`` and ``F3914 FALSE_POSITIVE``,
+    the two that surfaced as prosecution evidence on 2026-08-26 - into a file
+    handed to an analyst or an organiser. The older file is kept as the record
+    of the original four leak findings and is unioned in, so a name that only
+    ever appeared there is still refused.
+    """
+    cfg = firewall.config()
+    names = set(cfg.hard_quarantine) | set(cfg.conditional_quarantine)         | set(cfg.fairness_excluded)
     try:
-        cfg = load_config("leakage_quarantine")
+        legacy = load_config("leakage_quarantine")
     except FileNotFoundError:
-        return {TARGET_COLUMN}
-    names = {str(e["feature"]) for e in cfg.get("quarantine", []) if e.get("feature")}
+        legacy = {}
+    names |= {str(e["feature"]) for e in legacy.get("quarantine", [])
+              if e.get("feature")}
     names.add(TARGET_COLUMN)
     return names
 

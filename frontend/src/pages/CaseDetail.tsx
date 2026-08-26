@@ -21,6 +21,14 @@ export default function CaseDetail() {
 
   const { case: c, score, actions, feedback } = data as any;
   const reasons: any[] = score?.top_reasons ?? [];
+  // Feature Availability Firewall retirement: a handful of stored payloads
+  // were produced by a model_version the firewall has since retired, and
+  // their explanations quarantine columns (F3898, F3914 ...) a current score
+  // could never use. The backend already drops top_reasons/counterfactual_twin
+  // from `score` for those cases - `evidence_status` says why, and the drivers
+  // table below has to say so rather than quietly rendering "not stored".
+  const evidenceStatus = (data as any).evidence_status;
+  const evidenceRetired = evidenceStatus?.admissible_as_current_evidence === false;
 
   const act = async (action: string, approved_by?: string) => {
     if (!reason.trim() || busy) return;
@@ -83,7 +91,9 @@ export default function CaseDetail() {
       <div className="grid cols-2" style={{ marginTop: 14 }}>
         <div className="card">
           <h3>Verified technical drivers (SHAP, vs legitimate cohort)</h3>
-          {reasons.length ? (
+          {evidenceRetired ? (
+            <RetiredEvidenceNotice status={evidenceStatus} />
+          ) : reasons.length ? (
             <table className="data">
               <thead>
                 <tr><th>Feature</th><th>Value</th><th>Legit percentile</th><th>Effect</th><th>SHAP</th></tr>
@@ -105,10 +115,12 @@ export default function CaseDetail() {
               </tbody>
             </table>
           ) : <Empty msg="Explanations not stored for this score." />}
-          <div className="notice">
-            Anonymous features are compared numerically against the legitimate
-            cohort. No business meaning is asserted for unnamed features.
-          </div>
+          {!evidenceRetired && (
+            <div className="notice">
+              Anonymous features are compared numerically against the legitimate
+              cohort. No business meaning is asserted for unnamed features.
+            </div>
+          )}
         </div>
 
         <div className="card">
@@ -239,6 +251,33 @@ export default function CaseDetail() {
         </table>
       </div>
     </>
+  );
+}
+
+// A retired-model payload is an audit record, not a live driver table: either
+// showing its withheld reasons or silently rendering "not stored" would
+// misrepresent it. This says which happened, in the backend's own words -
+// the rest of the case file (actions, feedback, audit history) stays fully
+// visible below, because none of that came from the retired model.
+function RetiredEvidenceNotice({ status }: { status: any }) {
+  const prov = status?.provenance ?? {};
+  const quarantined: string[] = status?.quarantined_features_used ?? [];
+  return (
+    <div className="notice" style={{ borderColor: "#dc2626" }}>
+      <b>RETIRED / STALE EVIDENCE{status?.reason ? ` — ${String(status.reason).replace(/_/g, " ")}` : ""}:</b>{" "}
+      not admissible as current evidence.
+      <p style={{ margin: "8px 0 0" }}>{status?.explanation}</p>
+      <div className="stat-sub" style={{ marginTop: 8 }}>
+        Scored by model_version <code>{prov.stored_model_version ?? "–"}</code>,
+        current production model_version <code>{prov.current_model_version ?? "–"}</code>.
+      </div>
+      {quarantined.length > 0 && (
+        <div className="stat-sub" style={{ marginTop: 4 }}>
+          Quarantined features in the stored payload:{" "}
+          {quarantined.map((f) => <code key={f} style={{ marginRight: 6 }}>{f}</code>)}
+        </div>
+      )}
+    </div>
   );
 }
 

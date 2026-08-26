@@ -37,6 +37,7 @@ from pydantic import BaseModel, Field
 
 from muleguard import settings
 from muleguard.api import database as db
+from muleguard.api import evidence_guard
 from muleguard.llm.ollama_client import OllamaNarrator
 from muleguard.llm.schemas import NarratorInput, ReasonFact
 from muleguard.logging import get_logger
@@ -143,6 +144,18 @@ def startup() -> None:
                     " VALUES (?,?,?,?)",
                     (b["version"], manifest["bundle_sha256"], b["winner_oof_name"], db.utcnow()),
                 )
+            # Exactly one champion. The status column defaults to 'champion' on
+            # insert and nothing ever cleared it, so the database carried two
+            # rows both claiming to be production - including the 2026-07-10
+            # CatBoost bundle that the registry has recorded as retired since
+            # August. A table that names two champions cannot be used to answer
+            # "which model produced this?", which is the question the retired
+            # evidence incident turned on.
+            c.execute("UPDATE model_versions SET status='retired'"
+                      " WHERE bundle_sha256 <> ? AND status <> 'retired'",
+                      (manifest["bundle_sha256"],))
+            c.execute("UPDATE model_versions SET status='champion'"
+                      " WHERE bundle_sha256 = ?", (manifest["bundle_sha256"],))
         log.info("startup complete, model warm")
     except FileNotFoundError:
         log.warning("no final bundle yet - scoring endpoints will 503")
@@ -355,6 +368,20 @@ def list_cases(status: str | None = None, tier: str | None = None,
 
 @app.get("/v1/cases/{case_id}")
 def case_detail(case_id: str) -> dict:
+    """The case file, with its evidence gated by provenance.
+
+    This route used to return ``payload_json`` verbatim, which is how a
+    pre-firewall CatBoost explanation naming ``F3898 MIN_RESOLVE_DAYS`` and
+    ``F3914 FALSE_POSITIVE`` reached a reviewer's screen under the heading
+    "Verified technical drivers". The payload is now passed through
+    :mod:`muleguard.api.evidence_guard` first.
+
+    The page stays reachable for a retired case on purpose - the action history,
+    the feedback and the audit trail are still the analyst's, and refusing the
+    whole case file to withhold two columns would be the wrong trade. What is
+    withheld is the *evidence*, and ``evidence_status`` says so in the response
+    rather than leaving a reader to wonder why the table is short.
+    """
     with db.connect() as c:
         case = c.execute("SELECT * FROM cases WHERE case_id=?", (case_id,)).fetchone()
         if not case:
@@ -365,6 +392,10 @@ def case_detail(case_id: str) -> dict:
             "SELECT * FROM case_actions WHERE case_id=? ORDER BY id", (case_id,))]
         feedback = [dict(r) for r in c.execute(
             "SELECT * FROM analyst_feedback WHERE case_id=? ORDER BY id", (case_id,))]
+    payload = json.loads(score["payload_json"]) if score else None
+    status = evidence_guard.evidence_status(case_id, payload)
+    if payload is not None:
+        payload = evidence_guard.redact_retired_evidence(case_id, payload, status)
     # Section 21. Derived from the tier the policy already set - it reads the
     # decision and adds nothing to it.
     control = control_attribution(
@@ -372,7 +403,8 @@ def case_detail(case_id: str) -> dict:
         risk_tier=str(case["risk_tier"]))
     return {
         "case": dict(case),
-        "score": json.loads(score["payload_json"]) if score else None,
+        "score": payload,
+        "evidence_status": status,
         "actions": actions,
         "feedback": feedback,
         "control_attribution": control,
@@ -469,10 +501,28 @@ def drift_status() -> dict:
 
 @app.post("/v1/reports/{case_id}/generate")
 def generate_report(case_id: str, use_llm: bool = True) -> dict:
+    """An evidence packet, or nothing - never a packet built from a retired score.
+
+    Unlike the case file this route cannot redact and continue: a packet whose
+    "Verified technical drivers" section is missing is not a weaker packet, it
+    is a document that will be exported, filed and read later without the
+    caveat that travelled with it. It also feeds the narrator, and the one rule
+    the narrator has is that it may only mention features from ``top_reasons`` -
+    so a retired payload here is how a quarantined column ends up in English
+    prose. Refuse instead.
+    """
     detail = case_detail(case_id)
     score = detail["score"]
     if score is None:
         raise HTTPException(409, "case has no stored score payload")
+    status = detail["evidence_status"]
+    if not status["admissible_as_current_evidence"]:
+        raise HTTPException(409, {
+            "error": status["reason"],
+            "case_id": case_id,
+            **(status["provenance"] or {}),
+            "message": status["explanation"],
+        })
     ctx = NarratorInput(
         account_reference=detail["case"]["account_reference"],
         calibrated_risk=score["calibrated_risk"],

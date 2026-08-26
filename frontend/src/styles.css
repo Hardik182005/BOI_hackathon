@@ -1,3 +1,24 @@
+/* ---------------------------------------------------------------------------
+   Typefaces. Both files are vendored under frontend/public/fonts and served
+   from this origin: the console must render identically with no internet, so
+   nothing here reaches a font CDN. Each file is a single variable font, which
+   is why one @font-face covers the whole weight range.
+   --------------------------------------------------------------------------- */
+@font-face {
+  font-family: "Inter var";
+  src: url("/fonts/Inter-var.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono var";
+  src: url("/fonts/JetBrainsMono-var.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --bg: #ffffff;
   --panel: #ffffff;
@@ -10,33 +31,52 @@
   --warn: #d97706;
   --danger: #dc2626;
   --purple: #7c3aed;
+  --font-sans: "Inter var", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono var", Consolas, "Courier New", monospace;
 }
 * { box-sizing: border-box; }
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font: 14px/1.5 "Segoe UI", system-ui, sans-serif;
+  font: 14px/1.55 var(--font-sans);
+  /* `cv11` gives Inter the single-storey lowercase g and straight-tailed l,
+     which stops 1/l/I collapsing into each other in an account identifier;
+     `ss01` is the disambiguated zero. Both are ignored by the fallback. */
+  font-feature-settings: "cv11" 1, "ss01" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+/* Numbers an analyst compares down a column have to line up, so every figure
+   in the console is tabular and lining regardless of where it is rendered. */
+.stat, .stat-sub, table.data td, table.kv td, .mono, .tier, .badge, .verdict,
+input, select, textarea {
+  font-variant-numeric: tabular-nums lining-nums;
 }
 a { color: var(--accent); text-decoration: none; }
 
 .layout { display: flex; min-height: 100vh; }
 .sidebar {
-  width: 220px; flex-shrink: 0; background: var(--panel-2);
+  width: 256px; flex-shrink: 0; background: var(--panel-2);
   border-right: 1px solid var(--border); padding: 16px 0;
   position: sticky; top: 0; height: 100vh;
 }
-.brand { padding: 0 16px 14px; border-bottom: 1px solid var(--border); }
-.brand h1 { font-size: 17px; margin: 0; }
-.brand .tagline { font-size: 10.5px; color: var(--muted); margin-top: 3px; }
-.nav { display: flex; flex-direction: column; padding: 10px 8px; gap: 2px; }
+.brand { padding: 0 18px 16px; border-bottom: 1px solid var(--border); }
+.brand h1 { font-size: 20px; margin: 0; letter-spacing: -0.015em; font-weight: 650; }
+/* The wordmark is the link back to the public landing page. It must not
+   pick up the accent colour every other anchor carries. */
+.brand-home { color: var(--text); display: inline-block; }
+.brand-home:hover h1 { opacity: 0.66; }
+.brand .tagline { font-size: 12px; line-height: 1.5; color: var(--muted); margin-top: 4px; }
+.nav { display: flex; flex-direction: column; padding: 12px 9px; gap: 3px; }
 .nav a {
-  padding: 8px 10px; border-radius: 6px; color: var(--muted); font-size: 13px;
+  padding: 9px 11px; border-radius: 6px; color: var(--muted); font-size: 15px;
 }
 .nav a.active, .nav a:hover { background: #e3e9f2; color: var(--text); }
 .main { flex: 1; padding: 20px 24px; min-width: 0; }
-.page-title { font-size: 19px; margin: 0 0 4px; }
-.page-sub { color: var(--muted); font-size: 12.5px; margin: 0 0 18px; }
+.page-title { font-size: 21px; margin: 0 0 5px; letter-spacing: -0.022em; font-weight: 650; }
+.page-sub { color: var(--muted); font-size: 12.5px; line-height: 1.55; margin: 0 0 18px; max-width: 92ch; }
 
 .grid { display: grid; gap: 14px; }
 .cols-4 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
@@ -46,8 +86,11 @@ a { color: var(--accent); text-decoration: none; }
   border-radius: 10px; padding: 14px 16px; min-width: 0;
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
 }
-.card h3 { margin: 0 0 10px; font-size: 13px; color: var(--muted); font-weight: 600; }
-.stat { font-size: 24px; font-weight: 700; }
+.card h3 {
+  margin: 0 0 10px; font-size: 11.5px; color: var(--muted); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.stat { font-size: 26px; font-weight: 660; letter-spacing: -0.03em; line-height: 1.1; }
 .stat-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
 
 table.data { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -59,7 +102,10 @@ table.data th {
 table.data td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
 table.data tr:hover td { background: var(--panel-2); }
 
-.tier { padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.tier {
+  padding: 2px 9px; border-radius: 999px; font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.045em; white-space: nowrap;
+}
 .tier.CRITICAL_REVIEW { background: #fee2e2; color: #991b1b; }
 .tier.URGENT_REVIEW { background: #fef3c7; color: #92400e; }
 .tier.STANDARD_REVIEW { background: #dbeafe; color: #1e40af; }
@@ -120,7 +166,7 @@ input, select, textarea {
 table.kv { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 table.kv td { padding: 4px 10px 4px 0; vertical-align: top; }
 table.kv td:first-child { color: var(--muted); width: 46%; }
-.mono { font-family: Consolas, "Courier New", monospace; font-size: 11.5px; word-break: break-all; }
+.mono { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: -0.01em; word-break: break-all; }
 
 .meter { height: 8px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
 .meter > span { display: block; height: 100%; background: var(--accent); }
@@ -187,7 +233,7 @@ table.kv td:first-child { color: var(--muted); width: 46%; }
 .try-form { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
 .try-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
 .try-form input, .try-form textarea { width: 100%; font-family: inherit; }
-.try-form textarea { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; }
+.try-form textarea { font-family: var(--font-mono); font-size: 12px; line-height: 1.5; }
 .try-form button { align-self: flex-start; }
 .try-result { display: flex; gap: 28px; align-items: flex-end; flex-wrap: wrap; }
 .reason-list { margin: 4px 0 0; padding-left: 18px; font-size: 13px; }

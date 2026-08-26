@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
 import json
 from typing import Any
 
@@ -36,16 +37,24 @@ def _description_sha() -> tuple[str | None, str]:
 
 
 def _quarantine() -> tuple[list[str], list[str]]:
-    """Quarantined feature names and the availability classes in force."""
-    import yaml
+    """Quarantined feature names and the availability classes in force.
 
+    Read from ``artifacts/features/quarantined_features.json`` - the manifest
+    the release gate tests the bundle against - and not from
+    ``configs/leakage_quarantine.yaml``. The YAML predates the Feature
+    Availability Firewall and lists 4 columns where the firewall quarantines
+    13, so the registry has until now been publishing a provenance block that
+    understated its own quarantine by nine columns, four of which
+    (``F3898``, ``F3913``, ``F3914``, ``F3916``) are precisely the ones the
+    superseded CatBoost bundle had selected. A provenance record that
+    under-reports the policy it was built under is worse than no record.
+    """
     names: list[str] = []
     try:
-        with open(settings.CONFIG_DIR / "leakage_quarantine.yaml", encoding="utf-8") as fh:
-            cfg = yaml.safe_load(fh) or {}
-        names = [str(e["feature"]) for e in cfg.get("quarantine", [])
+        man = load_json(settings.FEATURES_DIR / "quarantined_features.json")
+        names = [str(e["feature"]) for e in man.get("quarantine", [])
                  if e.get("feature")]
-    except FileNotFoundError:
+    except (FileNotFoundError, ValueError):
         pass
 
     classes: list[str] = []
@@ -94,18 +103,35 @@ def _holdout_metrics() -> dict[str, Any]:
 
 
 def _feature_set_version() -> dict[str, Any]:
-    for name in ("final_selected_features.json", "selected_features.json"):
-        p = settings.FEATURES_DIR / name
-        if p.exists():
-            try:
-                d = load_json(p)
-            except ValueError:
-                continue
-            n = (len(d) if isinstance(d, list)
-                 else len(d.get("selected") or d.get("features") or d))
-            return {"source": f"artifacts/features/{name}",
-                    "sha256": sha256_file(p), "n_features": n}
-    return {"source": None, "note": "no selected-feature artifact found"}
+    """The feature set the shipped bundle actually carries.
+
+    The bundle, not a selector artifact. The previous version walked
+    ``final_selected_features.json`` and fell through to ``len(d)`` on a dict
+    that has six top-level keys (``generated_utc``, ``method``, ``selector``,
+    ``n_repeats_used``, ``pools``, ``__provenance__``) - so it published
+    ``n_features: 6`` for a 120-feature model. That file is a record of the
+    per-view selection *pools*, not of what shipped; only the bundle knows
+    which pool won and which columns survived into it.
+    """
+    from muleguard.models.scoring import load_bundle
+
+    p = settings.MODELS_DIR / "final_bundle.joblib"
+    try:
+        kept = list(load_bundle()["feature_list_kept"])
+    except Exception as exc:  # noqa: BLE001
+        return {"source": None,
+                "note": f"model bundle unreadable, so the shipped feature set "
+                        f"could not be established: {exc}"}
+    return {
+        "source": "artifacts/models/final_bundle.joblib:feature_list_kept",
+        "bundle_sha256": sha256_file(p) if p.exists() else None,
+        # Hashed the way muleguard.usp.baseline._feature_hash hashes it, so
+        # the registry's number and the regression baseline's number are
+        # comparable by eye rather than only by re-deriving one of them.
+        "feature_list_sha256": hashlib.sha256(
+            chr(10).join(kept).encode("utf-8")).hexdigest(),
+        "n_features": len(kept),
+    }
 
 
 def enrich() -> dict[str, Any]:

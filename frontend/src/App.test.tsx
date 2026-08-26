@@ -15,7 +15,7 @@ const renderApp = () =>
 describe("App routes", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new TypeError("network down"))));
-    window.location.hash = "#/";
+    window.location.hash = "#/overview";
   });
 
   it("renders sidebar with all pages and safety tagline", () => {
