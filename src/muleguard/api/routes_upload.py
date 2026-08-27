@@ -1,7 +1,7 @@
 """CSV/XLSX batch-upload scoring endpoint.
 
 POST /v1/score/file  (multipart form: file=<csv|xlsx>)
-  - size cap (default 60 MB) and MIME/extension validation
+  - size cap (default 512 MB, MAX_UPLOAD_MB) and MIME/extension validation
   - safe parsing (polars CSV / fastexcel XLSX); corrupted files -> 422
   - the target column F3924, index columns and unknown extras are DROPPED
     safely (recorded in the response header block, never used)
@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import uuid
 
 import numpy as np
@@ -32,7 +33,12 @@ log = get_logger("api.upload")
 
 router = APIRouter()
 
-MAX_UPLOAD_BYTES = 60 * 1024 * 1024
+# The organiser's hidden-validation file is a full-shape export, not a sample:
+# the competition dataset alone is ~140 MB as .xlsx. A cap below that turns a
+# correct submission into a 413 at the only moment that matters, so the default
+# admits a full dataset and MAX_UPLOAD_MB lowers it again for a public deploy.
+MAX_UPLOAD_MB = max(1, int(os.environ.get("MAX_UPLOAD_MB", "512")))
+MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024
 ALLOWED_SUFFIXES = {".csv", ".xlsx"}
 CHUNK_ROWS = 500
 

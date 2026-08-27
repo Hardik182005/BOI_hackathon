@@ -13,7 +13,7 @@ Live evidence: `artifacts/testing/security_results.json` +
 | Deserialisation | joblib loads restricted to pipeline-produced artifacts; no user-supplied pickle paths | PASS |
 | Path traversal | no user-supplied filesystem paths; report/case ids are server-generated | PASS |
 | CSV formula injection | `csv_safe` prefixes `= + - @`; asserted on live batch output | PASS |
-| Upload abuse | 60 MB cap (413), extension/MIME allowlist, corrupted-file 422 without crash | PASS |
+| Upload abuse | 512 MB cap, MAX_UPLOAD_MB (413), extension/MIME allowlist, corrupted-file 422 without crash | PASS |
 | SQL injection | parameterised queries throughout; hostile case-id path returns 404 with service healthy | PASS |
 | XSS | API is JSON-only; React text nodes auto-escape analyst notes | PASS |
 | Malformed JSON | 422 | PASS |

@@ -35,7 +35,7 @@ injection.
 | Windows reserved device names | `CON`, `PRN`, `AUX`, `NUL`, `COM1`–`COM9`, `LPT1`–`LPT9` are rejected separately, because containment is not enough: `CON.json` resolves to the console *while sitting inside* the seal directory — reading it blocks, writing it silently discards data |
 | SQL injection | parameterised queries throughout; a hostile case-id path returns 404 with the service healthy |
 | XSS | the API is JSON-only; React text nodes auto-escape analyst notes |
-| Upload abuse | 60 MB cap (413), extension and MIME allowlist, corrupted file → 422 without a crash |
+| Upload abuse | 512 MB cap, MAX_UPLOAD_MB (413), extension and MIME allowlist, corrupted file → 422 without a crash |
 | Malformed JSON | 422 |
 | **Model artefacts** | the joblib bundle is SHA-256-hashed in the manifest and registry, and loaded **only** from the repo-owned artifacts directory. Upload endpoints never accept model files |
 | Deserialisation | joblib loads are restricted to pipeline-produced artefacts; no user-supplied pickle path exists |
